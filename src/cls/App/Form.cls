@@ -324,7 +324,7 @@ ClassMethod BlockUI(mode = 1, msg = "Загрузка")
 /// Mode = 0 режим просмотра
 /// Mode = 1 режим редактирования со всеми кнопками
 /// Mode = "1,WithoutSave,WithoutDel,WithCreate" режим редактирования без кнопок
-ClassMethod Show(obj, Mode = 0)
+ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "")
 {
 	if '$isobject(obj) w "Нет объекта" quit
 	set st=..GetPropertyDefinition(obj,.gn)
@@ -345,7 +345,7 @@ ClassMethod Show(obj, Mode = 0)
 		}
 	}
 	write "<tr><td style='text-align: right;'>"
-		set onclick="$('#MainContent').load('App.Action.cls',$('#MainForm').serializeArray());"
+		set onclick="$('#"_PrefixIdDIV_"MainContent').load('App.Action.cls',$('#"_PrefixIdDIV_"MainForm').serializeArray());"
 		if Mode {
 			write "<input type=hidden name=appNsp value='"_$zu(5)_"'>"
 			write "<input type=hidden name=appClass id=appClass value='App.Form'>"

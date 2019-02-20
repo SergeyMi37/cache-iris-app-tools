@@ -3,12 +3,11 @@ Include App.LogMacro
 Class App.LogInfoPane Extends %CSP.Util.Pane
 {
 
-/// ttttttttttt
 ClassMethod GetLink()
 {
 	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_
-	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"
-	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link
+	       "<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"
+	    q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link
 }
 
 /// Add libraries and functions js to the panel
@@ -50,6 +49,10 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	set:Next="" Next=1
 	set MaxNode=%request.Get("MaxNode") 
 	if 'MaxNode set MaxNode=$$$MAXSHOW
+
+	set GlobalTarget=%request.Get("GlobalTarget") 
+	if GlobalTarget'="" set MaxNode=MaxNode_GlobalTarget
+
 	if what=($$$HISTORYGN_"-") KILL @$$$HISTORYGN
 	set:$e(what,*)="-" what=$e(what,1,*-1),exp="-"
 	set:$e(what,*)="+" what=$e(what,1,*-1),Next="-1"
@@ -93,7 +96,9 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	elseif $p($zconvert(what,"L")," ",1)="obj" { ;,$zconvert($e(what,1,2),"L")="##"||($zconvert($e(what,1,2),"L")="=#") {
 		set classname=$p($p(what,"(",2),")",1)
 		set id=$p($p(what,"%OpenId(",2),")",1) set:id[$c(34) id=$tr(id,$c(34))
-		try {set Obj=$classmethod(classname,"%OpenId",id)
+		s Message=$$$aText("Class description","Описание класса ")_classname_"<br> Пример получения массива описания <br>"_$zu(5)_">do ##class(App.LogInfoPane).GetClassDef("""_classname_""",,.out)"
+		try { if id="" set Obj=$classmethod(classname,"%New"),id=0 
+			  else  set Obj=$classmethod(classname,"%OpenId",id)
 			if $isobject(Obj) {
 				do ##class(App.LogInfoPane).GetClassDef(classname,Obj,.out)
 	 			if $e($p(what," ",2,99))'="=" {
@@ -199,12 +204,12 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	#; arbitrary query
 	if $g(sql)'="" {
 		if DSN'="" {
-			set gnTemp="^||tmpDSN"
+			set gnTemp=$na(@$$$TEMPORYGN@($username))
 			KILL @gnTemp
 			if $G(listDSN(DSN))'="" set st=##class(App.sys).SaveGateway(sql,$G(listDSN(DSN)),"_system","",gnTemp,MaxNode) 
 			else  set st=##class(App.sys).SqlToDSN(sql,DSN,gnTemp,MaxNode)
 			if $d(@gnTemp) {
-				set st=..DrawSQL("result "_gnTemp,MaxNode,NSpace,"In DSN: "_DSN_" Query: "_$g(sql),$g(ExecuteDraw),$lb(exportXLS,exportXLSfile,exportXLSfileEmail))
+				set st=..DrawSQL("result "_gnTemp,MaxNode,NSpace,"В DSN: "_DSN_" Запрос "_$g(sql),$g(ExecuteDraw),$lb(exportXLS,exportXLSfile,exportXLSfileEmail))
 			}
 			
 		}
@@ -231,7 +236,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		}
 	}
 	elseif (nsp'="")!(what'="") {
-		&html<<center><b>#($$$aText("Empty output","Вывод пустой"))#</b></center>>
+		&html<<center><b>#($$$aText("Commands not defined","Команды не определены"))#</b></center>>
 	}
 	write "<br><br>"
 	quit $$$OK
@@ -828,11 +833,13 @@ ClassMethod GetPathStack() As %String
 	quit Path
 }
 
-/// The method implements getting values
-/// in - class property description
-/// out - result of values 
-/// Example 	d ##class(App.LogInfoPane).GetClassDef(classname,Obj,.out)
-/// 			d ##class(App.LogInfoPane).GetValueObj(Obj,.out,.res)
+/// /*! \brief The method implements getting values
+/// <br>\defgroup class_definition Class definition
+/// <br>\ingroup class_definition
+/// <br>\param in - class property description
+/// <br>\param out - result of values 
+/// <br>\example 	d ##class(App.LogInfoPane).GetClassDef(classname,Obj,.out)
+/// <br>	 				d ##class(App.LogInfoPane).GetValueObj(Obj,.out,.res) */
 ClassMethod GetValueObj(obj, in, out)
 {
 	set p="" for  { set p=$o(in(p)) quit:p=""
@@ -857,8 +864,9 @@ ClassMethod GetValueObj(obj, in, out)
 	quit $$$OK
 }
 
-/// Parse class description into methods and properties
-/// d ##class(App.LogInfoPane).GetClassDef("mvk.utils.Log","",.out)
+/// /*! \brief Parse class description into methods and properties
+/// <br>\ingroup class_definition
+/// \example d ##class(App.LogInfoPane).GetClassDef("mvk.utils.Log","",.out) */
 ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 {
 	if $g(doc)'="", $isobject(doc) set aClassName=doc.%ClassName(1)
@@ -913,7 +921,7 @@ ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 }
 
 /// Copy to clipboard
-/// d ##class(App.LogInfoPane).AddJS("MSW")
+/// /// /*! \example d ##class(App.LogInfoPane).AddJS("MSW")*/
 ClassMethod AddJS(textareaId)
 {
  &html<	
@@ -970,7 +978,7 @@ function WinOpen(ns,met,el) {
 }
 
 /// The method initializes the developer in the system
-/// d ##class(App.LogInfoPane).Init(,"MSW")
+/// /// /*! \example d ##class(App.LogInfoPane).Init(,"MSW")*/
 ClassMethod Init(username = {$username}, fio = "DEV")
 {
 	set @$$$MgtPortalSettings@($Username,"DeveloperName")=$g(fio,"DEV")
@@ -994,7 +1002,7 @@ ClassMethod GetSysinfo(color) As %String
 	q sysinfo_" <input type='hidden' id='AppLang' name='AppLang'>"_key
 }
 
-/// d ##class(App.LogInfoPane)AddAction()
+/// /*! \example d ##class(App.LogInfoPane)AddAction()*/
 ClassMethod AddAction(nameElem = "NSP,MaxNode,Filtr,Next,WHAT,tWHAT,exportXLS,exportXLSfile,exportXLSfileEmail,selectDSN,SDNum")
 {
 	&html<
@@ -1015,7 +1023,8 @@ ClassMethod AddAction(nameElem = "NSP,MaxNode,Filtr,Next,WHAT,tWHAT,exportXLS,ex
 	q ""
 }
 
-/// d ##class(App.LogInfoPane).AddProdQuery()
+/// 
+/// /*! \example ##class(App.LogInfoPane).AddProdQuery() */
 ClassMethod AddProdQuery(SDNum, csp = "csp")
 {
 	&html< <tr style='vertical-align: middle;' >
@@ -1038,6 +1047,7 @@ ClassMethod GetHelp(help)
 {
 	#define sH(%msg) set help($i(help))=%msg
 	$$$sH("Примеры вызова:")
+	$$$sH("obj ##class(App.Log).%New() --- Получить информацию по классу")
 	$$$sH("obj ##class(App.Log).%OpenId(15) --- Получить информацию по классу и объекту")
 	$$$sH("obj =##class(App.Log).%OpenId(15) --- Получить информацию только по значениям объекта")
 	$$$sH(" ")

@@ -203,10 +203,12 @@ ClassMethod SaveQuery(query = "%SYSTEM.License:Counts", gn = "^%App.Task", datet
 	q $$$OK
 }
 
-/// Procedure for calling from a regular job and storing reports in the global
-/// d ##class(App.sys).SaveSQL("select * from Ens.MessageHeader where id=1461","^logMSW2")
-/// ext=1 add saving column and row positions
-ClassMethod SaveSQL(SQL, gn = "^mtempSQLGN", ext = 0)
+/// /*! \brief Procedure query executing and storing reports in the global
+/// <br>\ingroup query
+/// <br>\param ext=1 add saving column and row positions
+/// <br>\return count rows
+/// <br>\example d ##class(App.sys).SaveSQL("select * from Ens.MessageHeader where id=1461","^logMSW2") */
+ClassMethod SaveSQL(SQL, gn = "^mtempSQLGN", ext = 0) As %String
 {
 	s st=$$$OK,hr=$h,ts=$$$AppDT(hr)
 	s myQuery = ##CLASS(%ResultSet).%New("%DynamicQuery:SQL")

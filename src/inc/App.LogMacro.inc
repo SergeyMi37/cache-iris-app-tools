@@ -81,6 +81,8 @@ ROUTINE App.LogMacro [Type=INC]
 #define GNEnsConf "^%App.Setting"
 /// Global history of command
 #define HISTORYGN "^%App.History"
+/// Global tempory data
+#define TEMPORYGN "^mtempAppData"
 /// Global projects in the system
 #define PROJGN "^%App.Proj"
 /// Global tempory data for Journals

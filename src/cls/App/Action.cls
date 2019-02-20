@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-/// Выводить необходимые действия 
+/// Выводить необходимые действия
 Class App.Action Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
 {
 

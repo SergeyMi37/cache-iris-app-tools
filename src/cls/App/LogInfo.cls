@@ -26,7 +26,7 @@ ClassMethod ClearFields(fields = "")
 		continue:$p(fields,",",f)=""
 		s onclick=$g(onclick)_"try{document.getElementById('"_$p(fields,",",f)_"').value=''}catch(e){};"
 	}
-	quit $replace(res,"#",$g(onclick,"alert('No fields');"))
+	quit $replace(res,"#",$g(onclick,"alert('Нет полей');"))
 }
 
 /// Пометить красным контекст в исходной строки
