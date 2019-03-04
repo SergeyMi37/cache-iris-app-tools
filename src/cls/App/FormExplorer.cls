@@ -34,7 +34,6 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		w "$( '#accordion' ).accordion({"
 	 	w " collapsible: true, icons: { header: ""ui-icon-zoomin"",  headerSelected: ""ui-icon-zoomout"" }"
 		w "});"
-		
 	    w " var Namespace = ["
     	s ns=##class(App.sys).ListNS(.info)
     	f i=1:1:$l(ns,",") {

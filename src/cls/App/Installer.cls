@@ -1,14 +1,19 @@
 Include App.LogMacro
 
 /// Importing this class will install App Tools properly.
+/// fork from 
 Class App.Installer Extends %Projection.AbstractProjection
 {
 
 Parameter DispatchClass = "App.RestMetrics";
 
-Parameter ResourceName = "AppTools";
+Parameter ResourceName = "%AppTools";
 
 Parameter RoleName = "AppTools";
+
+Parameter AppRest = "apptoolsrest";
+
+Parameter AppCSP = "apptools";
 
 Parameter AppName = "AppTools";
 
@@ -19,11 +24,12 @@ Parameter VERSION = 1.0;
 /// This method is invoked when a class is compiled.
 ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 {
-	q $$$OK ;!!!!
 	new $Namespace
 	set ns = $Namespace // ought to be package home namespace!
+	if $g(@$$$GNEnsConf@("HomeNamespace"))'="",$g(@$$$GNEnsConf@("HomeNamespace"))'=ns {
+		 QUIT $$$OK
+	}
     set @$$$GNEnsConf@("HomeNamespace") = ns
-    set @$$$GNEnsConf@("FirstLaunch") = 1
     write !, "Installing "_..#AppName_" application to " _ ns
     set dbdir = $$$defdir
     try {
@@ -33,34 +39,40 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
             _ " to enter the %SYS namespace. Please, log in as a privileged user"
             _ " to set up the "_..#AppName_" application."
         set err = $$$ERROR($$$GeneralError, mes)
-        ;do ##class(WebTerminal.Analytics).ReportInstallStatus(err)
         write !, mes
         return err
     }
     
+   	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	s tSC=result.Prepare("select * FROM Security.Applications where Name=?")
+	s:tSC tSC=result.Execute("/csp/"_ns)
+	i '$$$ISOK(tSC) {
+		s text="Ошибка настройки приложений :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
+	}
+	else {
+		while result.Next() {
+			set cspProperties("Path")=result.Data("Path")
+		}
+	}
+    zw cspProperties
+    set cspProperties("AutheEnabled") = $$$AutheCache
+    set cspProperties("NameSpace") = ns
+    set cspProperties("Description") = "A WEB application for "_..#AppName_"."
+    set cspProperties("IsNameSpaceDefault") = $$$NO
+    set st = ..RegisterWebApplication("/"_..#AppCSP, .cspProperties)
+    return:$$$ISERR(st) st
+    
+	s @$$$GNEnsConf@("CSP-Path")=cspProperties("Path")
+	KILL cspProperties("Path")
+	
     set cspProperties("AutheEnabled") = $$$AutheCache
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
     set cspProperties("IsNameSpaceDefault") = $$$NO
     set cspProperties("DispatchClass") = ..#DispatchClass
-    set st = ..RegisterWebApplication("/apptools", .cspProperties)
-    ;do:($$$ISERR(st)) ##class(WebTerminal.Analytics).ReportInstallStatus(st)
+    set st = ..RegisterWebApplication("/"_..#AppRest, .cspProperties)
     return:$$$ISERR(st) st
-    
-    set cspProperties("AutheEnabled") = $$$AutheUnauthenticated
-    set cspProperties("Description") = "An application representing the open socket for /apptools application."
-    set cspProperties("DispatchClass") = ""
-    set role = ..GetDBRole(dbdir)
-    if ($system.Version.GetISCProduct() >= 4) {
-        set cspProperties("MatchRoles")=":%DB_IRISSYS" _ $case($get(role)'="", 1: ":"_role, :"")
-    } else {
-        set cspProperties("MatchRoles")=":%DB_CACHESYS" _ $case($get(role)'="", 1: ":"_role, :"")
-    }
-
-    ;set st = ..RegisterWebApplication("/terminalsocket", .cspProperties)
-    ;do:($$$ISERR(st)) ##class(WebTerminal.Analytics).ReportInstallStatus(st)
-    ;return:$$$ISERR(st) st
-    
+ 
     do ..CreateAllNamespace()
     
     write !, "Mapping "_..#AppName_" package into all namespaces:"
@@ -69,7 +81,6 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
         do $System.Status.DisplayError(st)
     } else {
 	    write !, ""_..#AppName_" package successfully mapped into all namespaces."
-	    ;do ##class(WebTerminal.Analytics).ReportInstallStatus(1)
     }
 
     if (##class(Security.Resources).Exists(..#ResourceName) = 0) {
@@ -79,8 +90,8 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 
     if (##class(Security.Roles).Exists(..#RoleName) = 0) {
         set st = ##class(Security.Roles).Create(..#RoleName,
-            "WebTerminal user role which may grant access to WebTerminal application if set up.",
-            "%WebTerminal:RWU")
+            "AppTools user role which may grant access to /apptools application if set up.",
+            ..#ResourceName_":RWU")
     }
     
     return st
@@ -163,22 +174,6 @@ ClassMethod RemoveProjection(cls As %String, ByRef params, recompile As %Boolean
     return st
 }
 
-ClassMethod GetDBRole(directory As %String) As %String
-{
-	return:'$d(directory) ""
-	new $Namespace
-	set $Namespace = "%SYS"
-	#dim db As SYS.Database
-	set db = ##class(SYS.Database).%OpenId(directory)
-	if $Isobject(db) {
-		set resource = db.ResourceName
-		set role = resource // I'm assuming that default role exists (@eduard93)
-	} else {
-		set role = ""
-	}
-	return role
-}
-
 ClassMethod CreateAllNamespace() As %Status
 {
 	new $Namespace
@@ -227,10 +222,10 @@ ClassMethod Map(fromNS = "") As %Status
         continue:(fromNS = namespace)
         continue:('##Class(Config.Namespaces).Exists(namespace))
         write " ", namespace
-        if ('##Class(Config.MapPackages).Exists(namespace, "WebTerminal")) {
+        if ('##Class(Config.MapPackages).Exists(namespace, "App")) {
         	set st1 = ##Class(Config.MapPackages).Create(namespace, "App", .Properties)
         }
-        if ('##Class(Config.MapGlobals).Exists(namespace, "WebTerminal")) {
+        if ('##Class(Config.MapGlobals).Exists(namespace, "App")) {
 	        set st2 = ##Class(Config.MapGlobals).Create(namespace, "App", .Properties)
         }
         set st = $$$ADDSC(st,$$$ADDSC($get(st1,$$$OK),$get(st2,$$$OK)))
@@ -250,10 +245,10 @@ ClassMethod UnMap(fromNS As %String) As %Status
 	    continue:(fromNS = namespace)
 	    continue:('##Class(Config.Namespaces).Exists(namespace))
         write " ", namespace
-        if (##Class(Config.MapPackages).Exists(namespace, "WebTerminal")) {
+        if (##Class(Config.MapPackages).Exists(namespace, "App")) {
         	set st1 = ##Class(Config.MapPackages).Delete(namespace, "App", .Properties)
         }
-        if (##Class(Config.MapGlobals).Exists(namespace, "WebTerminal")) {
+        if (##Class(Config.MapGlobals).Exists(namespace, "App")) {
 	        set st2 = ##Class(Config.MapGlobals).Delete(namespace, "App", .Properties)
         }
         set st = $$$ADDSC(st,$$$ADDSC($get(st1,$$$OK),$get(st2,$$$OK)))

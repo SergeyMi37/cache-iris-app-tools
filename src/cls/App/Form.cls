@@ -65,7 +65,7 @@ ClassMethod GetPropVal(obj, propName, gn, nameAttr)
 }
 
 /// Вывести строку свойств объекта
-ClassMethod ShowProp(obj, propName, gn)
+ClassMethod ShowProp(obj, propName, gn, PrefixIdDIV)
 {
 	set sysType=..GetPropVal(obj,propName,.gn,"Type")
 	set Name=..GetPropVal(obj,propName,.gn,"Name")
@@ -85,7 +85,7 @@ ClassMethod ShowProp(obj, propName, gn)
 	write "<td style='text-align: right;'><label>"_label_"</label></td>"
 	write "<td style='text-align: left;'>"
 	s pr("attr")=$g(pr("attr"))_" "_$s(Required:"Required",1:"")_$s(ReadOnly:"Disabled",1:"")
-	s %id=..#PREFIXFIELD_Name
+	s %id=$g(PrefixIdDIV)_..#PREFIXFIELD_Name
 	s %val=$g(Value)
 	s size=" size=50 " if pr("attr")["size" set size=""
 	if sysType="%Boolean" {
@@ -118,7 +118,7 @@ ClassMethod ShowProp(obj, propName, gn)
 			if met'="" {
 				;;w met
 				if (met["{") { //список из json
-					;w 11111111
+					;TODO
 				}
 				else { //список из функции
 					x "do "_met
@@ -162,13 +162,13 @@ ClassMethod ObjectDelete(Param = "", Ref = 0)
 	set id=$p(Param,",")
 	set Class=$p(Param,",",2)
 	;m $$$AppL("MSW","req")=%request.Data
-	if id="" w $$$appError("Неопределен идентификатор объекта")_"<br>" d:Ref ..ButtonRef() q
+	if id="" w $$$appError("Неопределен идентификатор объекта")_"<br>" d:'Ref ..ButtonRef() q
 	set obj=$classmethod(Class,"%OpenId",id)
-	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:Ref ..ButtonRef() q
+	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:'Ref ..ButtonRef() q
 	set st=obj.%DeleteId(obj.%Id())
-	if 'st w $$$appError($System.Status.GetErrorText(st)) w "<br>" d:Ref ..ButtonRef() q
+	if 'st w $$$appError($System.Status.GetErrorText(st)) w "<br>" d:'Ref ..ButtonRef() q
 	write $$$appMsg("Объект удален")
-	write "<br>" d:Ref ..ButtonRef() 
+	write "<br>" d:'Ref ..ButtonRef() 
 	q
 }
 
@@ -199,20 +199,20 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 {
 	set id=$p(Param,",")
 	set Class=$p(Param,",",2)
+	s PrefixIdDIV=$p(Param,",",3)
 	if id="" s obj=$classmethod(Class,"%New")
 	else  s obj=$classmethod(Class,"%OpenId",id)
-	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:Ref ..ButtonRef() q ""
+	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:'Ref ..ButtonRef() q ""
 	;set gn="%prop"
 	set st=..GetPropertyDefinition(obj,.gn)
-	if 'st w $$$appError($System.Status.GetErrorText(st))_"<br>" d:Ref ..ButtonRef() q ""
-	set i=..#PREFIXFIELD
+	if 'st w $$$appError($System.Status.GetErrorText(st))_"<br>" d:'Ref ..ButtonRef() q ""
+	set prefix=$g(PrefixIdDIV)_..#PREFIXFIELD
+	set i=prefix
 	;m $$$AppL("SPZ",".gn")=gn
 	;m m=%request.Data	zw m
-	for { set i=$o(%request.Data(i)) quit:i=""  quit:i'[..#PREFIXFIELD
-			set nameProp=$p(i,..#PREFIXFIELD,2)
-
+	for { set i=$o(%request.Data(i)) quit:i=""  quit:i'[prefix
+			set nameProp=$p(i,prefix,2)
 			s Value=$g(%request.Data(i,1))
-
 			if ..GetPropVal(obj,nameProp,.gn,"Required"),Value="" {
 				;получить свойство - описание pr("description")
 				d ..GetJsonProp(obj, nameProp, .gn, .pr)
@@ -221,10 +221,10 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 			;write "<li>"_nameProp_" "_$g(%request.Data(i,1))
 			s $property(obj,nameProp)=Value
 	}
-	if $d(err) w "<br><br>"_$$$appError("Ошибки проверки свойств<hr>"_$g(err)) d:Ref ..ButtonRef() q ""
+	if $d(err) w "<br><br>"_$$$appError("Ошибки проверки свойств<hr>"_$g(err)) d:'Ref ..ButtonRef() q ""
 	set st=obj.%Save(1)
-	if 'st w "<br><br>"_$$$appError($System.Status.GetErrorText(st))_"<br>" d:Ref ..ButtonRef() q ""
-	write "<br><br>"_$$$appMsg("Сохранено")_"<br>" d:Ref ..ButtonRef()
+	if 'st w "<br><br>"_$$$appError($System.Status.GetErrorText(st))_"<br>" d:'Ref ..ButtonRef() q ""
+	write "<br><br>"_$$$appMsg("Сохранено")_"<br>" d:'Ref ..ButtonRef()
 	quit obj
 }
 
@@ -335,33 +335,35 @@ ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "")
 	if orderProp'="" {
 		for i=1:1:$l(orderProp,",") { s nameProp=$ZStrip($p(orderProp,",",i),"<>WCP")
 		 	continue:nameProp=""
-			do ..ShowProp(obj,nameProp,.gn) ;gn("Properties")
+			do ..ShowProp(obj,nameProp,.gn,PrefixIdDIV) ;gn("Properties")
 		}
 	} //вывод полей по умочанию
 	else {
 		set p=""
 		for  { s p=$o(gn("Properties",p)) q:p=""  ;q:'$d(@gn@(p))  
-			do ..ShowProp(obj,p,.gn)
+			do ..ShowProp(obj,p,.gn,PrefixIdDIV)
 		}
 	}
 	write "<tr><td style='text-align: right;'>"
 		set onclick="$('#"_PrefixIdDIV_"MainContent').load('App.Action.cls',$('#"_PrefixIdDIV_"MainForm').serializeArray());"
 		if Mode {
-			write "<input type=hidden name=appNsp value='"_$zu(5)_"'>"
-			write "<input type=hidden name=appClass id=appClass value='App.Form'>"
-			write "<input type=hidden name='appMethod' id='appMethod' value=''>"
-			write "<input type=hidden name=appPar value='"_obj.%Id()_","_obj.%ClassName(1)_"'>"
-
+			;write "<input type=hidden name="_PrefixIdDIV_"appNsp id="_PrefixIdDIV_"appNsp value='"_$zu(5)_"'>"
+			;write "<input type=hidden name="_PrefixIdDIV_"appClass id="_PrefixIdDIV_"appClass value='App.Form'>"
+			;write "<input type=hidden name="_PrefixIdDIV_"appMethod id="_PrefixIdDIV_"appMethod value=''>"
+			;write "<input type=hidden name="_PrefixIdDIV_"appPar id="_PrefixIdDIV_"appPar value='"_obj.%Id()_","_obj.%ClassName(1)_","_PrefixIdDIV_",~objId="_obj.%Id()_"~ClassName="_obj.%ClassName(1)_"~pref="_PrefixIdDIV_"'>"
+			w $$$appInputHidden(""_PrefixIdDIV_"appNsp","",$zu(5))
+			w $$$appInputHidden(""_PrefixIdDIV_"appClass","","App.Form")
+			w $$$appInputHidden(""_PrefixIdDIV_"appMethod","","")
+			w $$$appInputHidden(""_PrefixIdDIV_"appPar","",obj.%Id()_","_obj.%ClassName(1)_","_PrefixIdDIV_",~objId="_obj.%Id()_"~ClassName="_obj.%ClassName(1)_"~pref="_PrefixIdDIV)
 			if Mode'["WithoutSave" {
 				set buttval=$s(obj.%Id()'="":"Сохранить",1:"Создать")
-				do ..ButtonMake(buttval,"$('#appMethod').attr('value','ObjectSave');"_onclick,"appButtonSave")
+				do ..ButtonMake(buttval,"$('#"_PrefixIdDIV_"appMethod').attr('value','ObjectSave');"_onclick,"appButtonSave")
 			}
 			if Mode'["WithoutDel" {
-				if obj.%Id() w "&nbsp; " d ..ButtonMake("Удалить","if (confirm('Удалить, вы уверены ?')) {$('#appMethod').attr('value','ObjectDelete');"_onclick_"}","appButtonDelete")
+				if obj.%Id() w "&nbsp; " d ..ButtonMake("Удалить","if (confirm('Удалить, вы уверены ?')) {$('#"_PrefixIdDIV_"appMethod').attr('value','ObjectDelete');"_onclick_"}","appButtonDelete")
 			}
 			if obj.%Id(),Mode["WithCreate" {
-			  w "&nbsp; " do ..ButtonMake("Сохранить как новый","$('#appMethod').attr('value','ObjectSaveAsNew');"_onclick,"appButtonSaveAsNew")
-			  ;do ..ButtonMake("Новый","$('#appMethod').attr('value','ObjectNew');$('#appPar').attr('value',',"_obj.%ClassName(1)_","_Mode_"');"_onclick,"appButtonNew")
+			  w "&nbsp; " do ..ButtonMake("Сохранить как новый","$('#"_PrefixIdDIV_"appMethod').attr('value','ObjectSaveAsNew');"_onclick,"appButtonSaveAsNew")
 			}
 		}
 		if Mode'["WithoutCancel" {

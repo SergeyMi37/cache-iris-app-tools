@@ -29,9 +29,7 @@ ROUTINE App.JsonUtils [Type=INC]
     						//usage: obj.$$$jsonPop()
     #define jsonPush $push									
     						//usage: obj.$$$jsonPush(val) 
-    #define jsonPush $push									
-    						//usage: obj.$$$jsonPush(val) 
-	#define jsonAbstractClass %Library.AbstractObject
+ 	#define jsonAbstractClass %Library.AbstractObject
 	#define jsonObjectClass %Library.Object
 	#define jsonArrayClass %Library.Array
 

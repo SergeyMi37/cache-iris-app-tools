@@ -12,6 +12,7 @@ ROUTINE App.LogMacro [Type=INC]
 #define StackPlace 		$st($st(-1),"PLACE")
 #define CurrentClass 	##Expression($$$quote(%classname))
 #define CurrentMethod 	##Expression($$$quote(%methodname))
+#define slash $s($zversion(1)=3:"/",1:"\")
 
 #define MethodArguments ##Expression(##class(App.Log).GetMethodArguments(%classname,%methodname))
 
@@ -29,7 +30,7 @@ ROUTINE App.LogMacro [Type=INC]
 #define LoggedDT(%h) $s(%h[",":$tr($zd(%h,4),"/",".")_" "_$zt(+$p(%h,",",2),1),1:"")
 
 #; макрос сохраняет в узле глобала стэк вызовов и все локальные переменные 
-#; Пример применения: /csp/log/App.LogInfo.cls?WHAT=?
+#; Пример применения: /apptools/App.LogInfo.cls?WHAT=?
 #; Если нужна ловушка для конкретного процесса, то присвоить s ^logFIO(0)=Номер процесса
 #define LogEventAddGN(%debubGN, %message) s %AppLogId=##class(App.Log).AddRecord($$$CurrentClass,$$$CurrentMethod,$$$StackPlace,"DEBUG",%debubGN,%message)
 #define logdevGN 	"^log"
@@ -94,7 +95,7 @@ ROUTINE App.LogMacro [Type=INC]
 
 #;;; Parameters dependent on the installation server
 #define GNLang "^%AppCacheMsg"
-#; Path to CSP apps "/csp/aisgsasums/"
+#; Path to CSP apps "/apptools/"
 #define  PATHCSP $GET(@$$$GNEnsConf@("PATHCSP")) 
 #; Mail Server Settings
 #define  EMAILSERVERIP $GET(@$$$GNEnsConf@("EMAILSERVERIP"))

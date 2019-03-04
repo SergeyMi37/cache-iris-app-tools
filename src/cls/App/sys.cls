@@ -67,6 +67,28 @@ ClassMethod IsPreparedNS(name)
 	Q 0
 }
 
+/// //get csp apps 
+/// w ##class(App.sys).getCSPapps("/apptools","Path")
+ClassMethod getCSPapps(csppapp, prop)
+{
+		
+ $$$NspGoto(curNs,"%SYS")
+	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	s tSC=result.Prepare("select * FROM Security.Applications where Name=?")
+	s:tSC tSC=result.Execute(csppapp)
+	i '$$$ISOK(tSC) {
+		 QUIT tSC
+	}
+	else {
+		while result.Next() {
+			set res=result.Data(prop)
+		}
+	}
+	d result.Close()
+	$$$NspReturn(curNs)	
+	Q $g(res)
+}
+
 /// Get a list of database names separated by commas
 /// w ##class(App.sys).ListDB(.info,"NotPre")
 /// Flag = "NotPre" - exclude prepared
@@ -99,6 +121,7 @@ ClassMethod ListNS(info, Flag = "")
 	s disp=""
 	$$$NspGoto(curNs,"%SYS")	
 	set tRS = ##class(%ResultSet).%New("Config.Namespaces:List")
+	if '$isobject(tRS) q ""
 	set tSC = tRS.Execute()
 	While tRS.Next() {	
 		s name=tRS.GetData(1) KILL ens

@@ -4,6 +4,26 @@ Include App.LogMacro
 Class App.net [ Abstract ]
 {
 
+/// Zip files and Send to email
+/// w ##class(App.net).SendFilesToEmail()
+ClassMethod SendFilesToEmail(subj, text, files, zip = 1) As %Status
+{
+	;send files to email
+	s slash=##class(App.files).getSlash()
+	zw files
+	;s path=$p(exportXLSfile,slash,1,*-1)
+	;s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
+	;if sc s exportXLSfile=exportXLSfile_".zip"
+	;i 'sc s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
+	//TODO prepare file to send e-mail
+	q 1
+	;i exportXLSfileEmail'="" {
+	;	s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
+	;	i 'sc s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
+	;	}
+	q $$$OK
+}
+
 /// Послать электронное письмо
 /// subscrible - список через запятую, кому направлять письмо
 /// subj - тема
@@ -277,6 +297,35 @@ ClassMethod GetListIP() As %String
 ClassMethod GetIP() As %String
 {
 	q $P($ZU(54,13,$zu(54,0)),",",1)
+}
+
+/// Получить ответ на Post Http запрос
+/// w ##class(App.net).PostHttp("cip-test.mvk.ru:57772", "/apptoolsrest/jsonrpc","msw" ,"S37@asu3" ,"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}",.out)
+ClassMethod PostHttp(ServerPort, method, user, pass, ByRef body, ByRef out) As %String
+{
+    set ht = ##class(%Net.HttpRequest).%New()
+	set ht.Server = $p(ServerPort,":")
+	if user'="" {
+		set ht.Username=user
+		set ht.Password=pass
+	}
+	s ht.ContentType="text/html;  charset=UTF-8"
+	;s ht.ContentType="application/json; charset=UTF-8"
+	i $p(ServerPort,":",2)'="" set ht.Port = $p(ServerPort,":",2)
+	Do ht.EntityBody.Write($g(body))
+	if $d(body)>1 s i="" f  s i=$o(body(i)) q:i=""  Do ht.EntityBody.Write(body(i))
+	
+	Do ht.Post(method)
+	;Do ht.HttpResponse.OutputToDevice()
+	S out=ht.HttpResponse.StatusLine
+	;s ^z1=ht.HttpResponse.ContentLength
+    set i="" for  S i=ht.HttpResponse.GetNextHeader(i) Q:i=""  S out("Header",i)=ht.HttpResponse.GetHeader(i)
+    if ht.HttpResponse.Data.Size>0 {
+	    set sc=##class(App.files).Stream2String(ht.HttpResponse.Data,.json)
+	    m out("Data")=json
+	}
+ 	do ht.%Close()
+ 	q $g(out)
 }
 
 }

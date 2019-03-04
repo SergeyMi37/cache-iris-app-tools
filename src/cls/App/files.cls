@@ -4,6 +4,12 @@ Include App.LogMacro
 Class App.files [ Abstract ]
 {
 
+/// Поучить слэшь
+ClassMethod getSlash() As %String
+{
+	q $$$slash
+}
+
 /// Поток перевести в строку
 /// w ##class(App.files).Stream2String(resp,.str)
 ClassMethod Stream2String(resp As %Stream, StringValue As %String) As %Status
@@ -32,7 +38,7 @@ ClassMethod UnzipToDirectory(fileName As %String, Output dirName As %String, cmd
 		
 		;$$$TRACE(cmd)
 		set result = $zf(-1, cmd)
-		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, "Ошибка кода возврата:" _ result_" для "_cmd)) }
+		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, $$$aText("Return code error","Ошибка кода возврата")_":" _ result_" cmd="_cmd)) }
 	} catch ex {
 		set st = ex.AsStatus()
 		;$$$TRACE($system.Status.GetErrorText(st))
@@ -41,25 +47,29 @@ ClassMethod UnzipToDirectory(fileName As %String, Output dirName As %String, cmd
 }
 
 /// Упаковка файла в архив
-/// w ##class(App.files).zipFile("/opt/isc/ensemble/csp/spgz/files/","2018-08-03_145830_2._Texniceckoe_zadanie.docx","test333.zip")
 ///  Каталогу tempdir нужно присвоить права на запись cacheusr >sudo chmod ugo+w .
-ClassMethod zipFile(dir, fileName As %String, newfileName As %String, tempdir As %String = "/opt/isc/ensemble/mgr/SPGZ/tmp") As %Status
+ClassMethod zipFile(dir, fileName As %String, newfileName As %String, tempdir As %String = "") As %Status
 {
 	set st = $$$OK
+	if tempdir="" set tempdir=dir
 	try {
-		set cmd = "cd "_dir_"; zip -r "_tempdir_"/"_newfileName_" "_fileName_" ; cp -f "_tempdir_"/"_newfileName_" "_newfileName_" ;" 
+		if $zversion(1) { ;for Linux
+			set cmd = "cd "_dir_"; zip -r "_tempdir_"/"_newfileName_" "_fileName_";"
+			if dir'=tempdir s cmd=cmd_" cp -f "_tempdir_"/"_newfileName_" "_newfileName_";" 
+		} else {
+			;set cmd = "cd "_dir_"; zip -r "_tempdir_"/"_newfileName_" "_fileName_";"
+			
+		}
 		set result = $zf(-1, cmd)
-		;s $$$AppL("MSW","cmd")=$lb(cmd,result)
-		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, "Ошибка кода возврата:" _ result_" для "_cmd)) }
+		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, $$$aText("Return code error","Ошибка кода возврата")_":" _ result_" cmd="_cmd)) }
 	} catch ex {
 		set st = ex.AsStatus()
-		;$$$TRACE($system.Status.GetErrorText(st))
 	}
 	quit st
 }
 
-/// Получить список файлов в директории по маске
-/// w ##class(App.files).GetList("/backup/temp/blob/",,.List)
+/// Get all files in a directory without subdirectories
+/// w ##class(App.files).GetList("D:\dev\app1\src\","*.xml",.List)
 ClassMethod GetList(directory As %String, ext As %String = "*.*", ByRef list) As %Status
 {
 	set st = $$$OK
@@ -87,7 +97,7 @@ ClassMethod RemoveFiles(pFile As %String, pDir As %String = "") As %Status
 
 ClassMethod GetUzipCommand(file, dir) As %String
 {
-	if (##class(%SYS.System).GetNodeName() [ "MVK.RU") quit "unzip -o " _ file _ " -d " _ dir
+	if $zversion(1)=3 quit "unzip -o " _ file _ " -d " _ dir
 	quit "7z x " _ file _ " -o" _ dir
 }
 
@@ -201,7 +211,7 @@ ClassMethod LoadXML(fn, tag, class)
 /// w ##class(App.files).getPathcconsole()
 ClassMethod getPathcconsole(ByRef dir, ByRef logname)
 {
-	s slash=..getSlash()
+	s slash=$$$slash
 	Set path=$p($zu(86),"*",1)
 	s dir=$p(path,slash,1,$l(path,slash)-1)_slash_"mgr"_slash
 	s logname=$s($zv["IRIS":"messages",1:"cconsole")
@@ -379,14 +389,6 @@ IncludDataTime(DateTime1,df,dt,stop)
  quit z
 }
 
-/// Поучить слэшь
-ClassMethod getSlash() As %String
-{
-	If $zversion(1)=3 s slash="/"
-	else  s slash="\"
-	q slash
-}
-
 /// Посчитать в одном журнале какие глобалы как модифицируются
 /// k ^tmpJRN d ##class(App.files).OneJournalCount("/sdb/journals/20181225.003","^tmpJRN")
 ClassMethod OneJournalCount(journal = "", tempGlob = {##class(App.LogInfoPane).#TEMPJRNL})
@@ -467,7 +469,7 @@ ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {##class(App.LogInf
  i $g(@tempGlob)'="" w !,"Насчет уже идет "_$g(@tempGlob) q
  s @tempGlob=$zts ;начало формирования
 
- s slash=..getSlash()
+ s slash=$$$slash
  if fileYYYYMMDD="" { 
 	w !,"Будем считать за предыдущий день"
 	s file=##class(%SYS.Journal.System).GetCurrentFile()
@@ -525,6 +527,20 @@ ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {#
 	WRITE !,"Записано в файл "_aFileName,!
 	KILL FileStream quit sc
 	q
+}
+
+/// Get all files in a directory and subdirectories
+/// d ##class(App.files).GetAllDir("d:\dev\app1\src\",,.a)
+ClassMethod GetAllDir(dir, ext = "", ByRef out)
+{
+	set dir = ##class(%File).NormalizeDirectory(dir)
+	set rs = ##class(%ResultSet).%New("%File:FileSet")
+	s sc=rs.Execute(dir, ext)
+	while (rs.Next()) {
+		set out($i(out)) = $lb(rs.Get("Name"),rs.Get("Type"),rs.Get("Size"),rs.Get("ItemName"),rs.Get("DateCreated"),rs.Get("DateModified"))
+		i rs.Get("Type")="D" d ##class(App.files).GetAllDir($lg(out(out),1),ext,.out)
+	}
+	q $$$OK
 }
 
 }

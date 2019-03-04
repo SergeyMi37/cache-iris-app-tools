@@ -6,8 +6,10 @@ Class App.LogInfoPane Extends %CSP.Util.Pane
 ClassMethod GetLink()
 {
 	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_
-	       "<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"
-	    q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link
+	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"
+	s icon="<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/img/apptools-ico-lofel.ico"" type=""image/x-icon""/>"_
+	"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/img/apptools-ico-lofel.ico"" type=""image/x-icon""/>"
+	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link ;_icon
 }
 
 /// Add libraries and functions js to the panel
@@ -49,10 +51,6 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	set:Next="" Next=1
 	set MaxNode=%request.Get("MaxNode") 
 	if 'MaxNode set MaxNode=$$$MAXSHOW
-
-	set GlobalTarget=%request.Get("GlobalTarget") 
-	if GlobalTarget'="" set MaxNode=MaxNode_GlobalTarget
-
 	if what=($$$HISTORYGN_"-") KILL @$$$HISTORYGN
 	set:$e(what,*)="-" what=$e(what,1,*-1),exp="-"
 	set:$e(what,*)="+" what=$e(what,1,*-1),Next="-1"
@@ -196,6 +194,15 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	if what="trm" {
 		write !,"<iframe style='width:95%; height:70%' id='terminal"_NSpace_"' src='/terminal/?ns="_NSpace_"&clean=1' ></iframe>"
 		quit $$$OK
+	}
+	#; Post request
+	if $p($zconvert(what,"L")," ",1)="post" {
+		set posturl=$p($p(what," ",2,*),$C(13,10),1)
+		set server=$p(posturl,"/",3)
+		if $p(server,"@")'="" set user=$p($p(server,"@"),":"),pass=$p($p(server,"@"),":",2),server=$p(server,"@",2)
+		set postbody=$p($p(what," ",2,*),$C(13,10),2,*)
+		s st=##class(App.net).PostHttp(server, $p($p(posturl,"/",4,*),"?"),user ,pass ,postbody,.out)
+		w st w "<pre>" zw out("Data") w "</pre>" q $$$OK
 	}
 	if $g(SDNum)'="",$d(@$$$PROJGN) {
 		write "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
@@ -668,9 +675,15 @@ ClassMethod CloseXLSfile(fileXLS, ByRef exportXLSfileEmail, ByRef exportXLSfile,
 	</body>
 	</html>>
 	use io close exportXLSfile
+	s slash=##class(App.files).getSlash()
+	s path=$p(exportXLSfile,slash,1,*-1)
+	s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
+	if sc s exportXLSfile=exportXLSfile_".zip"
+	i 'sc s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
 	// Send file to e-mail
 	i exportXLSfileEmail'="" {
-		d ##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
+		s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
+		i 'sc s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
 		}
 	write !,"<br><h3>"_$$$aText("Query result","Результ запроса")_" ("_(+count)_" "_$$$aText("lines) uploaded to file","строк) выгружен в файл")_" "_exportXLSfile_"</h3>"
 	quit
@@ -1038,7 +1051,7 @@ ClassMethod AddProdQuery(SDNum, csp = "csp")
 	q ""
 }
 
-ClassMethod ExportProjects(Dir) As %Status
+ClassMethod ExportProjects(Dir, files) As %Status
 {
 	q $$$OK
 }
@@ -1086,6 +1099,9 @@ ClassMethod GetHelp(help)
 	$$$sH("xec job ##class(App.files).OneDayJournalCount()::0 if $test write ""Запустили"" --- Внимание! Процесс может быть долгим. Информация о глабалах по умолчанию запишется в "_$$$TEMPJRNL)
 	$$$sH("xec do ##class(App.files).Export2CSV() --- Вывести информацию о глобалах из "_$$$TEMPJRNL_" в "_$$$EMAILXLSPATH_"JrnCount*.csv")
 	$$$sH(" ")
+	$$$sH("post http://VSZHARTUn:keybfokgrp@cip-test.mvk.ru:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1} ---  Выполнить http запрос методом POST с телом JSON")
+	$$$sH(" ")
+	
 	;set $$$AppL("MSW","%session3")=$$$AppObJs(##class(%MessageDictionary).GetLanguages())
 	quit
 	$$$sH(" Максрос $$$AppLog("""_fio_""",""node"",$lb(var1,var2),mode) позволит записать значений переменных var1,var2 в глобал "_gn)
@@ -1103,7 +1119,7 @@ ClassMethod GetHelp(help)
 	##;1. MSW tools Исправить ошибку в %ZEN.Generator).%FindLocalizedText()
 	;try { Set pTextList(tKey) = "" } catch e {}
 	##;2. MSW tools Добавить ссылку в %CSP.Portal.Home).%DrawLinks()
-	;Set tOptions($I(n)) = $LB($$$Text("<font color=red>Developers Tools</font>"),"",..Link("/csp/user/App.LogInfo.cls?WHAT=%3F"),$$$Text("загрузить инструменты разработчика"))
+	;Set tOptions($I(n)) = $LB($$$Text("<font color=red>Developers Tools</font>"),"",..Link("/apptools/App.LogInfo.cls?WHAT=%3F"),$$$Text("загрузить инструменты разработчика"))
 	##;3. Запретить обновление страницы при завершении сессии   %CSP.Util.AutoPage).DrawAutoLogout() 
 	;	If %request.URL '[ "UtilSqlQuery.csp" && ( %request.URL '[ "/App.") { ##; MSW
 }

@@ -157,12 +157,12 @@ ClassMethod Transliteration(Str As %String) As %Status
 
 /// Разобрать строку по CGI переменным 
 /// w ##class(App.type).ParseURL("aaa=sfdsds&bbb=dfываыавапв")
-ClassMethod ParseURL(str As %String, ByRef out) As %Status
+ClassMethod ParseURL(str As %String, ByRef out, del = "&") As %Status
 {
-	f i=1:1:$l(str,"&") {
-		continue:$p(str,"&",i)=""
-		continue:$p($p(str,"&",i),"=")=""
-		s out($p($p(str,"&",i),"="))=$p($p(str,"&",i),"=",2)
+	f i=1:1:$l(str,del) {
+		continue:$p(str,del,i)=""
+		continue:$p($p(str,del,i),"=")=""
+		s out($p($p(str,del,i),"="))=$p($p(str,del,i),"=",2)
 	}
 }
 

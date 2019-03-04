@@ -86,7 +86,7 @@ ClassMethod GetInputXLSTagsVal(exportXLS, exportXLSfile, exportXLSfileEmail, SDN
 
 /// Послать пользователю файл с сообщением
 /// w ##class(App.LogInfo).SendEmail("mihaylenko_sv@mosvodokanal.ru", "Тест", "Тестовое сообщ", "c:\temp\2019-01-16_32309.xls")
-ClassMethod SendEmail(supportemail = "", subj = "", msg = "", file = "") As %String
+ClassMethod SendEmail(supportemail = "", subj = "", msg = "", file = "") As %Status
 {
 		set subj="Сервер : "_$zu(110)_", "_subj
 		set text="<html><head></head><body color=greay><h4>Здравствуйте пользователь "_supportemail_"</h4>"_
@@ -103,7 +103,7 @@ ClassMethod SendEmail(supportemail = "", subj = "", msg = "", file = "") As %Str
 		if file'="" {
 			s slash=##class(App.files).getSlash()
 			s path=$p(file,slash,1,*-1)
-			s file=$lb($p(file,slash,1,*-1)_"/",$p(file,slash,*))
+			s file=$lb($p(file,slash,1,*-1)_slash,$p(file,slash,*))
 		}
 		set sc=##class(App.net).SendMail($$$EMAILSERVERIP,$$$EMAILSERVERPORT, 0, 0, "", authFrom, authFromPass, authFrom, email_","_supportemail, subj, text,file)
 		if 'sc w !,"Ошибка "_$System.Status.GetErrorText(sc) $$$AppLogTab("ERROR","()",$System.Status.GetErrorText(sc))
@@ -122,29 +122,31 @@ ClassMethod GetImg(code)
 {
 	quit:code="help" "<span class='ui-icon ui-icon-help'></span>"
 	quit:code="search" "<span class='ui-icon ui-icon-search'></span>"
+	;quit:code="apptools" "<img src="""_$$$PATHCSP_"jqueryui/img/apptools-ico-lofel.ico"" width=""1%""/>" 
+	;quit:code="apptools" "<img src="""_$$$PATHCSP_"jqueryui/img/apptools-ico.ico"" width=""1%""/>" ;gear
 	quit:code="tools" "<span class='ui-icon ui-icon-wrench'></span>" ;gear
 	quit:code="trash" "<span class='ui-icon ui-icon-trash'></span>"
 	quit:code="check" "<span class='ui-icon ui-icon-check'></span>"
 	quit:code="closethick" "<span class='ui-icon ui-icon-closethick'></span>"
-	
 	quit ""
 }
 
 /// Export all projects to XML
-ClassMethod ExportProjects(Dir) As %Status
+ClassMethod ExportProjects(Dir, files) As %Status
 {
 	$$$NspGoto(curNs,"AAA")
-	d ..ExportAppProj(Dir,"app")
+	d ..ExportAppProj(Dir,"app",.files)
 	$$$NspReturn(curNs)
+	d ##class(App.net).SendFilesToEmail($zn,Dir,.files)
 	q $$$OK
 }
 
 /// Export all projects to XML
 /// d ##class(App.LogInfo).ExportProj("/backup/source/","app")
-ClassMethod ExportAppProj(Dir, proj = "") As %Status
+ClassMethod ExportAppProj(Dir, proj = "", files) As %Status
 {
 	s pFileName=Dir_$zu(110)_"-"_$zu(5)_"-"_proj_"-"_$tr(##class(App.type).GetDateTime($h),":T","-_")_".xml"
-	w !,pFileName
+	w !,pFileName s files(pFileName)=""
 	/*
 The items to export.
 Each of the items must have a type determined by an extension selected from the following list of basic types, additional types are supported under the abstract routine interface so this list is not exhaustive.
@@ -164,8 +166,11 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 	*/
 	s list("App*.CLS")=""
 	s list("App*.INC")=""
-	s list("/csp/aaa*.CSP")=""
 	Write $SYSTEM.OBJ.Export(.list, pFileName)
+	k list
+	s list("/apptools/*.*")=""
+	s pFileName=Dir_$zu(110)_"-"_$zu(5)_"-"_proj_"-CSP-"_$tr(##class(App.type).GetDateTime($h),":T","-_")_".xml"
+	w !,pFileName s files(pFileName)=""
 }
 
 }

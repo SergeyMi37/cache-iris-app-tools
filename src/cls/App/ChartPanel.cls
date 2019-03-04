@@ -208,7 +208,7 @@ ClassMethod ChartEnsUtilLog(arg, days, res, list)
  s ns=$p(days,",",2,999)
  s days=+days
  s ToDay=$zd($h,3),FromDay=$zd($h-days,3)
- s sql="select Convert(VarChar,TimeLogged, 103) as days,count(*) as erro from Ens_Util.Log where Type='2' and TimeLogged>'"_FromDay_"' and TimeLogged<'"_ToDay_"' and (Text not like '%ErrFTP%' and Text not like '%Не реализовано%' and text not like '%Ключ не определен однозначно%') group by Convert(VarChar,TimeLogged, 103)"
+ s sql="select Convert(VarChar,TimeLogged, 103) as days,count(*) as erro from Ens_Util.Log where Type='2' and TimeLogged>'"_FromDay_"' and TimeLogged<'"_ToDay_"' and (Text not like '%ErrFTP%' and Text not like '%Не реализовано%' and text not like '%Ключ не определен однозначно%' and text not like '%Could not get%') group by Convert(VarChar,TimeLogged, 103)"
  f i=1:1:$l(ns,",") {
 	 s nspace=$p(ns,",",i)
 	 continue:nspace=""
