@@ -139,7 +139,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		<div id=dialogContent></div>
 	</div>
 		<form name="loginfo" id="loginfo">
-		<table width="90%" border="1" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<table width="90%" border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
 				#(##class(App.LogInfo).GetImg("tools"))#
@@ -380,7 +380,7 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 				set anc="<a  title='"_$$$aText("Go to the protocol node","Перейти к узлу протокола")_"' "_href_" >"_gn_"</a>"
 				&html<
 				<h1>View stack : #(anc)# <font color=red>$ze:</font> #($lg(@gn,1))#<font color=red> $h: </font>#($$$LoggedDT($lg(@gn,2)))#<font color=red> $tl: </font>#($lg(@gn,3))#<font color=red> $io: </font>#($lg(@gn,4))#<font color=red> $j: </font>#($lg(@gn,5))#<font color=red>  $zu(110):</font> #($lg(@gn,6))# <font color=red> IP-Adress: </font> #($lg(@gn,8))#</h1>
-				<table border="1" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
+				<table border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
 				<tr>
 					<th align="left" width="5px">#</th>
 					<th align="left" width="50px">Ссылка на код</th>
@@ -419,7 +419,7 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 		}
 			&html<
 			<h1>#($s(msg="":$$$aText("View array","Просмотр массива")_" : "_gn_" "_$$$aText("in namespace","в области")_" "_$zu(5),1:msg))#</h1>
-			<table width="90%" border="1" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
+			<table width="90%" border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
 			<tr>
 				<th align="left" width="1%">#(num)#</th>
 				<th align="left" width="9%">#(ref)#</th>
@@ -455,6 +455,14 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 	if $g(exportXLSfile)'="" { 
 		d ..CloseXLSfile(fileXLS, .exportXLSfileEmail, .exportXLSfile,.io, .count, .msg, .gn)
 	}  	
+	i '$d(%DrawArray) {
+		$$$jsstart
+		w "$('.trs').hover(function(){ " // set the function when you hover the cursor over the element and during its lead	ui-state-hover
+		w "  $(this).toggleClass( 'ui-widget-content' )" 
+		w " });"
+		$$$jsstop
+	 s %DrawArray=1
+	}
   	quit $$$OK
 	##; Условия фильтра по узлу и значениям
 ExpTestFiltr(%gn,Filtr) set %test=0
@@ -558,10 +566,10 @@ ClassMethod DrawNodeGN(node As %String = "", val As %String = "", ByRef count, j
 		s val=..AddExecute(Execute,val, 3, NSpace = "",.countEx) 
 	}
 	&html<
-	<tr>
+	<tr class=trs >
 		<td align="left" >#(count)#</td>
-		<td align="left" bgcolor=#(bgcolor)# >#(node)#</td>
-		<td align="left" bgcolor=#(bgcolor)# >#(val)#</td>
+		<td align="left" >#(node)#</td>
+		<td align="left" >#(val)#</td>
 	</tr>
 	>
 }
@@ -745,7 +753,7 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
 
 	&html<
 	<h1>#($s(msg'="":msg,1:"Запрос: "_SQL))#</h1>
-	<table border="1" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%"><tbody>
+	<table border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%"><tbody>
 	<tr><th align="left" width="1%">#</th>
 	>
 	s %AppLogInfoHead=1 //Processing title
@@ -1099,7 +1107,7 @@ ClassMethod GetHelp(help)
 	$$$sH("xec job ##class(App.files).OneDayJournalCount()::0 if $test write ""Запустили"" --- Внимание! Процесс может быть долгим. Информация о глабалах по умолчанию запишется в "_$$$TEMPJRNL)
 	$$$sH("xec do ##class(App.files).Export2CSV() --- Вывести информацию о глобалах из "_$$$TEMPJRNL_" в "_$$$EMAILXLSPATH_"JrnCount*.csv")
 	$$$sH(" ")
-	$$$sH("post http://VSZHARTUn:keybfokgrp@cip-test.mvk.ru:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1} ---  Выполнить http запрос методом POST с телом JSON")
+	$$$sH("post http://User:pass@localhost:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1} ---  Выполнить http запрос методом POST с телом JSON")
 	$$$sH(" ")
 	
 	;set $$$AppL("MSW","%session3")=$$$AppObJs(##class(%MessageDictionary).GetLanguages())
