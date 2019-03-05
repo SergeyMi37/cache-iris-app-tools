@@ -7,6 +7,7 @@ CSP application but based on jQuery-Ui, chart.js, jsgrid.js
 
 Find the latest release and import XML file into Caché by one of the next ways:
 
-1. Just drag XML file over Studio window;
-2. Go to the Management Portal -> System Explorer -> Classes -> Import and select the XML file;
-3. Execute `do $system.OBJ.Load("C:\path\to\file\FileToImport.xml","ck")` in terminal.
+1. Enter in namespace where you want to install
+2. During installation, mappig will be created in all namespace through namrspace %All
+3. Execute `%SYS>do $system.OBJ.ImportDir("c:\path\to\project","*.*","ck",,1)` in terminal.
+4. http://localhost:57772/apptools/App.LogInfo.cls?WHAT=%3F
