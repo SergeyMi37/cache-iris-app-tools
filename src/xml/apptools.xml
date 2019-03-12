@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-03-12 21:53:59">
+<Export generator="Cache" version="26" zv="IRIS for Windows (x86-64) 2018.1.1 (Build 643U)" ts="2019-03-12 23:20:18">
 <Class name="App.Action">
 <Description>
 Выводить необходимые действия</Description>
@@ -2198,92 +2198,11 @@ This method is invoked when a class is 'uncompiled'.</Description>
 </Class>
 
 
-<Routine name="App.JsonUtils" type="INC" timestamp="65073,42352.807516"><![CDATA[
-#include %occReference
-#if $$$comClassDefined("%Library.Object")
-    #define jsonClassIsLatestVersion $classIsLatestVersion 	
-    						//usage: obj.$$$jsonClassIsLatestVersion()
-    #define jsonExtends $extends							
-    						//usage: {}.$$$jsonExtends(classname) 
-    #define jsonFromJSON $fromJSON							
-    						//usage: {}.$$$jsonFromJSON(string) 
-    #define jsonGetIterator $getIterator 					
-    						//usage: obj.$$$jsonGetIterator()
-    #define jsonGetNext $getNext 					
-    						//usage: iterator.$$$jsonGetNext(.key, .value)
-    #define jsonIsA $isA									
-    						//usage: obj.$$$jsonIsA(classname)
-    #define jsonToJSON $toJSON								
-    						//usage: obj.$$$jsonToJSON()
-    #define jsonGet $get									
-    						//usage: obj.$$$jsonGet(key)
-    #define jsonIsDefined $isDefined						
-    						//usage: obj.$$$jsonIsDefined(key) 
-    #define jsonRemove $remove								
-    						//usage: obj.$$$jsonRemove(key)
-    #define jsonSet $set									
-    						//usage: obj.$$$jsonSet(key, val)
-    #define jsonSize $size									
-    						// usage: obj.$$$jsonSize()
-    #define jsonPop $pop									
-    						//usage: obj.$$$jsonPop()
-    #define jsonPush $push									
-    						//usage: obj.$$$jsonPush(val) 
- 	#define jsonAbstractClass %Library.AbstractObject
-	#define jsonObjectClass %Library.Object
-	#define jsonArrayClass %Library.Array
-
-	#define jsonInitialArrayIndex 0
-#else
-    #define jsonClassIsLatestVersion %ClassIsLatestVersion 	
-    						//usage: obj.$$$jsonClassIsLatestVersion()
-    #define jsonExtends %Extends							
-    						//usage: {}.$$$jsonExtends(classname) 
-    #define jsonFromJSON %FromJSON							
-    						//usage: {}.$$$jsonFromJSON(string) 
-    #define jsonGetIterator %GetIterator 					
-    						//usage: obj.$$$jsonGetIterator()
-	#define jsonGetNext %GetNext 					
-    						//usage: iterator.$$$jsonGetNext(.key, .value)
-	#define jsonIsA %IsA									
-    						//usage: obj.$$$jsonIsA(className)
-    #define jsonToJSON %ToJSON								
-    						//usage: obj.$$$jsonToJSON()
-    #define jsonGet %Get									
-    						//usage: obj.$$$jsonGet(key)
-    #define jsonIsDefined %IsDefined						
-    						//usage: obj.$$$jsonIsDefined(key) 
-    #define jsonRemove %Delete								
-    						//usage: obj.$$$jsonRemove(key)
-    #define jsonSet %Set									
-    						//usage: obj.$$$jsonSet(key, val)
-    #define jsonSize %Size									
-    						//usage: obj.$$$jsonSize()
-    #define jsonPop %Pop									
-    						//usage: obj.$$$jsonPop()
-    #define jsonPush %Push									
-    						//usage: obj.$$$jsonPush(val) 
-	#define jsonAbstractClass %Library.AbstractDynamicObject
-	#define jsonObjectClass %Library.DynamicObject
-	#define jsonArrayClass %Library.DynamicArray
-	
-	#define jsonInitialArrayIndex 1
-#endif
-
-#def1arg jsonIsAbstract %IsA(##Quote($$$jsonAbstractClass))
-							//usage: obj.$$$jsonIsAbstract
-#def1arg jsonIsObject %IsA(##Quote($$$jsonObjectClass))
-							//usage: obj.$$$jsonIsObject
-#def1arg jsonIsArray %IsA(##Quote($$$jsonArrayClass))
-							//usage: obj.$$$jsonIsArray
-]]></Routine>
-
-
 <Class name="App.Log">
 <Description>
 Updated at 12/08/2017 16:09:03</Description>
 <Super>%Persistent</Super>
-<TimeChanged>65084,77072.112909</TimeChanged>
+<TimeChanged>65078,29921</TimeChanged>
 <TimeCreated>63685,63064.148177</TimeCreated>
 
 <Parameter name="Null">
@@ -2639,7 +2558,7 @@ LoadNode(GNkey,key)
 </Method>
 
 <Storage name="Default">
-<Type>%Library.CacheStorage</Type>
+<Type>%Storage.Persistent</Type>
 <DataLocation>^App.LogD</DataLocation>
 <DefaultData>LogDefaultData</DefaultData>
 <IdLocation>^App.LogD</IdLocation>
@@ -4184,131 +4103,6 @@ The method initializes the developer in the system
 </Class>
 
 
-<Routine name="App.LogMacro" type="INC" timestamp="65077,57360.393934"><![CDATA[
-#include EnsSQLTypes
-#Include %occMessages
-#Include App.JsonUtils
-#;Include %msql $$$MaxStringLength
-#;		;2016.2<= set title={}.%FromJSON(json).title 
-#;		;2016.1 set title={}.$fromJSON(json).title
-#;		set title={}.$$$jsonFromJSON(json).title
-
-#define R(%property) %request.Content.##Expression(%property)
-#define RG(%property) %request.Get(%property)
-#define StackPlace 		$st($st(-1),"PLACE")
-#define CurrentClass 	##Expression($$$quote(%classname))
-#define CurrentMethod 	##Expression($$$quote(%methodname))
-#define slash $s($zversion(1)=3:"/",1:"\")
-
-#define MethodArguments ##Expression(##class(App.Log).GetMethodArguments(%classname,%methodname))
-
-#define LogEvent(%type, %message) Do ##class(App.Log).AddRecord($$$CurrentClass,$$$CurrentMethod,$$$StackPlace,%type,$$$MethodArguments,%message)
-#define LogNone(%message) 		$$$LogEvent("NONE", %message)
-#define LogError(%message) 		$$$LogEvent("ERROR", %message)
-#define LogFatal(%message) 		$$$LogEvent("FATAL", %message)
-#define LogWarn(%message) 		$$$LogEvent("WARN", %message)
-#define LogInfo(%message) 		$$$LogEvent("INFO", %message)
-#define LogStat(%message) 		$$$LogEvent("STAT", %message)
-#define LogDebug(%message) 		$$$LogEvent("DEBUG", %message)
-#define LogRaw(%message) 		$$$LogEvent("RAW", %message)
-
-#; Получить дату и время из $h
-#define LoggedDT(%h) $s(%h[",":$tr($zd(%h,4),"/",".")_" "_$zt(+$p(%h,",",2),1),1:"")
-
-#; макрос сохраняет в узле глобала стэк вызовов и все локальные переменные 
-#; Пример применения: /apptools/App.LogInfo.cls?WHAT=?
-#; Если нужна ловушка для конкретного процесса, то присвоить s ^logFIO(0)=Номер процесса
-#define LogEventAddGN(%debubGN, %message) s %AppLogId=##class(App.Log).AddRecord($$$CurrentClass,$$$CurrentMethod,$$$StackPlace,"DEBUG",%debubGN,%message)
-#define logdevGN 	"^log"
-#define MgtPortalSettings 	"^CacheTemp.MgtPortalSettings"
-#define AppLogTab(%type,%message,%desc) Do ##class(App.Log).AddRecord($$$CurrentClass,$$$CurrentMethod,$$$StackPlace,%type,%desc,%message)
-#define AppLog(%dev,%node,%list,%mode) s zsr=$zr,zsG=$$$logdevGN_%dev  if $g(@zsG@(0))=$j||($g(@zsG@(0))="") { s @zsG@(1,$i(@zsG),%node)=%list,zsGzr=$zr if %mode["t" { $$$LogEventAddGN(zsGzr,%list) } if %mode["s" {s zsG=$na(@($qs(zsGzr,0)_"stack")@($qs(zsGzr,2))),@zsG=$lb($ze,$h,$tl,$io,$j,$zu(110),##class(App.LogInfoPane).GetPathStack(),##class(App.Log).GetClientAddress()) S zs1="",zsG=$na(@zsG@("varList")),zsii=0 k @zsG s:%mode["e" @zsG@("%%%$$LOG^%ETN")=$$LOG^%ETN  if %mode["v" { f { s zs1=$O(@zs1) q:zs1=""  continue:$e(zs1,1,2)="zs"&&(zs1'="zs")  if $d(@zs1)'["0",$isobject(@zs1) { s @zsG@(zs1)=##class(App.Log).SerializeObject(@zs1,$na(@zsG@(zs1))),zsii=zsii+1 } elseif $d(@zs1)>9 {s:$d(@zs1)=11 @zsG@(zs1)=@zs1,zsii=zsii+1 MERGE @zsG@(zs1)=@zs1 if zs1="%zlog" {s zs2="" for {s zs2=$o(@zs1@(zs2)) q:zs2=""   s @zsG@(zs1,zs2)=##class(App.Log).SerializeObject($G(@zs1@(zs2)),$na(@zsG@(zs1,zs2)),%mode)   }}}	 elseif $d(@zs1)=1 {s @zsG@(zs1)=@zs1,zsii=zsii+1}} s @zsG=zsii KILL zsii,zsG,zs1,zs2}else{KILL zsii,zsG,zs1,zs2,zsGzr}} try{ if $d(@zsr) KILL zsr} catch e { KILL zsr}}
-#; Добавить активную ссылку на панель
-#define addAppLog(%text,%title,%input,%target) "<a title='"_%title_"' "_$g(%target)_" href=""App.LogInfo.cls?NSP="_$zu(5)_"&WHAT="_$zconvert(%input,"O","URL")_""">"_%text_"</a>"
-
-#; Получить дату и время ГГГГ-ММ-ДД ЧЧ:ММ:СС
-#define AppDT(%h) $zd(+%h,3)_" "_##class(App.type).GetValidZT(%h)
-#define AppObJs(%ob)  $s($isobject(%ob):##class(App.Log).WriteJSONFromObject(%ob),1:%ob)
-#define ApplogGN(%fio) ("^log"_$zconvert($e(%fio,1,3),"U"))
-#;define AppL(%fio,%node) @$$$ApplogGN(%fio)@($i(@$$$ApplogGN(%fio)),$$$AppDT($h)_" "_%node)
-#define AppL(%fio,%node) @$$$ApplogGN(%fio)@($i(@$$$ApplogGN(%fio)),$$$AppDT($h)_" ("_$classname()_")."_%node)
-
-#define forAll(%in,%gn) s gn%in=$na(%gn) s %in="" f { s %in=$o(@gn%in@(%in)) q:%in=""
-#define forAllk(%in,%kn,%gn) s gn%in=$na(%gn) s %in="" f %kn=1:1 { s %in=$o(@gn%in@(%in)) q:%in=""
-#define endFor  }
-
-#; сохранить имя текущей области
-#define NspGoto(%cur,%ns)  s %cur=$zu(5) try {zn %ns} catch e {} 
-#; возвратиться в текущую области
-#define NspReturn(%cur)  zn %cur
-#;---------- верстка
-#;
-#define appStyleInput " style='border: none;	background: none;	color: inherit;	padding: .222em 0;	margin: .2em 0;	vertical-align: middle;	margin-left: .4em;	margin-right: .4em;' "
-#define appInputHidden(%id,%attr,%val) "<input type=hidden "_%attr_" id='"_%id_"' name='"_%id_"' value='"_%val_"'>"
-#define appText(%id,%attr,%val) "<span class='ui-spinner ui-corner-all ui-widget ui-widget-content'><input autocomplete='off' "_$$$appStyleInput_" type=text "_%attr_" id='"_%id_"' name='"_%id_"' value='"_%val_"'></span>"
-#define appAutocomplete(%id,%attr,%val) "<span class='ui-spinner ui-corner-all ui-widget ui-widget-content'><input id='"_%id_"' name='"_%id_"' "_%attr_" "_$$$appStyleInput_" autocomplete='off' value='"_%val_"'>"
-#define appAutocomplete2(%id,%attr,%val) "<input id='"_%id_"' name='"_%id_"' "_%attr_" class='ui-autocomplete-input' autocomplete='off' value='"_%val_"'>"
-#define appInput(%id,%attr,%val) "<span class='ui-spinner ui-corner-all ui-widget ui-widget-content'><input autocomplete='off' "_$$$appStyleInput_" "_%attr_" id='"_%id_"' name='"_%id_"' value='"_%val_"'></span>"
-#define appButton(%id,%attr,%val) "<input class='ui-button ui-corner-all ui-widget' type=button id='"_%id_"' name='"_%id_"' "_%attr_" value='"_%val_"'>"
-#define appTextarea(%id,%attr,%val) "<span class='ui-spinner ui-corner-all ui-widget ui-widget-content'><textarea autocomplete='off' "_$$$appStyleInput_" "_%attr_" id='"_%id_"' name='"_%id_"' >"_%val_"</textarea></span>"
-#define appDate(%id,%attr,%val) ""
-#define appCheck(%id,%attr,%val) "<input class='ui-button ui-corner-all ui-widget' type=checkbox id='"_%id_"' name='"_%id_"' "_%attr_" value='"_%val_"'>"
-#define appSelect(%id,%attr,%val) ""
-#define appError(%val) "<div class='ui-widget'><div class='ui-state-error ui-corner-all' style='margin-top: 20px; padding: 1em;'><p><span class='ui-icon ui-icon-alert' style='float: left; margin-right: 3em;'></span>"_%val_"</p></div></div>"
-#define appMsg(%val) "<div class='ui-widget'><div class='ui-state-highlight ui-corner-all' style='margin-top: 20px; padding: 1em;'><p><span class='ui-icon ui-icon-info' style='float: left; margin-right: 3em;'></span>"_%val_"</p></div></div>"
-
-#define jsstart w "<script language='javascript'>"
-#define jsstop w "</script>"
-#define styleurl "text-decoration:underline; color:blue; cursor:hand;"
-#define blockui(%msg)  "$.blockUI( { message: '"_%msg_"' , css: { border: 'none', padding: '15px', backgroundColor: '#000', '-webkit-border-radius': '10px','-moz-border-radius': '10px', opacity: .5, color: '#fff' }} );"
-
-#;	Localization
-#define GNLangDOMAIN "AppLog"
-
-#define GNEnsConf "^%App.Setting"
-/// Global history of command
-#define HISTORYGN "^%App.History"
-/// Global tempory data
-#define TEMPORYGN "^mtempAppData"
-/// Global projects in the system
-#define PROJGN "^%App.Proj"
-/// Global tempory data for Journals
-#define TEMPJRNL "^%App.JRNL"
-/// Limiting the number of nodes in a global or query result for output
-#define MAXSHOW 10000
-/// The module display links to the administrative application panel
-#define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)
-
-#;;; Parameters dependent on the installation server
-#define GNLang "^%AppCacheMsg"
-#; Path to CSP apps "/apptools/"
-#define  PATHCSP $GET(@$$$GNEnsConf@("PATHCSP")) 
-#; Mail Server Settings
-#define  EMAILSERVERIP $GET(@$$$GNEnsConf@("EMAILSERVERIP"))
-#define  EMAILSERVERPORT $GET(@$$$GNEnsConf@("EMAILSERVERPORT"))
-#; Authorization in the mail server
-#define  EMAILAUTH $GET(@$$$GNEnsConf@("EMAILAUTH")) 
-#define  EMAILAUTHPASS $GET(@$$$GNEnsConf@("EMAILAUTHPASS"))
-#; Technical support admin address
-#define  EMAILSUPPORT $G(@$$$GNEnsConf@("EMAILSUPPORT")) 
-#; Path for temporary xls file before sending to mail
-#define  EMAILXLSPATH $G(@$$$GNEnsConf@("EMAILXLSPATH"))
-#; Path to storing project sources
-#define  EXPORTPROJPATH $G(@$$$GNEnsConf@("EXPORTPROJPATH")) 
-#; List of databases to monitor free space in App..Chart.cls?panel=class(App.ChartPanel).ChartDbSize
-#define DBCACHESizeMon $G(@$$$GNEnsConf@("DBCACHESizeMon"))
-
-#define aTextOld(%ru,%en) ##function($$AddLangMsg^App.util(%ru,%en))
-#define aText(%en,%ru) ##Expression(##class(App.sys).AddLangMsg(%en,%ru))
-
-#; --------------- Прикладной раздел
-#define GNmessages "^%App.cconsolelog"
-#define DubledQuote(%s)	$replace(%s,"'","''")
-#define  TESTSERVER "cip-test.mvk.ru"
-
-]]></Routine>
-
-
 <Class name="App.Metrics">
 <Description>
 This class is an object-oriented implementation of ^mgstat routine.
@@ -4714,7 +4508,7 @@ Memory offset for journals</Description>
 <Description>
 Параметры для панели администратора</Description>
 <Super>%Persistent,App.Form</Super>
-<TimeChanged>65084,77072.175147</TimeChanged>
+<TimeChanged>65078,29921</TimeChanged>
 <TimeCreated>64695,66336.883011</TimeCreated>
 
 <Parameter name="AppORDERPROPERTY">
@@ -4815,7 +4609,7 @@ ServerName $zu(110) </Description>
 </Property>
 
 <Storage name="Default">
-<Type>%Library.CacheStorage</Type>
+<Type>%Storage.Persistent</Type>
 <DataLocation>^%App.ParameterD</DataLocation>
 <DefaultData>ParameterDefaultData</DefaultData>
 <IdLocation>^%App.ParameterD</IdLocation>
@@ -5194,7 +4988,7 @@ Sample: input = WriteDaemon, output = _write_daemon</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65071,33345.453343</TimeChanged>
+<TimeChanged>65084,83405.547184</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 
 <Parameter name="HeaderText">
@@ -5223,32 +5017,20 @@ Sample: input = WriteDaemon, output = _write_daemon</Description>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>#(..#HeaderText)#</title>
-<script src="/csp/spgz/jqueryui/external/jquery/jquery.js"></script>
-<script src="/csp/spgz/jqueryui/jquery-ui.js"></script>
-<script src="/csp/spgz/jqueryui/jquery.blockui.js"></script>
-
-<!-- Контрол Множественного выбора -->
-<script src="/csp/spgz/jqueryui/selectize.js"></script>
-<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/selectize.default.css"/>
-
-<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/css/main.css"/>
-<link href="/csp/spgz/jqueryui/jquery-ui.css" rel="stylesheet">
-<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+>
+	w ##class(App.LogInfoPane).GetLink()
+	d ##class(App.LogInfoPane).AddJsScripts() 
+ &html<
  <style type="text/css">
-
 </style>
 </head>
 <body>
  <div id="MainBody">
   <nav style='background: #d7ebf9;' > 
     &nbsp;&nbsp;&nbsp;  
-    	<img  title='заголовок' style='vertical-align: middle;' src="???.png" />  &nbsp;&nbsp;&nbsp; 
+    	<img  title='заголовок' style='vertical-align: middle;' src="jqueryui/favicon.ico" />  &nbsp;&nbsp;&nbsp; 
  	<div id="MainControlgroup" > </div>
  	<span id='status_nav'> Статус сессии </span>
- 	<div id="logo" style='text-align: right;'>
- 		<img  title='#(..GetSupportInfo())#' src="???.png" />
- 	</div>
   </nav> 
  <div id="tabs"> </div>
 </div>
@@ -5308,7 +5090,7 @@ $( ".tip" ).tooltip();
 
 <Method name="DrawStatus">
 <Description>
-отрисовка меню</Description>
+отрисовка статуса пользователя</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Par</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -5331,19 +5113,19 @@ $( ".tip" ).tooltip();
 <Implementation><![CDATA[
 	;TODO права доступа к страницам
 	;TODO сохранить в БД таблицы
-	s key="zspr"
-	s opt(key)="Справочники"
-	s opt(key,"id")="Class"
-	s opt(key,"TabName")="Справочники"
-	s opt(key,"ClassName")="App.PatternSimpleApp"
+	s key="menu-first"
+	s opt(key)="Поиск" ;Имя меню
+	s opt(key,"id")="Find"
+	s opt(key,"TabName")="Вкладка поиска" ;имя вкладки
+	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=0 ;разрабатывается
 
-	s key="zspr2"
-	s opt(key)="Справочники2"
-	s opt(key,"id")="Class2"
-	s opt(key,"TabName")="Справочники2"
-	s opt(key,"ClassName")="App.PatternSimpleApp"
+	s key="menu-second"
+	s opt(key)="О программе"
+	s opt(key,"id")="About"
+	s opt(key,"TabName")="О программе"
+	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=1 ;разрабатывается
 	
@@ -5381,8 +5163,12 @@ Par - код пункта меню из ..Permiss</Description>
  		w "var index = $('#tabs a[href=""#"_tabId_"""]').parent().index();"
 		w "$('#tabs').tabs({'active':index});" ;сделаем ее активной
  		;w "alert('"_tabId_"');"
- 		if $g(opt(Par,"Url"))'="" w "$('#"_tabId_"').load('AsuPriz.MVK.Export.cls');"
- 		else  w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+ 		if $g(opt(Par,"Url"))'="" {
+	 		w "$('#"_tabId_"').load('"_$g(opt(Par,"Url"))_"');"
+ 		}
+ 		else {
+	 		w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+ 		}
 	$$$jsstop
 ]]></Implementation>
 </Method>

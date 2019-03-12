@@ -21,32 +21,20 @@ ClassMethod OnPage() As %Status
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>#(..#HeaderText)#</title>
-<script src="/csp/spgz/jqueryui/external/jquery/jquery.js"></script>
-<script src="/csp/spgz/jqueryui/jquery-ui.js"></script>
-<script src="/csp/spgz/jqueryui/jquery.blockui.js"></script>
-
-<!-- Контрол Множественного выбора -->
-<script src="/csp/spgz/jqueryui/selectize.js"></script>
-<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/selectize.default.css"/>
-
-<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/css/main.css"/>
-<link href="/csp/spgz/jqueryui/jquery-ui.css" rel="stylesheet">
-<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+>
+	w ##class(App.LogInfoPane).GetLink()
+	d ##class(App.LogInfoPane).AddJsScripts() 
+ &html<
  <style type="text/css">
-
 </style>
 </head>
 <body>
  <div id="MainBody">
   <nav style='background: #d7ebf9;' > 
     &nbsp;&nbsp;&nbsp;  
-    	<img  title='заголовок' style='vertical-align: middle;' src="???.png" />  &nbsp;&nbsp;&nbsp; 
+    	<img  title='заголовок' style='vertical-align: middle;' src="jqueryui/favicon.ico" />  &nbsp;&nbsp;&nbsp; 
  	<div id="MainControlgroup" > </div>
  	<span id='status_nav'> Статус сессии </span>
- 	<div id="logo" style='text-align: right;'>
- 		<img  title='#(..GetSupportInfo())#' src="???.png" />
- 	</div>
   </nav> 
  <div id="tabs"> </div>
 </div>
@@ -94,7 +82,7 @@ ClassMethod IsDebugMode(mode = 0) As %Status
 	q 0
 }
 
-/// отрисовка меню
+/// отрисовка статуса пользователя
 ClassMethod DrawStatus(Par) As %Status
 {
 	;do ##class(App.Form).BlockUI(0)
@@ -110,19 +98,19 @@ ClassMethod Permiss(opt) As %Status
 {
 	;TODO права доступа к страницам
 	;TODO сохранить в БД таблицы
-	s key="zspr"
-	s opt(key)="Справочники"
-	s opt(key,"id")="Class"
-	s opt(key,"TabName")="Справочники"
-	s opt(key,"ClassName")="App.PatternSimpleApp"
+	s key="menu-first"
+	s opt(key)="Поиск" ;Имя меню
+	s opt(key,"id")="Find"
+	s opt(key,"TabName")="Вкладка поиска" ;имя вкладки
+	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=0 ;разрабатывается
 
-	s key="zspr2"
-	s opt(key)="Справочники2"
-	s opt(key,"id")="Class2"
-	s opt(key,"TabName")="Справочники2"
-	s opt(key,"ClassName")="App.PatternSimpleApp"
+	s key="menu-second"
+	s opt(key)="О программе"
+	s opt(key,"id")="About"
+	s opt(key,"TabName")="О программе"
+	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=1 ;разрабатывается
 	
@@ -150,8 +138,12 @@ ClassMethod ShowTab(Par) As %Status
  		w "var index = $('#tabs a[href=""#"_tabId_"""]').parent().index();"
 		w "$('#tabs').tabs({'active':index});" ;сделаем ее активной
  		;w "alert('"_tabId_"');"
- 		if $g(opt(Par,"Url"))'="" w "$('#"_tabId_"').load('AsuPriz.MVK.Export.cls');"
- 		else  w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+ 		if $g(opt(Par,"Url"))'="" {
+	 		w "$('#"_tabId_"').load('"_$g(opt(Par,"Url"))_"');"
+ 		}
+ 		else {
+	 		w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+ 		}
 	$$$jsstop
 }
 
