@@ -139,7 +139,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		<div id=dialogContent></div>
 	</div>
 		<form name="loginfo" id="loginfo">
-		<table width="90%" border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
 				#(##class(App.LogInfo).GetImg("tools"))#
@@ -213,7 +213,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		if DSN'="" {
 			set gnTemp=$na(@$$$TEMPORYGN@($username))
 			KILL @gnTemp
-			if $G(listDSN(DSN))'="" set st=##class(App.sys).SaveGateway(sql,$G(listDSN(DSN)),"_system","",gnTemp,MaxNode) 
+			if $G(listDSN(DSN))'="" set st=##class(App.sys).SaveGateway(sql,$G(listDSN(DSN)),%request.Get("User"),%request.Get("Password"),gnTemp,MaxNode) 
 			else  set st=##class(App.sys).SqlToDSN(sql,DSN,gnTemp,MaxNode)
 			if $d(@gnTemp) {
 				set st=..DrawSQL("result "_gnTemp,MaxNode,NSpace,"В DSN: "_DSN_" Запрос "_$g(sql),$g(ExecuteDraw),$lb(exportXLS,exportXLSfile,exportXLSfileEmail))
@@ -380,7 +380,7 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 				set anc="<a  title='"_$$$aText("Go to the protocol node","Перейти к узлу протокола")_"' "_href_" >"_gn_"</a>"
 				&html<
 				<h1>View stack : #(anc)# <font color=red>$ze:</font> #($lg(@gn,1))#<font color=red> $h: </font>#($$$LoggedDT($lg(@gn,2)))#<font color=red> $tl: </font>#($lg(@gn,3))#<font color=red> $io: </font>#($lg(@gn,4))#<font color=red> $j: </font>#($lg(@gn,5))#<font color=red>  $zu(110):</font> #($lg(@gn,6))# <font color=red> IP-Adress: </font> #($lg(@gn,8))#</h1>
-				<table border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
+				<table style="border-radius: 10px; border: 1px solid #72a7cf"  cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
 				<tr>
 					<th align="left" width="5px">#</th>
 					<th align="left" width="50px">Ссылка на код</th>
@@ -419,7 +419,7 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 		}
 			&html<
 			<h1>#($s(msg="":$$$aText("View array","Просмотр массива")_" : "_gn_" "_$$$aText("in namespace","в области")_" "_$zu(5),1:msg))#</h1>
-			<table width="90%" border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
+			<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
 			<tr>
 				<th align="left" width="1%">#(num)#</th>
 				<th align="left" width="9%">#(ref)#</th>
@@ -753,7 +753,7 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
 
 	&html<
 	<h1>#($s(msg'="":msg,1:"Запрос: "_SQL))#</h1>
-	<table border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%"><tbody>
+	<table style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%"><tbody>
 	<tr><th align="left" width="1%">#</th>
 	>
 	s %AppLogInfoHead=1 //Processing title
@@ -1068,12 +1068,13 @@ ClassMethod GetHelp(help)
 {
 	#define sH(%msg) set help($i(help))=%msg
 	$$$sH("Примеры вызова:")
+	$$$sH(" "_$$$addAppLog("^%App.Setting"," Перейти","^%App.Setting","")_" --- Просмотр основных параметров панели")
 	$$$sH("obj ##class(App.Log).%New() --- Получить информацию по классу")
 	$$$sH("obj ##class(App.Log).%OpenId(15) --- Получить информацию по классу и объекту")
 	$$$sH("obj =##class(App.Log).%OpenId(15) --- Получить информацию только по значениям объекта")
 	$$$sH(" ")
 	$$$sH("xec set obj=##class(App.Log).%OpenId(15)  write ""&lt;pre&gt;"" zw obj w ""&lt;/pre&gt;"" --- Выполнить команду : Показать dump объекта ")
-	$$$sH("xec do ##class(App.sys).SaveQuery(""SYS.Database:FreeSpace"",""^GN"") --- Выполнить команду : Сохранить результат запроса в глобале ")
+	$$$sH("xec zn ""%SYS"" do ##class(App.sys).SaveQuery(""SYS.Database:FreeSpace"",""^GN"") --- Выполнить команду : Сохранить результат запроса в глобале ")
 	$$$sH(" ")
 	$$$sH("query ##class(%Library.ResultSet).%New(""%SYSTEM.License:Counts"") --- Выполнить запрос и показать")
 	$$$sH("query %SYSTEM.License:Counts --- Выполнить запрос и показать использование лицензий")
@@ -1096,8 +1097,8 @@ ClassMethod GetHelp(help)
 	$$$sH(" "_$$$addAppLog(input,title,input,"")_" --- "_title_"")
 	$$$sH(" "_$$$addAppLog("^*","Список всех глобалов","^*","")_" --- показать список всех глобалов в текущей области")
 	$$$sH(" "_$$$addAppLog("^log*","Список глобалов по маске","^log*","")_" --- показать список глобалов по маске")
-	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log*","")_" --- показать список глобалов с занимаемым размером Allocated MB")
-	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log*","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
+	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
+	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log***","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
 	$$$sH(" ")
 	$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
 	$$$sH("--- Если этот макрос вставить в исследуемую программу $$$LogDebug(""Отладочная информация"") то в таблице App.Log появися новая запись")

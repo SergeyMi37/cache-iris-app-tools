@@ -101,6 +101,7 @@ ClassMethod LoadFileHttp(aURL = "", aDATA, TempDir = "", fileName) As %Status
 /// w ##class(App.net).GetHttp("https://opendatabot.com/c/19358827",.out,"c:\!\","^temp")
 /// w ##class(App.net).GetHttp("http://www.cbr.ru/mcirabis/PluginInterface/GetBicCatalog.aspx",.out,"/backup/temp/")
 /// w ##class(App.net).GetHttp("http://www.cbr.ru/mcirabis/BIK/bik_db_13102017.zip",.out2,"/backup/temp/")
+/// w ##class(App.net).GetHttp("https://codeload.github.com/SergeyMi37/cache-iris-app-tools/zip/master",.out2,"D:\temp\")
 ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 {
 	set part1=$p(aURL,"/",3),part2=$p(aURL,"/",4,$l(aURL,"/")),params=$p(aURL,"?",2)
@@ -120,7 +121,7 @@ ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 		set:(port="") port=443
 		set HttpRequest.Https=1
 		;set HttpRequest.FollowRedirect = 1
-		set HttpRequest.SSLConfiguration=..CheckSSLCertificate("MvkDefaultSSL")
+		set HttpRequest.SSLConfiguration=..CheckSSLCertificate("DefaultSSL")
 	
 	#; Запрос по HTTP
 	} else {
@@ -242,6 +243,7 @@ ClassMethod ListFtp() As %String
  ;for  set len=32763,line=stream.Read(.len) write line  quit:stream.AtEnd
  for  {
 	 s line=stream.ReadLine() s ^logFTT(1,$i(^logFTT),"F")=$lb(line) 
+	 w !,line
 	 quit:stream.AtEnd
  }
  Write !," -------- End of stream -----",!
@@ -326,6 +328,39 @@ ClassMethod PostHttp(ServerPort, method, user, pass, ByRef body, ByRef out) As %
 	}
  	do ht.%Close()
  	q $g(out)
+}
+
+/// d ##class(App.net).RunPage()
+ClassMethod RunPage(Url As %String = "http://intersystems.ru")
+{
+    #Include %occOptions
+    Set Browser = $s($$$isWINDOWS:"start", $$$isUNIX:"x-www-browser", 1:"x-www-browser")
+    Set Command = Browser _ " " _ Url
+    Do $ZF(-1, Command)
+}
+
+/// Import CSP-file from GitHub repository for 7z utility 
+/// s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_repo_"/zip/master",repo,"d:\!\csptest")
+ClassMethod ImportCSPFromGitHub(url, repo, target)
+{
+	s tempdir=##class(%File).TempFilename("zip")
+	s st=##class(%File).CreateDirectory(tempdir)
+	i 'st q st
+ 	s st=##class(App.net).GetHttp(url,.out,tempdir)
+ 	w !,tempdir
+	s unzip=##class(%File).TempFilename("unzip")
+	s st=##class(%File).CreateDirectory(unzip)
+	i 'st q st
+	s cmd="7z x "_tempdir_$$$slash_repo_"-master.zip -y -o"_unzip ;_" >d:\!\log.log"
+	s st=$ZF(-1,cmd)
+	w !,cmd 
+	s source=unzip_$$$slash_repo_"-master"_$$$slash_"src"_$$$slash_"csp"
+	w !,source_" copy to "_target,!
+	s st=##class(%File).CopyDir(source,target,1,1,1)
+	i 'st w !,st
+	d ##class(%File).Delete(tempdir)
+	d ##class(%File).Delete(unzip)
+	q $$$OK
 }
 
 }

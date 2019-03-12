@@ -77,7 +77,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		<div id=dialogContent></div>
 	</div>
 		<form name="loginfo" id="loginfo">
-		<table width="90%" border="0" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 		  <td>#(##class(App.LogInfo).GetInfoImg("search"))# 
 			 <DIV id=MainNamespaces></div>

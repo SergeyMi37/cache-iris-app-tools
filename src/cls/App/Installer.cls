@@ -9,6 +9,8 @@ Parameter DispatchClass = "App.RestMetrics";
 
 Parameter ResourceName = "%AppTools";
 
+Parameter Repository = "cache-iris-app-tools";
+
 Parameter RoleName = "AppTools";
 
 Parameter AppRest = "apptoolsrest";
@@ -24,10 +26,25 @@ Parameter VERSION = 1.0;
 /// This method is invoked when a class is compiled.
 ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 {
+	m $$$AppL("MSW","cls")=cls
+	m $$$AppL("MSW","params")=params
+	s $$$AppL("MSW","cls")=$$LOG^%ETN
 	new $Namespace
 	set ns = $Namespace // ought to be package home namespace!
 	if $g(@$$$GNEnsConf@("HomeNamespace"))'="",$g(@$$$GNEnsConf@("HomeNamespace"))'=ns {
 		 QUIT $$$OK
+	}
+	if $g(@$$$GNEnsConf@("HomeNamespace"))="" {
+	;Заполнение глобала значениями по умолчанию
+	 set @$$$GNEnsConf@("DBCACHESizeMon")="CACHESYS,CACHEAUDIT"
+	 set @$$$GNEnsConf@("EMAILAUTH")="mail@server.com"
+	 set @$$$GNEnsConf@("EMAILAUTHPASS")=12345
+	 set @$$$GNEnsConf@("EMAILSERVERIP")="127.0.0.1"
+	 set @$$$GNEnsConf@("EMAILSERVERPORT")=25
+	 set @$$$GNEnsConf@("EMAILSUPPORT")="admin@server.com"
+	 set @$$$GNEnsConf@("EMAILXLSPATH")="c:\temp\"
+	 set @$$$GNEnsConf@("EXPORDPROJPATH")="c:\temp\source\"
+	 set @$$$GNEnsConf@("Language")="en"
 	}
     set @$$$GNEnsConf@("HomeNamespace") = ns
     write !, "Installing "_..#AppName_" application to " _ ns
@@ -54,13 +71,15 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 			set cspProperties("Path")=result.Data("Path")
 		}
 	}
-    zw cspProperties
+    ;zw cspProperties
     set cspProperties("AutheEnabled") = $$$AutheCache
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
     set cspProperties("IsNameSpaceDefault") = $$$NO
     set st = ..RegisterWebApplication("/"_..#AppCSP, .cspProperties)
     return:$$$ISERR(st) st
+    
+    d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,cspProperties("Path"))
     
 	s @$$$GNEnsConf@("CSP-Path")=cspProperties("Path")
 	KILL cspProperties("Path")
@@ -90,7 +109,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 
     if (##class(Security.Roles).Exists(..#RoleName) = 0) {
         set st = ##class(Security.Roles).Create(..#RoleName,
-            "AppTools user role which may grant access to /apptools application if set up.",
+            "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
     
@@ -121,7 +140,7 @@ ClassMethod RemoveWebApplication(name As %String)
     set st = $$$OK
     if (##class(Security.Applications).Exists(name)) {
         do ##class(Security.Applications).Get(name, .props)
-        if (props("DispatchClass") '= ..#DispatchClass) && (name = "/apptools") {
+        if (props("DispatchClass") '= ..#DispatchClass) && (name = "/"_..#AppCSP) {
             write !, "Won't delete WEB-application """_name_""" because it does not refer to dispatch class anymore."
         } else {
             write !, "Deleting WEB application """_name_"""..."
@@ -137,18 +156,17 @@ ClassMethod RemoveProjection(cls As %String, ByRef params, recompile As %Boolean
 {
 	new $Namespace
 
-	write:(recompile) !, "Recompiling WebTerminal, skipping the deletion..."
+	write:(recompile) !, "Recompiling "_..#AppName_", skipping the deletion..."
     return:(recompile) $$$OK
 
 	set ns = $get(@$$$GNEnsConf@("HomeNamespace"), $Namespace)
-    write !, "Uninstalling WebTerminal application from ", ns
+    write !, "Uninstalling "_..#AppName_" application from ", ns
     zn "%SYS"
-    set st = ..RemoveWebApplication("/apptools")
+    set st = ..RemoveWebApplication("/"_..#AppCSP)
     return:($$$ISERR(st)) st
     
-    ;set st = ..RemoveWebApplication("/terminalsocket")
-    ;do:($$$ISERR(st)) ##class(WebTerminal.Analytics).ReportInstallStatus(st)
-    ;return:($$$ISERR(st)) st
+    set st = ..RemoveWebApplication("/"_..#AppRest)
+    return:($$$ISERR(st)) st
     
     if (##class(Security.Resources).Exists(..#ResourceName) = 1) {
         set st = ##class(Security.Resources).Delete(..#ResourceName)

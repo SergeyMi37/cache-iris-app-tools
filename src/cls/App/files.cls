@@ -537,6 +537,7 @@ ClassMethod GetAllDir(dir, ext = "", ByRef out)
 	set rs = ##class(%ResultSet).%New("%File:FileSet")
 	s sc=rs.Execute(dir, ext)
 	while (rs.Next()) {
+		;w !,rs.Get("Name")
 		set out($i(out)) = $lb(rs.Get("Name"),rs.Get("Type"),rs.Get("Size"),rs.Get("ItemName"),rs.Get("DateCreated"),rs.Get("DateModified"))
 		i rs.Get("Type")="D" d ##class(App.files).GetAllDir($lg(out(out),1),ext,.out)
 	}

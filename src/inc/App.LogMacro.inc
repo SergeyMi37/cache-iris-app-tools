@@ -108,7 +108,7 @@ ROUTINE App.LogMacro [Type=INC]
 #; Path for temporary xls file before sending to mail
 #define  EMAILXLSPATH $G(@$$$GNEnsConf@("EMAILXLSPATH"))
 #; Path to storing project sources
-#define  EXPORDPROJPATH $G(@$$$GNEnsConf@("EXPORDPROJPATH")) 
+#define  EXPORTPROJPATH $G(@$$$GNEnsConf@("EXPORTPROJPATH")) 
 #; List of databases to monitor free space in App..Chart.cls?panel=class(App.ChartPanel).ChartDbSize
 #define DBCACHESizeMon $G(@$$$GNEnsConf@("DBCACHESizeMon"))
 
