@@ -147,8 +147,8 @@ ClassMethod Stream2Log(aStream, aLogFolder, aFileName, ByRef filename) As %Statu
 	d aStream.Rewind() quit sc
 }
 
-/// Открыть файл для записи 
-/// w ##class(App.files).ReadFile2Arr("/backup/temp/snmp/os-cip.mvk.ruRunCmd2018-10-03_14:31:00.txt","RSK",,"%tmp")
+/// Открыть файл и записать в массив 
+/// w ##class(App.files).ReadFile2Arr("/backup/temp/snmp/ruRunCmd2018-10-03_14:31:00.txt","RSK",,"%tmp")
 ClassMethod ReadFile2Arr(file, mode = "RSK", code = "UTF8", gn = "tmp") As %Status
 {
 	s io=$i
@@ -176,7 +176,6 @@ ClassMethod OpenFile(file, time = 1, mode = "WNSK", code = "UTF8") As %Status
 /// w ##class(App.files).File2Arr("/backup/eaist/work/SPGZ.xml_2018-05-07_14.56.26.461","^tmpFile")
 ClassMethod File2Arr(file, Mas, Param = "RSU") As %Status
 {
- //ПРОЧИТАТЬ ИЗ ФАЙЛА И ПОЛОЖИТЬ В МАССИВ
  set f=##class(%File).%New(file)
  set ok=f.Open(Param)     if 'ok do f.%Close() Q ok
  set len=$zu(140,1,file)
@@ -189,8 +188,7 @@ ClassMethod File2Arr(file, Mas, Param = "RSU") As %Status
 }
 
 /// Загрузка XML в класс объектов  
-/// d ##class(App.files).LoadXML("/backup/eaistprod/arhive/InfoObject.xml_2018-09-19_08.49.08.638","infoObject","Mvk.model.InfoObject") 
-/// d ##class(App.files).LoadXML("d:\!\InfoObject.xml","infoObject","Mvk.model.InfoObject") 
+/// d ##class(App.files).LoadXML("d:\!\InfoObject.xml","infoObject","Model.InfoObject") 
 ClassMethod LoadXML(fn, tag, class)
 {
 	Set tReader = ##class(%XML.Reader).%New()

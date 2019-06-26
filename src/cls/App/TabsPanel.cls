@@ -7,9 +7,6 @@ Class App.TabsPanel Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
 /// Заголовок приложения / Application title
 Parameter HeaderText = "Tabs Application title";
 
-/// Префикс идентификатора контейнера
-Parameter PrefixIdDIV = "Exp";
-
 /// Главный метод формирования содержимого страницы
 ClassMethod OnPage() As %Status
 {
@@ -22,11 +19,72 @@ ClassMethod OnPage() As %Status
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>#(..#HeaderText)#</title>
 >
-	w ##class(App.LogInfoPane).GetLink()
-	d ##class(App.LogInfoPane).AddJsScripts() 
+	write ##class(App.LogInfoPane).GetLink()
+	write ##class(App.LogInfoPane).AddJsScripts() 
+    d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
  &html<
  <style type="text/css">
+ 
+ /*
+	div {
+  max-width: 400px;
+  max-height: 150px;
+  overflow: scroll;
+}
+*/
+
+/* Use position: sticky to have it stick to the edge
+ * and top, right, or left to choose which edge to stick to: */
+
+thead th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  top: 0;
+}
+
+tbody th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  left: 0;
+}
+
+
+/* To have the header in the first column stick to the left: */
+
+thead th:first-child {
+  left: 0;
+  z-index: 1;
+}
+
+
+/* Just to display it nicely: */
+
+thead th {
+  background: #E7EBF9;
+
+}
+
+tbody th {
+  background: #E7EBF9;
+
+}
+
+table {
+  border-radius: 10px; 
+  border: 1px solid #72a7cf
+}
+
+td,
+th {
+  padding: 0.5em;
+}
+
+.bigbox { 
+height: 20px; width: 20px 
+}
+ 
 </style>
+<script src="jqueryui/jquery.blockui.js"></script>
 </head>
 <body>
  <div id="MainBody">
@@ -56,6 +114,9 @@ ClassMethod OnPage() As %Status
 $( ".tip" ).tooltip();
 </script>
 <div id='MainHidden' style='display:none;'></div>
+<div id="dialog" title="Dialog Title">
+	<div id=dialogContent></div>
+</div>
 </body>
 </html>
 	>
@@ -86,7 +147,7 @@ ClassMethod IsDebugMode(mode = 0) As %Status
 ClassMethod DrawStatus(Par) As %Status
 {
 	;do ##class(App.Form).BlockUI(0)
-	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.MVK.EISinfo).GetFIO($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
+	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.sys).GetFullName($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
  	$$$jsstart
 	w "$('.tip').tooltip();"
 	$$$jsstop
@@ -94,7 +155,7 @@ ClassMethod DrawStatus(Par) As %Status
 }
 
 /// какие доступны режимы
-ClassMethod Permiss(opt) As %Status
+ClassMethod GetAllApps(opt) As %Status
 {
 	;TODO права доступа к страницам
 	;TODO сохранить в БД таблицы
@@ -111,27 +172,151 @@ ClassMethod Permiss(opt) As %Status
 	s opt(key,"id")="About"
 	s opt(key,"TabName")="О программе"
 	s opt(key,"ClassName")=..%ClassName(1)
-	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Method")="ShowTabAbout"
 	s opt(key,"Disable")=1 ;разрабатывается
 	
 	q $$$OK
 }
 
-/// отрисовка Вкладки ранее переданных
-/// Par - код пункта меню из ..Permiss
-ClassMethod ShowTabSample(Par = "") As %Status
+/// отрисовка Вкладки О программе"
+/// Par - код пункта меню из ..GetAllApps
+ClassMethod ShowTabAbout(Par = "") As %Status
 {
-	d ..Permiss(.opt) 
+	d ..GetAllApps(.opt) 
 	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
+	s divId=$g(opt(Par,"id"))
 	w "Hello world! Parameter: "_Par
-	w ..ButtonAgain()
+	w ..ButtonAgain(divId,,Par)
+}
+
+/// отрисовка Вкладки ранее переданных
+/// Par - код пункта меню из ..GetAllApps
+ClassMethod ShowTabSample(key = "") As %Status
+{
+ d ..GetAllApps(.opt) 
+ i $g(opt(key,"Disable")) w ..GetSupportInfo() q $$$OK
+ s NSpace=$zu(5)
+ s pref=$g(opt(key,"id"))
+ s mhead=pref_"MainHeader"
+ s mcont=pref_"MainContent"
+ &html<
+<form id="#(pref_"MainForm")#">
+<table id="tbpage" cellspacing="0" width='100%' >
+  <tbody>
+   <tr height='10%' >
+   	<td>
+   		<DIV id="#(mhead)#"></div>
+	</td>
+   </tr>
+   <tr height='90%' >
+   	<td>
+ 		<div style='overflow: auto;' id="#(mcont)#"></div>
+	</td>
+ </tr>
+</tbody>
+</table>
+</form>
+>
+ ;d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
+ $$$jsstart
+  	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+ 	w "$('#"_mcont_"').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
+  	w $$$blockui("Загрузка...")
+	w "ActionJs('"_pref_"MainForm','"_mhead_"','','"_pref_"FirstHead','divId="_pref_"~key="_key_"');"
+ $$$jsstop
+ ;d ..AddToForm()
+ quit $$$OK
+}
+
+/// загрузить шаблон формы поиска
+ClassMethod FindFirstHead(Par = "") As %Status
+{
+	do ##class(App.Form).BlockUI(0)
+	s key=Par("key")
+	s divId=Par("divId")
+	set onclick=$$$blockui("Ждите...")_";ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+		&html<
+		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<tr>
+			<td>
+			Контекст названия фильма
+			</td>
+			<td>
+			#($$$appText(divId_"Name","","New"))#
+			</td>
+			<td>
+
+			</td>
+			<td>
+
+			</td>
+			<td>
+		
+			</td>
+			<td>
+
+			</td>
+		</tr>
+		<tr>
+			<td>
+			
+			</td>
+			<td>
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Поиск фильма в SAMPLES"))#
+			</td>
+			<td>
+
+			</td>
+			<td>
+			</td>
+			<td>
+			
+			</td>
+			<td>
+
+			</td>
+		</tr>
+		</table>
+	>
+	q $$$OK
+}
+
+/// Результат поиска
+ClassMethod FindResult(Par = "") As %Status
+{
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+	set Name=$g(Par("%request.Data",divId_"Name"))
+	set Desc=$g(Par("%request.Data",divId_"Desc"))
+	set Date=$g(Par("%request.Data",divId_"Date"))
+	write ..ButtonAgain(divId,,key)
+	if mode=1 {
+		if Name="" w $$$appError("Контекст пустой") q $$$OK
+		zn "samples"
+		set sql="select * from Cinema.Film where title is not null "
+		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
+		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		set msg="Запрос : "_sql
+		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
+		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
+		quit $$$OK
+	} 
+	elseif mode=2 {
+
+	}
+	w "<br>"
+
+	;i 'st  w $$$appError($System.Status.GetErrorText(st))
+	q $$$OK
 }
 
 /// отрисовка Вкладки
-/// Par - код пункта меню из ..Permiss
+/// Par - код пункта меню из ..GetAllApps
 ClassMethod ShowTab(Par) As %Status
 {
-	d ..Permiss(.opt) 
+	d ..GetAllApps(.opt) 
 	s tabId="tabs-"_opt(Par,"id")
  	$$$jsstart
  		w "var a = $('#li-"_tabId_"'); a.show();" ; откроем вкладку
@@ -151,7 +336,7 @@ ClassMethod ShowTab(Par) As %Status
 ClassMethod DrawMenu(Par) As %Status
 {
 	
-	d ..Permiss(.opt) 
+	d ..GetAllApps(.opt) 
 	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
 	w "<select id=""menu-spgz"" >"
 	s i="" w "<option VALUE=0> </option>"
@@ -170,7 +355,7 @@ ClassMethod DrawMenu(Par) As %Status
 /// отрисовка табов
 ClassMethod DrawTabs(Par) As %Status
 {
-	d ..Permiss(.opt)
+	d ..GetAllApps(.opt)
 	w "<ul>"
 	s i="" f { s i=$o(opt(i)) q:i=""  
 		s tabs(i)="tabs-"_$g(opt(i,"id"))
@@ -212,12 +397,12 @@ ClassMethod Logout(Par) As %Status
   	q $$$OK
 }
 
-/// Вывод кнопки Сначала для Вкладки TmcMainForm ShowTabTmc 
-ClassMethod ButtonAgain() As %Status
+/// Вывод кнопки Сначала
+ClassMethod ButtonAgain(Prefix = "", Method = "", appPar = "") As %Status
 {
-   	s formName=..#PrefixIdDIV_"MainContent"
-	s Method="ShowTab"_..#PrefixIdDIV
-	set onclick="$('#"_formName_"').load('App.Action.cls','"_..#PrefixIdDIV_"appClass="_..%ClassName(1)_"&"_..#PrefixIdDIV_"appMethod="_Method_"&"_..#PrefixIdDIV_"appNsp="_$zu(5)_"&"_..#PrefixIdDIV_"appPar=1');"
+	i Method="" s Method="ShowTab"
+	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
+	set onclick="$('#MainHidden').load('App.Action.cls','"_Prefix_"appClass="_..%ClassName(1)_"&"_Prefix_"appMethod="_Method_"&"_Prefix_"appNsp="_$zu(5)_"&"_Prefix_"appPar="_appPar_"');"
 	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
 }
 

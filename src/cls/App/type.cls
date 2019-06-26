@@ -20,6 +20,13 @@ ClassMethod GetTextMonth(mm) As %String
 	q $s(+mm="1":"январь",+mm="2":"февраль",+mm="3":"март",+mm="4":"апрель",+mm="5":"май",+mm="6":"июнь",+mm="7":"июль",+mm="8":"август",+mm="9":"сентябрь",+mm="10":"октябрь",+mm="11":"ноябрь",1:"декабрь")
 }
 
+/// Получить месяц
+/// w ##class(App.type).GetMonth($h)
+ClassMethod GetMonth(h) As %String
+{
+	q $p($zd(h,3),"-",2)
+}
+
 /// Перевести ГГГГ-ММ-ДД ЧЧ:ММ:СС в $HOROLOG
 /// w ##class(App.type).GetHorYYYYMMDD("2018-07-06 08:14:47")
 ClassMethod GetHorYYYYMMDD(dt) As %String
@@ -164,6 +171,154 @@ ClassMethod ParseURL(str As %String, ByRef out, del = "&") As %Status
 		continue:$p($p(str,del,i),"=")=""
 		s out($p($p(str,del,i),"="))=$p($p(str,del,i),"=",2)
 	}
+}
+
+/// Вывести js код для выбора файла в новом окне и загрузки его на сервер
+/// ##class(App.type).UploadFilesJS(%id)
+ClassMethod UploadFilesJS(id, %id) As %Status
+{
+	s onclick="win=window.open('App.UploadCSP.cls?idreturn="_id_"&ServerDirPath="_$zconvert($g(%id("filesStore")),"O","URL")_"', 'winupload', 'location=no,left=200,top=300,width=800,height=300,scrollbars=no,status=no,toolbar=no,menubar=no');"
+	q $$$appButton("appButtonUpload"_id,"onclick="""_$g(onclick)_"""","Загрузить файл")
+}
+
+/// Получить имя таблицы из Класса
+/// w ##class(App.type).GetTableName("App.sss.user")
+ClassMethod GetTableName(SelectClass) As %String
+{
+	set (tab,table)=$p(SelectClass,".",*)
+	//Если имя таблицы - ключевое слов, обрамим в кавычки
+	set:$SYSTEM.SQL.IsReservedWord(table) table = """"_table_""""
+	set tab=$tr($p(SelectClass,"."_tab,1),".","_")_"."_table
+	q tab
+}
+
+/// Вывести сумму прописью
+/// w ##class(App.type).SummaProp(1111111.11)
+ClassMethod SummaProp(n) As %String
+{
+ q $$sump(n)
+sump(n) ;$$;преобразование
+ s n=+$j($tr(n,","),"",2)
+ ;w !,$fn(num,",",2),!
+ s n=$$tran(n)_"k"
+ ;составляем разряды
+ s n=$$repl(n,",,,,,,,","eT")
+ s n=$$repl(n,",,,,,,","eM")
+ s n=$$repl(n,",,,,,","em")
+ s n=$$repl(n,",,,,","et")
+ s n=$$repl(n,",,,","e")
+ s n=$$repl(n,",,","d")
+ s n=$$repl(n,",","c")
+ ;убрать пустые значения
+ s n=$$repl(n,"0c0d0eT","")
+ s n=$$repl(n,"0c0d0et","")
+ s n=$$repl(n,"0c0d0em","")
+ s n=$$repl(n,"0c0d0eM","")
+ ;заменяем соответвующие значения на пропись
+ s n=$$repl(n,"0c","")
+ s n=$$repl(n,"1c","сто ")
+ s n=$$repl(n,"2c","двести ")
+ s n=$$repl(n,"3c","триста ")
+ s n=$$repl(n,"4c","четыреста ")
+ s n=$$repl(n,"5c","пятьсот ")
+ s n=$$repl(n,"6c","шестьсот ")
+ s n=$$repl(n,"7c","семьсот ")
+ s n=$$repl(n,"8c","восемьсот ")
+ s n=$$repl(n,"9c","девятьсот ")
+ ;
+ s n=$$repl(n,"1d0e","десять ")
+ s n=$$repl(n,"1d1e","одиннадцать ")
+ s n=$$repl(n,"1d2e","двенадцать ")
+ s n=$$repl(n,"1d3e","тринадцать ")
+ s n=$$repl(n,"1d4e","четырнадцать ")
+ s n=$$repl(n,"1d5e","пятнадцать ")
+ s n=$$repl(n,"1d6e","шестнадцать ")
+ s n=$$repl(n,"1d7e","семьнадцать ")
+ s n=$$repl(n,"1d8e","восемнадцать ")
+ s n=$$repl(n,"1d9e","девятнадцать ")
+ ;
+ s n=$$repl(n,"0d","")
+ s n=$$repl(n,"2d","двадцать ")
+ s n=$$repl(n,"3d","тридцать ")
+ s n=$$repl(n,"4d","сорок ")
+ s n=$$repl(n,"5d","пятьдесят ")
+ s n=$$repl(n,"6d","шестьдесят ")
+ s n=$$repl(n,"7d","семьдесят ")
+ s n=$$repl(n,"8d","восемьдесят ")
+ s n=$$repl(n,"9d","девяносто ")
+ ;
+ s n=$$repl(n,"0e","")
+ s n=$$repl(n,"5e","пять ")
+ s n=$$repl(n,"6e","шесть ")
+ s n=$$repl(n,"7e","семь ")
+ s n=$$repl(n,"8e","восемь ")
+ s n=$$repl(n,"9e","девять ")
+ ;
+ s n=$$repl(n,"1e.","один рубль ")
+ s n=$$repl(n,"2e.","два рубля ")
+ s n=$$repl(n,"3e.","три рубля ")
+ s n=$$repl(n,"4e.","четыре рубля ")
+ s n=$$repl(n,"1et","одна тысяча ")
+ s n=$$repl(n,"2et","две тысячи ")
+ s n=$$repl(n,"3et","три тысячи ")
+ s n=$$repl(n,"4et","четыре тысячи ")
+ s n=$$repl(n,"1em","один миллион ")
+ s n=$$repl(n,"2em","два миллиона ")
+ s n=$$repl(n,"3em","три миллиона ")
+ s n=$$repl(n,"4em","четыре миллиона ")
+ s n=$$repl(n,"1eM","один милиард ")
+ s n=$$repl(n,"2eM","два милиарда ")
+ s n=$$repl(n,"3eM","три милиарда ")
+ s n=$$repl(n,"4eM","четыре милиарда ")
+ s n=$$repl(n,"1eT","один триллион ")
+ s n=$$repl(n,"2eT","два триллиона ")
+ s n=$$repl(n,"3eT","три триллиона ")
+ s n=$$repl(n,"4eT","четыре триллиона ")
+ ;копейки
+ s n=$$repl(n,"11k","11 копеек")
+ s n=$$repl(n,"12k","12 копеек")
+ s n=$$repl(n,"13k","13 копеек")
+ s n=$$repl(n,"14k","14 копеек")
+ s n=$$repl(n,"1k","1 копейка")
+ s n=$$repl(n,"2k","2 копейки")
+ s n=$$repl(n,"3k","3 копейки")
+ s n=$$repl(n,"4k","4 копейки")
+ ;пустые позиции
+ s n=$$repl(n,"et","")
+ s n=$$repl(n,"em","")
+ s n=$$repl(n,"eM","")
+ s n=$$repl(n,"eT","")
+ ;если число <1
+ s:$p(n,".")="" n="ноль "_n
+ ;
+ s n=$$repl(n,".","рублей ")
+ s n=$$repl(n,"t","тысяч ")
+ s n=$$repl(n,"m","миллионов ")
+ s n=$$repl(n,"M","милиардов ")
+ s n=$$repl(n,"T","триллионов ")
+ s n=$$repl(n,"k"," копеек")
+ ;НЕРАСПОЗНАННЫЕ ОСТАТКИ ОТ ПРЕОБРАЗОВАНИЯ
+ s n=$tr(n,".ecdtmMkT")
+ ;w !,n
+ q n
+ ;
+tran(n) ;$$;приводим в форму пригодную для замены
+ s n=$tr($j(n,18,2)," ","0")
+ s n=$tr("q,w,,e,,,,,,,r,t,,y,,,,,,u,i,,o,,,,,p,a,,s,,,,d,f,,g,,,.hj","qwertyuiopasdfg.hj",n)
+ ;w !,n
+ q n
+ 
+repl(s,s0,sn)
+ q $replace(s,s0,sn)
+}
+
+/// Получить временную глобальну ссылку
+/// w ##class(App.type).tempGN("GN")
+ClassMethod tempGN(GN, NoKill = 0) As %String
+{
+	s gn=$na(^tmpSPGZ(GN,$j)) 
+	if 'NoKill KILL @gn	s @gn=$$$AppDT($h)
+	q gn
 }
 
 }

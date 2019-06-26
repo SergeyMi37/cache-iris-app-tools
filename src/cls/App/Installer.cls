@@ -37,11 +37,11 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 	if $g(@$$$GNEnsConf@("HomeNamespace"))="" {
 	;Заполнение глобала значениями по умолчанию
 	 set @$$$GNEnsConf@("DBCACHESizeMon")="CACHESYS,CACHEAUDIT"
-	 set @$$$GNEnsConf@("EMAILAUTH")="mail@server.com"
+	 set @$$$GNEnsConf@("EMAILAUTH")="user_from_send_mail@server.com"
 	 set @$$$GNEnsConf@("EMAILAUTHPASS")=12345
 	 set @$$$GNEnsConf@("EMAILSERVERIP")="127.0.0.1"
 	 set @$$$GNEnsConf@("EMAILSERVERPORT")=25
-	 set @$$$GNEnsConf@("EMAILSUPPORT")="admin@server.com"
+	 set @$$$GNEnsConf@("EMAILSUPPORT")="user_to_send_mail@server.com"
 	 set @$$$GNEnsConf@("EMAILXLSPATH")="c:\temp\"
 	 set @$$$GNEnsConf@("EXPORDPROJPATH")="c:\temp\source\"
 	 set @$$$GNEnsConf@("Language")="en"
@@ -49,6 +49,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
     set @$$$GNEnsConf@("HomeNamespace") = ns
     write !, "Installing "_..#AppName_" application to " _ ns
     set dbdir = $$$defdir
+    $$$NspGoto(curNs,"%SYS")
     try {
         set $Namespace = "%SYS"
     } catch (e) {
@@ -72,19 +73,18 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 		}
 	}
     ;zw cspProperties
-    set cspProperties("AutheEnabled") = $$$AutheCache
+    set cspProperties("AutheEnabled") = $$$AutheCache ;$$$AutheUnauthenticated ;
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
     set cspProperties("IsNameSpaceDefault") = $$$NO
     set st = ..RegisterWebApplication("/"_..#AppCSP, .cspProperties)
     return:$$$ISERR(st) st
     
-    d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,cspProperties("Path"))
-    
+ 
 	s @$$$GNEnsConf@("CSP-Path")=cspProperties("Path")
 	KILL cspProperties("Path")
 	
-    set cspProperties("AutheEnabled") = $$$AutheCache
+    set cspProperties("AutheEnabled") = $$$AutheCache ;$$$AutheUnauthenticated
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
     set cspProperties("IsNameSpaceDefault") = $$$NO
@@ -112,7 +112,8 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
             "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
-    
+	$$$NspReturn(curNs)
+    d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
 }
 

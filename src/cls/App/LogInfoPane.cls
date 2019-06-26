@@ -13,14 +13,42 @@ ClassMethod GetLink()
 }
 
 /// Add libraries and functions js to the panel
-/// d ##class(App.LogInfoPane).AddJsScripts()
+/// write ##class(App.LogInfoPane).AddJsScripts()
 ClassMethod AddJsScripts(mode)
 {
-	write "<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"
-	write "<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"
-	write:$g(mode)="grid" "<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>","<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"
-	write:$g(mode)="chart" "<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"
-	q
+	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script><script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"
+	set:$g(mode)="grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script><script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"
+	set:$g(mode)="chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"
+	q scr
+}
+
+/// write ##class(App.LogInfoPane).AddCSS()
+ClassMethod AddCSS(mode)
+{
+	/* https://habr.com/ru/post/453744/
+table {
+  overflow: hidden;
+}
+
+tr:hover {
+  background-color: #ffa;
+}
+
+td, th {
+  position: relative;
+}
+td:hover::after,
+th:hover::after {
+  content: "";
+  position: absolute;
+  background-color: #ffa;
+  left: 0;
+  top: -5000px;
+  height: 10000px;
+  width: 100%;
+  z-index: -1;
+}
+*/
 }
 
 /// Add libraries and functions js to the panel
@@ -33,7 +61,7 @@ Method DrawHEAD(pInstance As PageInstance) As %Status
 /// Drawing the form to enter information
 Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what, field, value, type, typeclass, caption) ]
 {
-	d ##class(App.LogInfoPane).AddJsScripts() 
+	write ##class(App.LogInfoPane).AddJsScripts() 
 	set $ZT="errors"
 	set color="red"
 	if $zu(110)=$$$TESTSERVER s color="blue" 
@@ -76,7 +104,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		set ExecuteDraw="##class(App.LogInfoPane).DrawHelp(.%AppLogInfoVal,%AppLogInfoCol,%AppLogInfoHead,.%AppLogInfoTemp,"""_NSpace_""","""_DSN_""")"
 	}
 	#; queries and query results
-	elseif ",query,result,select,s,q,r,"[(","_$zconvert($p(what," ",1),"L")_",") {
+	elseif ",query,result,select,s,q,r,begin,"[(","_$zconvert($p(what," ",1),"L")_",") {
 			set sql=what
 			i sql["p.party_id( )" s sql=$replace(sql,"p.party_id( )","p.party_id(+)")
 	}
@@ -152,7 +180,8 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 				 | <a name='Hist' href='#("App.LogInfo.cls?NSP="_$zu(5)_"&Next=-1&WHAT="_$zconvert($$$HISTORYGN,"O","URL")_"")#' title='#($$$aText("Show command input history","Показать историю ввода команд"))#' id='Hist'>#($$$aText("History","История"))#</a>
 				 | <a target='Explore' name='Explore' href='#("App.FormExp.cls?NSP="_$zu(5))#' id='Explorer'>#($$$aText("Selection Classes","Селектор Классов"))#</a>
 				 | <a target='ExploreTab' name='ExploreTab' href='#("App.FormExp.cls?panel=AccordionExp&NSP="_$zu(5))#'  id='ExplorerTab'>#($$$aText("Explorer tables","Табличный Навигатор"))#</a>
-				 | <a target='Param' name='Param' href='#("App.FormExp.cls?NSP="_$zu(5)_"&SelClass=App.Parameter")#' title='#($$$aText("Go to the options table","Перейти в таблицу параметров"))#' id='Param'>#($$$aText("Options","Параметры"))#</a>
+				 | <a target='Param' name='Param' href='#("App.FormExp.cls?NSP="_$zu(5)_"&SelClass=App.Parameter")#' title='#($$$aText("Go to the options table","Перейти в таблицу параметров"))#' id='Param'>#($$$aText("Parameters","Параметры"))#</a>
+				 | <a target='Tabs' name='Tabs' href='#("App.TabsPanelSample.cls")#' title='#($$$aText("Sample Tabs Application","Пример приложения с закладками"))#' id='Param'>#($$$aText("SampleTabsApplication","ПримерПриложения"))#</a>
 				 | <a target='Chart' name='Chart'  id='Chart' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartDbSize&NSP="_$zu(5))#'>#($$$aText("ChartDbSize","Размеры БазДанных"))#</a>
 				 | <a target='ChartAlert' name='ChartAlert'  id='ChartAlert' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartAlert&NSP="_$zu(5))#'>#($$$aText("ChartAlert","Важные события"))#</a>
  			 | 
@@ -185,14 +214,16 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		</table>
 		</form>
 	>
-	d ##class(App.LogInfoPane).AddJS("tWHAT") 
+	d ##class(App.LogInfoPane).AddJS(NSpace) 
 	if $g(execute)'="" {
 		write "<H3>"_$$$aText("Executing the command","Выполнение команды")_" "_execute_"</H3>"
 		x execute
 		q $$$OK
 	}
 	if what="trm" {
-		write !,"<iframe style='width:95%; height:70%' id='terminal"_NSpace_"' src='/terminal/?ns="_NSpace_"&clean=1' ></iframe>"
+		if ##class(App.sys).ClassExist("WebTerminal.Engine") {
+			write !,"<iframe style='width:95%; height:70%' id='terminal"_NSpace_"' src='/terminal/?ns="_NSpace_"&clean=1' ></iframe>"
+		}
 		quit $$$OK
 	}
 	#; Post request
@@ -202,11 +233,18 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		if $p(server,"@")'="" set user=$p($p(server,"@"),":"),pass=$p($p(server,"@"),":",2),server=$p(server,"@",2)
 		set postbody=$p($p(what," ",2,*),$C(13,10),2,*)
 		s st=##class(App.net).PostHttp(server, $p($p(posturl,"/",4,*),"?"),user ,pass ,postbody,.out)
-		w st w "<pre>" zw out("Data") w "</pre>" q $$$OK
+		w st w "<pre>" zw:$d(out("Data")) out("Data") w "</pre>" q $$$OK
 	}
-	if $g(SDNum)'="",$d(@$$$PROJGN) {
-		write "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
+	if $p($zconvert(what,"L")," ",1)="get" {
+		set url=$p($p(what," ",2,*),$C(13,10),1)
+		set server=$p(url,"/",3)
+		if $p(server,"@")'="" set user=$p($p(server,"@"),":"),pass=$p($p(server,"@"),":",2),server=$p(server,"@",2)
+		s st=##class(App.net).GetHttp(url,.out)
+		w "<pre>" zw out w ! if $d(out("content")) { while '(out("content").AtEnd) { w $zconvert(out("content").ReadLine(),"O","HTML") }} w "</pre>" q $$$OK
 	}
+
+	$$$SDNum
+	
 	set obj=""
 	#; arbitrary query
 	if $g(sql)'="" {
@@ -313,6 +351,7 @@ ClassMethod DrawHelp(Val, Col, Head, Temp, nspace, DSN)
 {
 	set res=Val
 	if Head {
+		 s %AppCol2="40%"
 		 q:Col=1 ""  
 		 if Col=2 {
 			set res=$$$aText("Command","Команда")
@@ -400,7 +439,7 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 					</tr>
 					>
 				}
-				&html<</table>>
+				&html<</tbody></table>>
 				set gn=$q(@gn)
 			}
 		} 
@@ -410,6 +449,7 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 		s num="#"
 		s ref=$$$aText("reference","Ссылка")
 		s data=$$$aText("Data","Данные")
+		s %AppCol2="9%"
 		if Execute'="" {
 			s %AppLogInfoHead=1
 			s %AppLogInfoTemp=data
@@ -421,8 +461,8 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
 			<h1>#($s(msg="":$$$aText("View array","Просмотр массива")_" : "_gn_" "_$$$aText("in namespace","в области")_" "_$zu(5),1:msg))#</h1>
 			<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
 			<tr>
-				<th align="left" width="1%">#(num)#</th>
-				<th align="left" width="9%">#(ref)#</th>
+				<th title='Edit nodes and values global' align="left" width="1%">#(num)#</th>
+				<th align="left" width="#(%AppCol2)#">#(ref)#</th>
 				<th align="left" width="*">#(data)#</th>
 			</tr>
 			>
@@ -440,18 +480,22 @@ ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", N
   				if $g(iglast)'="" set ig=iglast
   			}
   			if ig'="" {
-	  			if next=-1 { set NoDraw=0
-		  			i $g(Filtr)'="" set NoDraw=$$ExpTestFiltr(ig,Filtr) 
+	  			if next=-1 { 
+	  				set NoDraw=0
+		  			if $g(Filtr)'="" set NoDraw=$$ExpTestFiltr(ig,Filtr) 
+		  			if $p(ig,"(",1)=$$$HISTORYGN,$g(NSpace)'="%SYS" set:$lg(@ig,2)'=$g(NSpace) NoDraw=1
 		  			do:'NoDraw ..DrawNodeGN(ig,$g(@ig),.count,,ig,$g(NSpace),Execute)
 	  			}
-	  			for { set ig=$q(@ig,$g(next)) quit:ig=""||(ig'[$e(igg,1,*-1))
+	  			for { set ig=$q(@ig,$g(next)) 
+	  				quit:ig=""||(ig'[$e(igg,1,*-1))
 	  				if $g(Filtr)'="" continue:$$ExpTestFiltr(ig,Filtr)
 	  				set node=$e($p(ig,$e(igg,1,*-1),2),2,*)
+					if $p(ig,"(",1)=$$$HISTORYGN,$g(NSpace)'="%SYS" continue:$lg(@ig,2)'=$g(NSpace)
 					do ..DrawNodeGN(node,@ig,.count,$g(job),ig,$g(NSpace),Execute)
 					Quit:count>MaxNode
 	  			}
   			}
-  			&html<</table>>
+  			&html<</tbody></table>>
 	if $g(exportXLSfile)'="" { 
 		d ..CloseXLSfile(fileXLS, .exportXLSfileEmail, .exportXLSfile,.io, .count, .msg, .gn)
 	}  	
@@ -519,12 +563,12 @@ ClassMethod DrawNodeGN(node As %String = "", val As %String = "", ByRef count, j
 		} 
 		// If there is a serialized object, then open the browse window.
 		elseif $e(val,1)="{"&&($e(val,*)="}")||($e(val,1,4)="""\""{") {
-			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','ShowJson','"_$zconvert(gn,"O","URL")_"');"""
+			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowJson','"_$zconvert(gn,"O","URL")_"');"""
 			set title=$$$aText("Show formatted json","Показать форматированный json")
 			set node="<a title='"_title_"' "_href_" >"_node_"</a> "
 		}
 		elseif $e(val,1)="<"&&($e(val,*)=">") {
-			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','ShowXML','"_$zconvert(gn,"O","URL")_"');"""
+			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowXML','"_$zconvert(gn,"O","URL")_"');"""
 			set title=$$$aText("Show","Показать")_" XML"
 			set node="<a title='"_title_"' "_href_" >"_node_"</a> "
 			set val=$zconvert(val,"O","HTML")
@@ -565,13 +609,68 @@ ClassMethod DrawNodeGN(node As %String = "", val As %String = "", ByRef count, j
 		s node=..AddExecute(Execute,node, 2, NSpace = "",.countEx) 
 		s val=..AddExecute(Execute,val, 3, NSpace = "",.countEx) 
 	}
+	s count2="<span title='Редактировать' style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','"_..%ClassName(1)_"','WinOpenEditNode','&node="_$zconvert(gn,"O","URL")_"','EditNode');"" >"_count_"</span>"
 	&html<
 	<tr class=trs >
-		<td align="left" >#(count)#</td>
+		<td align="left" >#(count2)#</td>
 		<td align="left" >#(node)#</td>
 		<td align="left" >#(val)#</td>
 	</tr>
 	>
+}
+
+/// WinOpenEditNode
+ClassMethod WinOpenEditNode(Par) As %String
+{
+	set gn=$zconvert($g(Par("node")),"I","URL")
+	if gn="" w $$$appError("Global link is empty") q
+	if '$d(@gn) w $$$appError("Global node does not exist") q
+	set PrefixIdDIV="WinOpenEdit"
+	set Node=$$$appText(PrefixIdDIV_"Node","size=80",gn)
+	set Value=@gn
+	set:$lv(Value) Value=##class(%Global).Quote(Value)
+	set Value=$$$appTextarea(PrefixIdDIV_"Value","rows=6 cols=80",Value)
+	
+	set onclick="ActionJs('"_PrefixIdDIV_"MainForm','"_PrefixIdDIV_"MainContent','"_..%ClassName(1)_"','WinOpenNodeSaveOrKill','~mode=*');"
+
+	set bsave=$$$appButton(PrefixIdDIV_"idButtSave","onclick="""_$replace(onclick,"*","Save")_"""","Save")
+	set bkill=$$$appButton(PrefixIdDIV_"idButtKill","onclick=""if (prompt('Delete you sure ?','Yes')) {"_$replace(onclick,"*","Kill")_"}""","Delete")
+	&html<
+	<center>
+	<form id='#(PrefixIdDIV_"MainForm")#'>
+		<table>
+			<tr>
+				<td style='text-align: right;'>Node</td>
+				<td style='text-align: left;'>#(Node)#</td>
+			</tr>
+			<tr>
+				<td style='text-align: right;'>Data</td>
+				<td style='text-align: left;'>#(Value)#</td>
+			</tr>
+			<tr>
+				<td style='text-align: right;'>#(bsave)#</td>
+				<td style='text-align: left;'>#(bkill)#</td>
+			</tr>
+		</table>
+	</form><div id='#(PrefixIdDIV_"MainContent")#'></div>
+	</center>
+	>
+	q $$$OK
+}
+
+/// WinOpenNodeSaveOrKill
+ClassMethod WinOpenNodeSaveOrKill(Par) As %String
+{
+	set gn=$g(Par("%request.Data","WinOpenEditNode"))
+	set val=$g(Par("%request.Data","WinOpenEditValue"))
+	if $g(Par("mode"))="Save" {
+		s @gn=val
+		w $$$appMsg("Saved") q
+	}
+	elseif $g(Par("mode"))="Kill" {
+		k @gn	
+		w $$$appMsg("Killed") q
+	}
 }
 
 /// Add an active link for the terminal
@@ -586,14 +685,6 @@ ClassMethod AddExecute(Execute, data, col, NSpace = "", ByRef countEx) As %Strin
 	}
 	catch e { w $ze}
 	quit %AppLogInfoVal
-}
-
-/// Add an active link for the terminal
-ClassMethod AddWebTerm(count, ByRef node, Load, NSpace = "") As %String
-{
-	set href="style=""text-decoration: underline; color: blue;"" d onclick=""copyToClipboard('p"_count_"');"""
-	set title=$$$aText("Put a link to the context restore in the terminal in the clipboard","Поместить в буфер обмена ссылку на восстановление контекста в терминале")
-	set node="<div id='p"_count_"' style='display:none' >d ##class(App.Log).Load("""_$replace(Load,$c(34),$c(34,34))_""")</div><a title='"_title_"' "_href_" >"_node_"</a> "
 }
 
 /// Add an active link to view the class description.
@@ -625,14 +716,14 @@ ClassMethod AddClassId(classname, id, ByRef str, NSpace = "") As %String
 ClassMethod ShowCell(str, NSpace = "") As %String
 {
 	set:$lv(str) str=##class(%Global).Quote(str)
-	
+	/*
 	if $l(str,".")>2 {
 		; TODO cycle through the line if there are a lot of classes
 		if $p($p(str,"(",2),")",1)["." {
 			set class=$p($p(str,"(",2),")",1)
 			if class'="" d ..AddClassRef(class, .str, NSpace)
 		}
-	}
+	}*/
 	if str["_class"":" {
 			set class=$p($p(str,"_class"":",2),$c(34),2)
 			set id=$p($p(str,"_id"":",2),",",1)
@@ -702,7 +793,7 @@ ClassMethod CloseXLSfile(fileXLS, ByRef exportXLSfileEmail, ByRef exportXLSfile,
 /// 	$lg(fileXLS,1) =1 флаг 
 /// 	s exportXLSfileEmail=$lg(fileXLS,3) - parcel addresses separated by commas, to which to send the file
 /// 	s exportXLSfile=$lg(fileXLS,2) - full path to the file where to write the table
-ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", msg = "", Execute = "", fileXLS = "") As %Status
+ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", msg = "", Execute = "", fileXLS = "", Mode = "") As %Status
 {
 	if ($zconvert($e(SQL,1),"L")="q") {
 		try { set st=1
@@ -752,13 +843,16 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
 	}
 
 	&html<
-	<h1>#($s(msg'="":msg,1:"Запрос: "_SQL))#</h1>
-	<table style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%"><tbody>
-	<tr><th align="left" width="1%">#</th>
-	>
+	<h7>#($s(msg'="":msg,1:"Запрос: "_SQL))#</h7>
+	<table style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%">
+	<thead>
+		<tr class=trs >
+		>
+	if 'Mode write "<th width=""1%"">#</th>"
+	
 	s %AppLogInfoHead=1 //Processing title
 	For i=1:1:ColCount {
-		&html<	<th align="left" width="5%">>
+		&html<	<th width="5%">>
 		set %AppLogInfoCol=i
 		if $g(resGN)'="" {
 			if $d(@resGN@(0,i)) {set %AppLogInfoVal=$g(@resGN@(0,i))	if $lv(%AppLogInfoVal) set %AppLogInfoVal=$lg(%AppLogInfoVal,1)
@@ -775,14 +869,16 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
 					if %AppLogInfoVal'=%AppLogInfoVal2 set countEx=$g(countEx)+1
 					set %AppLogInfoVal=%AppLogInfoVal2
 				}
-				catch e {}
+				catch e {
+					set %AppLogInfoVal=$zconvert($ze,"O","HTML")
+					}
 			}
 			else {set %AppLogInfoVal=..ShowCell(%AppLogInfoVal,NSpace)	
 			}
 			write %AppLogInfoVal
-		&html<</th>>	
+		&html<&nbsp;</th>>	
 	}
-	&html<	</tr>	>
+	&html<	</tr></thead><tbody>	>
 	s %AppLogInfoHead=0 //We process lines
 	if $g(resGN)'="" { set i=0
 		for { set i=$order(@resGN@(i))   quit:i=""
@@ -796,7 +892,7 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
 			d qNext(.GetData) q:$g(stopWrite)
 		}
 	}
-	&html<</table>>
+	&html<</tbody></table>>
 	Write !,$$$aText("Number of records found","Количество записей найдено")_" :"_+$g(count)
 	if Execute'="" {
 		Write !,$$$aText("Contextual changes or allotments","Контекстных изменений или выделений")_" :"_+$g(countEx)
@@ -817,8 +913,9 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
  // Handling one query string
 qNext(GetData)
 		set count=count+1
-		&html<<tr class=trs ><td>#(count)#</td>>
-		if count>MaxNode w "<td style='color:red'>... "_$$$aText("More entries","Записей больше")_" "_MaxNode_"</td></tr>" s stopWrite=1 QUIT
+		write "<tr class=trs >"
+		if 'Mode write "<th>"_(count)_"</th>"
+		if count>MaxNode w "<th style='color:red'>... "_$$$aText("More entries","Записей больше")_" "_MaxNode_"</th></tr>" s stopWrite=1 QUIT
 		for ii=1:1:ColCount {	
 			set %AppLogInfoVal=$g(GetData(ii))
 			set %AppLogInfoCol=ii
@@ -834,7 +931,7 @@ qNext(GetData)
 				set %AppLogInfoVal=..ShowCell(%AppLogInfoVal,NSpace)	
 			}
 			if $g(exportXLSfile)'="",%AppLogInfoVal?1.N s %AppLogInfoVal="&nbsp;"_%AppLogInfoVal
-			&html<<td>#(%AppLogInfoVal)#</td>>	
+			write "<t"_$s(ii=1:"h",1:"d")_">"_(%AppLogInfoVal)_"</t"_$s(ii=1:"h",1:"d")_">"	
 		}
 			&html<</tr> >
 	quit
@@ -887,13 +984,13 @@ ClassMethod GetValueObj(obj, in, out)
 
 /// /*! \brief Parse class description into methods and properties
 /// <br>\ingroup class_definition
-/// \example d ##class(App.LogInfoPane).GetClassDef("mvk.utils.Log","",.out) */
+/// \example d ##class(App.LogInfoPane).GetClassDef("utils.Log","",.out) */
 ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 {
 	if $g(doc)'="", $isobject(doc) set aClassName=doc.%ClassName(1)
 	set classDefinition=##class(%Dictionary.ClassDefinition).%OpenId(aClassName)
 	if ('$isobject(classDefinition)) {
-		quit
+		quit $g(%objlasterror)
 	}
 
 	// class description
@@ -937,50 +1034,78 @@ ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 			set parameterDefinition=classDefinition.Parameters.GetNext(.key)
 			quit:(key="")
 			set out("Parameters",parameterDefinition.Name,"Description")=parameterDefinition.Description
+			set out("Parameters",parameterDefinition.Name,"Default")=parameterDefinition.Default
 		}
 	}
+	q $$$OK
 }
 
-/// Copy to clipboard
+/// add javascript
 /// /// /*! \example d ##class(App.LogInfoPane).AddJS("MSW")*/
-ClassMethod AddJS(textareaId)
+ClassMethod AddJS(ns = "", class = "")
 {
- &html<	
- <script language="javascript">
-  function copyToClipboard(elementId) {
-  // Create a "hidden" input
-  var aux = document.createElement("input");
-  // Assign it the value of the specified element
-  aux.setAttribute("value", document.getElementById(elementId).innerHTML);
-  // Append it to the body
-  document.body.appendChild(aux);
-  // Highlight its content
-  aux.select();
-  // Copy the highlighted text
-  document.execCommand("copy");
-  // Remove it from the body
-  document.body.removeChild(aux);
-}
-
-$('##(textareaId)#').keydown(function (e) {
-  if (e.ctrlKey && e.keyCode == 13) {
+ 	$$$jsstart	
+ &js<	
+$('#tWHAT').keydown(function (e) {
+  	if (e.ctrlKey && e.keyCode == 13) {
     // Ctrl-Enter pressed
-    document.getElementById('WHAT').value=document.getElementById('#(textareaId)#').value;
+    document.getElementById('WHAT').value=document.getElementById('tWHAT').value;
     document.forms['loginfo'].submit();
-  }
+   }
 });
+//
+function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
+	var $data ={};
+	var appNspace ='#(ns)#';
+	if (!appNsp) {appNsp =appNspace;}
+	var classname ='#(class)#';
+	if (!appClass) var appClass =classname;
+	if (FormId) {
+		$data = $('#'+FormId).serializeArray(); 
+		//alert(FormId);
+	}
+	$data.push({name:"appClass",value:appClass});
+	$data.push({name:"appMethod",value:appMethod});
+	$data.push({name:"appNsp",value:appNsp});
+	$data.push({name:"appPar",value:appPar});
+	$.ajax({
+	  url: 'App.Action.cls',
+	  type: 'post',
+	  data: $data,
+	  success: function(result) {
+	  if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
+}
+//
+function AppAct(FormId,ResultId,appAct){
+	var $data ={};
+	if (FormId) {$data = $('#'+FormId).serializeArray();}
+	$data.push({name:"appAct",value:appAct});
+	$.ajax({
+	  url: 'App.Action.cls',
+	  type: 'post',
+	  data: $data,
+	  success: function(result) {
+	  if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
+}
 
 // The function of opening the dialog box
-function WinOpen(ns,met,el) {
-	$("#dialogContent").load("App.Action.cls","appMethod="+met+"&appNsp="+ns+"&appPar="+el);
-	//$( "#dialog" ).dialog( "open" );
-	// position: { my: 'top', at: 'top+150' },
+function WinOpen(ns,classname,met,el,title) {
+	
+	var titlename="Method "+met+" parameter "+decodeURIComponent(el);
+	if (title) {titlename=title;}
+
+	//$("#dialogContent").load("App.Action.cls","appClass="+classname+"&appMethod="+met+"&appNsp="+ns+"&appPar="+el);
+	ActionJs('anyForm',"dialogContent",classname,met,el,ns);
 	$( "#dialog" ).dialog({
 		modal: true, 
-        title: "Method "+met+" parameter "+decodeURIComponent(el), 
+        title: titlename, 
         autoOpen: true, 
-        width:800, 
-        height:600,
+        width:window.innerWidth-200, 
+        height:window.innerHeight-300,
 		position: { my: 'top', at: 'top+150' },
 		buttons: [
 		{
@@ -991,11 +1116,11 @@ function WinOpen(ns,met,el) {
 		}
 		]
 		});
-	
-	event.preventDefault();
+	try { event.preventDefault();
+	} catch (e){};
 }
-</script>
 >
+	$$$jsstop
 }
 
 /// The method initializes the developer in the system
@@ -1053,7 +1178,7 @@ ClassMethod AddProdQuery(SDNum, csp = "csp")
 	 | <a target="ensproderr" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.EventLog.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionErrors","ОшибкиПродукция"))#</a> 
 	 | <a target="query" href='#("/csp/sys/exp/%25CSP.UI.Portal.SQL.Home.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Query","Запросы"))# </a> 
 	 | <a target="globals" href='#("/csp/sys/exp/%25CSP.UI.Portal.GlobalList.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Globals","Глобалы"))# </a> 
-	 | #($$$addAppLog($$$aText("WebTerminal","ВебТерминал"),$$$aText("Load WebTerminal","Загрузить Веб Терминал"),"trm",""))#
+	#($s(##class(App.sys).ClassExist("WebTerminal.Engine"):" | "_$$$addAppLog($$$aText("WebTerminal","ВебТерминал"),$$$aText("Load WebTerminal","Загрузить Веб Терминал"),"trm",""),1:""))#
 	 | 
 	</td></tr>>
 	q ""
@@ -1068,24 +1193,27 @@ ClassMethod GetHelp(help)
 {
 	#define sH(%msg) set help($i(help))=%msg
 	$$$sH("Примеры вызова:")
-	$$$sH(" "_$$$addAppLog("^%App.Setting"," Перейти","^%App.Setting","")_" --- Просмотр основных параметров панели")
-	$$$sH("obj ##class(App.Log).%New() --- Получить информацию по классу")
-	$$$sH("obj ##class(App.Log).%OpenId(15) --- Получить информацию по классу и объекту")
-	$$$sH("obj =##class(App.Log).%OpenId(15) --- Получить информацию только по значениям объекта")
 	$$$sH(" ")
-	$$$sH("xec set obj=##class(App.Log).%OpenId(15)  write ""&lt;pre&gt;"" zw obj w ""&lt;/pre&gt;"" --- Выполнить команду : Показать dump объекта ")
-	$$$sH("xec zn ""%SYS"" do ##class(App.sys).SaveQuery(""SYS.Database:FreeSpace"",""^GN"") --- Выполнить команду : Сохранить результат запроса в глобале ")
+	$$$sH(" "_$$$addAppLog("^%App.Setting"," Перейти","^%App.Setting","")_" --- Просмотр глобала с основными параметрами панели")
+	$$$sH(" "_$$$addAppL("obj ##class(App.Log).%New()")_" --- Получить информацию по классу")
+	$$$sH(" "_$$$addAppL("obj ##class(App.Log).%OpenId(2)")_" --- Получить информацию по классу и объекту")
+	$$$sH(" "_$$$addAppL("obj =##class(App.Log).%OpenId(2)")_" --- Получить информацию только по значениям объекта")
 	$$$sH(" ")
-	$$$sH("query ##class(%Library.ResultSet).%New(""%SYSTEM.License:Counts"") --- Выполнить запрос и показать")
-	$$$sH("query %SYSTEM.License:Counts --- Выполнить запрос и показать использование лицензий")
-	$$$sH("query %SYS.GlobalQuery:NameSpaceList USER --- показать список глобалов в области USER")
-	$$$sH("query %SYS.GlobalQuery:Size /opt/isc/ensemble/mgr/USER/ --- посчитать размеры глобалов в базе USER")
-	$$$sH(" ")
-	$$$sH("select * FROM App.Log order by id desc --- Выполнить произвольный sql запрос")
-	$$$sH(" ")
-	$$$sH("result ^GN(""SYS.Database:FreeSpace"",""2018-03-27 22:35:20"") --- Вывести записанный в глобал результат запроса ##class(App.sys).SaveQuery")
+	$$$sH(" "_$$$addAppL("xec set obj=##class(App.Log).%OpenId(2) write ""<pre>"" zw obj w ""</pre>"" ")_"--- Выполнить команду : Показать dump объекта ")
+	;$$$sH(" "_$$$addAppL("xec zn ""%SYS"" do ##class(App.sys).SaveQuery(""SYS.Database:FreeSpace"",""^GN"")")_"--- Выполнить команду : Сохранить результат запроса в глобале ")
+	$$$sH(" "_$$$addAppL("xec do ##class(App.sys).SaveQuery(""%SYSTEM.License:Counts"",""^GN"",0)")_"--- Выполнить команду : Сохранить результат запроса в глобале ^GN")
 	$$$sH("--- Если создать регуляное <a href='/csp/sys/op/%25CSP.UI.Portal.TaskSchedule.zen?$NAMESPACE=%25SYS'>задание</a> с legacy методом: s st=##class(App.sys).SaveQuery(""%SYSTEM.License:Counts"")")
 	$$$sH("--- То можно будет смотреть динамику использования лицензий")
+	$$$sH(" ")	
+	$$$sH(" "_$$$addAppL("result ^GN(""%SYSTEM.License:Counts"",0)")_" --- Вывести записанный в глобал результат запроса ##class(App.sys).SaveQuery")
+	$$$sH(" ")
+	$$$sH(" "_$$$addAppL("query ##class(%Library.ResultSet).%New(""%SYS.Portal.Users:List"")")_"--- Выполнить запрос и показать фаворитные страницы для пользователя")
+	$$$sH(" "_$$$addAppL("query ##class(%Library.ResultSet).%New(""%SYSTEM.License:Counts"")")_"--- Выполнить запрос и показать использование лицензий")
+	$$$sH(" "_$$$addAppL("query %SYSTEM.License:Counts")_"--- Выполнить запрос и показать использование лицензий")
+	$$$sH(" "_$$$addAppL("query %SYS.GlobalQuery:NameSpaceList USER")_" --- показать список глобалов в области USER")
+	$$$sH(" "_$$$addAppL("query %SYS.GlobalQuery:Size /opt/isc/ensemble/mgr/USER/")_" --- посчитать размеры глобалов в базе USER")
+	$$$sH(" ")
+	$$$sH(" "_$$$addAppL("select * FROM App.Log order by id desc")_" --- Выполнить произвольный sql запрос")
 	
 	$$$sH(" "_$$$addAppLog("Log","Перейти к протоколу","log","")_" --- Получить sql запрос по протоколу App.Log "_" "_$$$addAppLog("log-  ","Очистить таблицу протокола","log","")_" Удалить таблицу протокола")
 	$$$sH(" ")
@@ -1100,37 +1228,21 @@ ClassMethod GetHelp(help)
 	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log***","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
 	$$$sH(" ")
-	$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
+	if ##class(App.sys).ClassExist("WebTerminal.Engine") {
+		$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
+	}
 	$$$sH("--- Если этот макрос вставить в исследуемую программу $$$LogDebug(""Отладочная информация"") то в таблице App.Log появися новая запись")
 	$$$sH("--- Макрос $$$AppL("""_fio_""",""node"")=$$$AppObJs(object) позволит записать в глобал "_gn_" объект в формате json")
+	
 	$$$sH("--- Можно исследовать файлы  <a href='/csp/sys/mgr/%25CSP.UI.Portal.Journal.zen?$NAMESPACE=%25SYS'>журналов</a>")
 	$$$sH("--- Запустить в фоновом режиме сканирование журналов для сбора информации о модифицируемых глобалов за вчера")
-	$$$sH("xec job ##class(App.files).OneDayJournalCount()::0 if $test write ""Запустили"" --- Внимание! Процесс может быть долгим. Информация о глабалах по умолчанию запишется в "_$$$TEMPJRNL)
-	$$$sH("xec do ##class(App.files).Export2CSV() --- Вывести информацию о глобалах из "_$$$TEMPJRNL_" в "_$$$EMAILXLSPATH_"JrnCount*.csv")
+	$$$sH(" "_$$$addAppL("xec job ##class(App.files).OneDayJournalCount()::0 if $test write ""Запустили""")_" --- Внимание! Процесс может быть долгим. Информация о глабалах по умолчанию запишется в "_$$$TEMPJRNL)
+	$$$sH(" "_$$$addAppL("xec do ##class(App.files).Export2CSV()")_" --- Вывести информацию о глобалах из "_$$$TEMPJRNL_" в "_$$$EMAILXLSPATH_"JrnCount*.csv")
+	$$$sH(" "_$$$addAppL("xec Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(""AppTools"",""/apptools/App.LogInfo.cls?WHAT=%3F"") zw tSC")_" --- Добавить ссылку на AppTools в портал управления")
+	$$$sH(" --- Выполнение HttpRequest")
+	$$$sH(" "_$$$addAppL("post http://User:pass@localhost:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}")_" ---  Выполнить http запрос методом POST с телом JSON")
+	$$$sH(" "_$$$addAppL("get https://openexchange.intersystems.com/index.html")_" ---  Выполнить http запрос методом POST с телом JSON")
 	$$$sH(" ")
-	$$$sH("post http://User:pass@localhost:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1} ---  Выполнить http запрос методом POST с телом JSON")
-	$$$sH(" ")
-	
-	;set $$$AppL("MSW","%session3")=$$$AppObJs(##class(%MessageDictionary).GetLanguages())
-	quit
-	$$$sH(" Максрос $$$AppLog("""_fio_""",""node"",$lb(var1,var2),mode) позволит записать значений переменных var1,var2 в глобал "_gn)
-	$$$sH("	Где mode=""svetapdw"" строка симводов")
-	$$$sH("	s - Стэк сохраним")
-	$$$sH("	t - table App.Log")
-	$$$sH("	v - variables")
-	$$$sH("	e - записать стэк программой %ETN ") 
-	$$$sH(" Если (v)ar, то объекты сериализуются в формате Json, иначе:")
-	$$$sH(" a - перечень значений свойств и описание класса")
-	$$$sH(" p - только значения")
-	$$$sH(" d - zwrite obj вывести в терминале")
-	$$$sH(" w - write вывести в терминале")
-	
-	##;1. MSW tools Исправить ошибку в %ZEN.Generator).%FindLocalizedText()
-	;try { Set pTextList(tKey) = "" } catch e {}
-	##;2. MSW tools Добавить ссылку в %CSP.Portal.Home).%DrawLinks()
-	;Set tOptions($I(n)) = $LB($$$Text("<font color=red>Developers Tools</font>"),"",..Link("/apptools/App.LogInfo.cls?WHAT=%3F"),$$$Text("загрузить инструменты разработчика"))
-	##;3. Запретить обновление страницы при завершении сессии   %CSP.Util.AutoPage).DrawAutoLogout() 
-	;	If %request.URL '[ "UtilSqlQuery.csp" && ( %request.URL '[ "/App.") { ##; MSW
 }
 
 }

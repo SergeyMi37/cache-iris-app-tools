@@ -7,68 +7,63 @@ Class App.Action Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
 /// Главный метод формирования содержимого страницы
 ClassMethod OnPage() As %Status
 {
-	s $zt="Err"
+	set $zt="Err"
  	#dim %request as %CSP.Request
- 	set appNsp=%request.Get("appNsp")
-	set appMethod=%request.Get("appMethod")
-	set appClass=%request.Get("appClass")
-	set appPar=%request.Get("appPar")
-	set appJson=%request.Get("appJson")
-	s i=""
-	for { set i=$o(%request.Data(i)) quit:i=""
-			if i["appNsp" s appNsp=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-			if i["appMethod" s appMethod=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-			if i["appClass" s appClass=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-			if i["appPar" s appPar=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+
+ 	set $$$AppL("MSW","req")=$$$AppObJs(%request)
+ 	merge $$$AppL("MSW","%request.Data")=%request.Data
+	set $$$AppL("MSW","%request.AppData")=%request.AppData
+
+ 	if %request.Get("appAct")'="" { ;AppAct=NameSpace:Packet.ClassName:Method:@Par1=Val1@Par2=Val2...
+ 		set appPar=$p(%request.Get("appAct"),"AppAct=",2,*)
+		set i=""
+		for { set i=$o(%request.Data(i)) quit:i=""
+			set:$o(%request.Data(i,""),-1)'="" appPar("%request.Data",i)=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+		}
+		d ..RunMethod($p(appPar,":",1),$p(appPar,":",2),$p(appPar,":",3),.appPar)
+		q $$$OK
+ 	} else {
+	 	set appNsp=%request.Get("appNsp")
+		set appMethod=%request.Get("appMethod")
+		set appClass=%request.Get("appClass")
+		set appPar=%request.Get("appPar")
+		set appJson=%request.Get("appJson")
+		set i=""
+		for { set i=$o(%request.Data(i)) quit:i=""
+			if i["appNsp",appNsp="" s appNsp=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if i["appMethod",appMethod="" s appMethod=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if i["appClass",appClass="" s appClass=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if i["appPar",appPar="" s appPar=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
 			if i["appJson" s appJson=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-	}
-	if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
-	set NSpace=$zu(5)
+			set:$o(%request.Data(i,""),-1)'="" appPar("%request.Data",i)=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+		}
+		;if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
+		;set NSpace=$zu(5)
 
- 	;s $$$AppL("MSW","req")=$$$AppObJs(%request)
- 	i $isobject(%request.Content) { //POST
-	 	s stream=%request.Content
-		s sc=##class(App.files).Stream2String(%request.Content,.str)
-		i 'sc q sc
-	 	i $g(stt)["{" d ..ParseJson(.str,.appClass,.appMethod,.appPar) ;m appPar("%request.Content")=str  m appPar("%request")=$$$AppObJs(%request)
-	 	m $$$AppL("MSW","Content")=str
- 	}
-  	i $g(appJson)["{" d ..ParseJson(.appJson,.appClass,.appMethod,.appPar) ;m appPar("%request")=$$$AppObJs(%request)
+	 	if $isobject(%request.Content) { //POST
+		 	set stream=%request.Content
+			set sc=##class(App.files).Stream2String(%request.Content,.str)
+			if 'sc quit sc
+		 	if $g(str)["{" d ..ParseJson(.str,.appClass,.appMethod,.appPar) ;m appPar("%request.Content")=str  m appPar("%request")=$$$AppObJs(%request)
+		 	;merge $$$AppL("MSW","Content")=str
+	 	}
+	  	i $g(appJson)["{" d ..ParseJson(.appJson,.appClass,.appMethod,.appPar) ;m appPar("%request")=$$$AppObJs(%request)
+  	}
  	
- 	;m $$$AppL("MSW","%request.Data")=%request.Data
-	;s $$$AppL("MSW","%request.AppData")=%request.AppData
-
 	if appMethod="" {
 		$$$jsstart
- 		w "alert('Параметр appMethod пустой');"
- 		;w "console.log('Параметр appMethod пустой');"
+ 		write "alert('Параметр appMethod пустой');"
  		$$$jsstop
-		q $$$OK
+		quit $$$OK
 	}
-	
-	if appMethod="ShowJson" {
-		set gn=appPar
-		try {
-			write "<h3>"_gn_"</h3>"
-			write "<pre>" write $g(@gn) write "</pre>" 
-		} catch e { w $ze }
+	elseif appMethod="ShowJson" {
+		d ..ShowJson(appPar)
 	}
 	elseif appMethod="ShowXML" {
-		set gn=appPar
-		try {
-			write $zconvert($g(@gn),"O","HTML")
-		} catch e { w $ze }
+		d ..ShowXML(appPar)
 	}
 	else {
-		set:appClass="" appClass="App.Action"
-		;s $$$AppL("MSW","OnPage")=$lb(appPar,appClass,appMethod)
-		if $e(appPar,1)="{" {
-			;Разбор json TODO
-		}
-		elseif appPar["~" {
-			d ##class(App.type).ParseURL(appPar,.appPar,"~")  ;разбор в массив 
-		}
-		Do $CLASSMETHOD(appClass,appMethod,.appPar)
+		d ..RunMethod(appNsp,appClass,appMethod,.appPar)
 	}
 	
 	quit $$$OK
@@ -77,12 +72,54 @@ Err
 	quit $$$OK
 }
 
+/// Выполнить метод
+ClassMethod RunMethod(appNsp, appClass, appMethod, appPar) As %Status
+{
+	if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
+	set NSpace=$zu(5)
+		set:appClass="" appClass="App.Action"
+		if $e(appPar,1)="{" {
+			;Parse json TODO
+		}
+		elseif appPar["~" {
+			do ##class(App.type).ParseURL(appPar,.appPar,"~")  ;parse in array
+		}
+		elseif appPar["&" {
+			d ##class(App.type).ParseURL(appPar,.appPar,"&")
+		}
+		Do $CLASSMETHOD(appClass,appMethod,.appPar)
+}
+
+/// Показать форматированный json 
+ClassMethod ShowJson(appPar) As %Status
+{
+	set gn=$zconvert(appPar,"I","URL")
+	try {
+		write "<h3>"_gn_" in NameSpace :"_$zu(5)_"</h3>"
+		if '$d(@gn) w $$$appError("Global node does not exist") q
+		write "<pre>" write $g(@gn) write "</pre>" 
+	} catch e { w $ze }
+	quit $$$OK
+}
+
+/// Показать форматированный XNL
+ClassMethod ShowXML(appPar) As %Status
+{
+	set gn=$zconvert(appPar,"I","URL")
+	try {
+		write "<h3>"_gn_" in NameSpace "_$zu(5)_"</h3>"
+		if '$d(@gn) w $$$appError("Global node does not exist") q
+		write $zconvert($g(@gn),"O","HTML")
+	} catch e { write $ze }
+	quit $$$OK
+}
+
 /// Разобрать стоку в Json
 ClassMethod Test(appPar) As %Status
 {
-	w "ClassMethod Test."
-	zw appPar
-	q $$$OK
+	write "ClassMethod Test."
+	zwrite appPar
+	quit $$$OK
 }
 
 /// Разобрать стоку в Json
@@ -92,34 +129,12 @@ ClassMethod ParseJson(jsonStr, appClass, appMethod, appPar) As %Status
 	set appClass={}.$$$jsonFromJSON(jsonStr).appClass
 	set appMethod={}.$$$jsonFromJSON(jsonStr).appMethod
 	set appPar={}.$$$jsonFromJSON(jsonStr).appPar
+	set appPar("jsonStr")=jsonStr
 	}
  catch e { 
  	write $zconvert($ze,"O","HTML")
  }
  quit $$$OK
-}
-
-/// Получить js функцию
-ClassMethod getActionJs(jsonStr, appClass, appMethod, appPar) As %Status
-{
-	$$$jsstart
-	w "function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNs){"
-		w "var $data ={};"
-		w "if (FormId) {$data = $('#'+FormId).serializeArray();}"
-		w "$data.push({name:""appClass"",value:appClass});"
-		w "$data.push({name:""appMethod"",value:appMethod});"
-		w "$data.push({name:""appNs"",value:appNs});"
-		w "$data.push({name:""appPar"",value:appPar});"
-	    w "$.ajax({"
-	    w "  url: 'App.Action.cls',"
-	    w "  type: 'post',"
-	    w "  data: $data,"
-	    w "  success: function(result) {"
-	    w "   if (ResultId) {$('#'+ResultId).html(result);}"
-	    w "  }"
-	    w "});"
-	w "}"
-	$$$jsstop
 }
 
 }

@@ -4,7 +4,7 @@ Class App.sys [ Abstract ]
 {
 
 /// Create a task to clean the messages of the ensemble
-/// for ns="AISGSASUMS","MVK112","SPGZ","RDID","RDIDPROD" try {zn ns w !,ns," ",##class(App.sys).CreateTaskPurge("Ensemble message cleaning",ns,90)}catch{}
+/// for ns="AISGSASUMS","M112","SPGZ","RDID","RDIDPROD" try {zn ns w !,ns," ",##class(App.sys).CreateTaskPurge("Ensemble message cleaning",ns,90)}catch{}
 ClassMethod CreateTaskPurge(Name = "", ns, days = 90) As %Status
 {
 	Set Task=##Class(%SYSTEM.Task).%New()
@@ -142,18 +142,20 @@ ClassMethod RunCmd(cmdOs = "free", gn = "^TaskGN", AddDateTime = 0, dir = "/back
 	s gnTask=gn
 	set filename=dir_"RunCmd.log"
 	if AddDateTime set datetime=$tr($$$AppDT($h)," ","_") set gnTask=$na(@gn@(datetime)),filename=dir_"RunCmd"_datetime_".log"
+	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunCmd")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if ##class(App.files).ReadFile2Arr(filename,"RSK",,"^||tmpFile") MERGE @gnTask=^||tmpFile
 	q $$$OK
 }
 
 /// Function to call from a regular task
-/// %SYS>d ##class(App.sys).RunTask("snmpwalk -v 1 cip.mvk.ru -c public 1.3.6.1.4.1.16563.1.1.1.1.10","^%App.TaskLic","%SYSTEM.License:Counts","/backup/temp/snmp/")
+/// %SYS>d ##class(App.sys).RunTask("snmpwalk -v 1 server.ru -c public 1.3.6.1.4.1.16563.1.1.1.1.10","^%App.TaskLic","%SYSTEM.License:Counts","/backup/temp/snmp/")
 ClassMethod RunTask(cmdOs = "free", gn = "^TaskGN", query = "%SYSTEM.License:Counts", dir = "/backup/temp/")
 {
 	set datetime=$tr($$$AppDT($h)," ","_")
 	set gnTask=$na(@gn@(datetime))
 	set filename=dir_"RunTask"_datetime_".txt"
+	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunTask")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if query'="" d ##class(App.sys).SaveQuery(query,gn,datetime)
 	q $$$OK
@@ -262,7 +264,10 @@ ClassMethod SaveSQL(SQL, gn = "^mtempSQLGN", ext = 0) As %String
 ClassMethod ClassExist(class) As %String
 {
 	q:class="" ""
-	q $d($$$comClassRaw(class))
+	try {
+		s st=$d($$$comClassRaw(class))
+	} catch e { s st=$ze }
+  q $g(st)
 }
 
 /// Add two languages to global translation
@@ -333,20 +338,16 @@ ClassMethod GlobalSize(dir, ByRef list, SystemGlobals = 0, FastFlag = 1) As %Sta
  }
 }
 
-/// s a=##class(App.sys).GetObj("select top 1 * from Mvk_model.SPGZ where IdSPGZ=3620277 and deletedDate is null order by importDate desc") zw a
+/// s a=##class(App.sys).GetObj("select top 1 * from model.SP where deletedDate is null order by importDate desc") zw a
 ClassMethod GetObj(Query)
 {
-	#dim sql As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare(Query)
-	s obj=$$$NULLOREF
-	while sql.%Next() {
-		s obj=sql
-		q
-	}
-	q obj
+	#dim rs As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare(Query)
+	if 'rs.%Next() q $$$NULLOREF
+	q rs
 }
 
 /// Get a DSN request
-/// w $System.Status.GetErrorText(##class(App.sys).SqlToDSN("SELECT * FROM xxmv.xxmvk_t359_pzn","OEBS-Daily","^tmMSWq"))
+/// w $System.Status.GetErrorText(##class(App.sys).SqlToDSN("SELECT * FROM xxmv.xx_t359_pzn","OEBS-Daily","^tmMSWq"))
 ClassMethod SqlToDSN(sql, DSN, result, top = 100000) As %Status
 {
 	#dim %JDBCGateway As %Net.Remote.Java.JDBCGateway
@@ -357,8 +358,8 @@ ClassMethod SqlToDSN(sql, DSN, result, top = 100000) As %Status
 	set %JDBCGateway.StatementCache(conn) = st
 	set query = %JDBCGateway.execQuery(st)
 	
-	if (query = -1)
-	{
+	if (query = -1)	{
+		;w %JDBCGateway.getErrorText() q 0
 		set sc = $$$ERROR($$$GeneralError, %JDBCGateway.getErrorText())
 		do %JDBCGateway.removeStatement(conn)
 		;if $isObject($g(%JDBCGateway)) do %JDBCGateway.closeAll()
@@ -431,14 +432,14 @@ ClassMethod SaveGateway(sql, pDSN, usr, pwd, result, top = 100000)
  	set sc=gc.DescribeColumns(hstmt, .columnlist) 
  	if $$$ISERR(sc) quit sc
  	
- 	i $g(result)'="" s gn=result k @gn
-	e  s gn="result" 
+ 	if $g(result)'="" s gn=result k @gn
+	else  s gn="result" 
  	//display column headers delimited by ":"
  	set numcols=$listlength(columnlist)-1  //get number of columns
  	for colnum=2:1:numcols+1 {
  		    ;Write $listget($listget(columnlist,colnum),1),":"
- 		    s name=$listget($listget(columnlist,colnum),1)
- 		    s @gn@(0,colnum-1)=$lb(name)
+ 		    set name=$listget($listget(columnlist,colnum),1)
+ 		    set @gn@(0,colnum-1)=$lb(name)
 	  		set @gn@(-1,name)=colnum-1 
  	  		}
  	;write !
@@ -446,15 +447,15 @@ ClassMethod SaveGateway(sql, pDSN, usr, pwd, result, top = 100000)
  	//Return first 200 rows	  
  	set sc=gc.Fetch(hstmt)
  	if $$$ISERR(sc) quit sc
- 	s rownum=1
+ 	set rownum=1
  	while((gc.sqlcode'=100) && (rownum<=top)) {
  	      	for ii=1:1:numcols {
- 		      	s sc=gc.GetData(hstmt, ii, 1, .val)
+ 		      	set sc=gc.GetData(hstmt, ii, 1, .val)
  		      	;w " "_val
- 		      	s @gn@(rownum)=$g(@gn@(rownum))_$lb(val)
+ 		      	set @gn@(rownum)=$g(@gn@(rownum))_$lb(val)
  		      	if $$$ISERR(sc) break
  	      	}
- 	      	s rownum=rownum+1
+ 	      	set rownum=rownum+1
  	 		;write !
  	 		set sc=gc.Fetch(hstmt)
  			if $$$ISERR(sc) break
@@ -465,10 +466,80 @@ ClassMethod SaveGateway(sql, pDSN, usr, pwd, result, top = 100000)
  	set sc=gc.CloseCursor(hstmt)
  	if $$$ISERR(sc) quit sc
  	set sc=gc.Disconnect()
-	s @gn=rownum-1
-	s @gn@(-3,"sql")=$lb(sql,pDSN,top,usr,pwd)
-	s @gn@(-3,"timestamp")=$lb(ts,$$$AppDT($h),##class(App.type).GetCountSec($h)-##class(App.type).GetCountSec(hr))
+	set @gn=rownum-1
+	set @gn@(-3,"sql")=$lb(sql,pDSN,top,usr,pwd)
+	set @gn@(-3,"timestamp")=$lb(ts,$$$AppDT($h),##class(App.type).GetCountSec($h)-##class(App.type).GetCountSec(hr))
  	Quit sc
+}
+
+/// Sample  w ##class(App.sys).GetFullName("superuser")
+ClassMethod GetFullName(login) As %String
+{
+ try {
+	$$$NspGoto(curNs,"%SYS")
+	if ##class(Security.Users).Exists(login,.User,.Status) {
+			if $isobject(User) {
+				s fullName=User.FullName 
+			}
+		}
+  $$$NspReturn(curNs) 
+ } catch e {}
+  q $g(fullName)
+}
+
+/// Sample  w ##class(App.sys).GetRoles(mask,.roles)
+ClassMethod GetRoles(mask = "", ByRef list) As %String
+{
+  NEW $NAMESPACE
+  SET $NAMESPACE = "%SYS"
+  set mask=$zconvert(mask,"L")
+  set sql="select NameLowerCase,Description,Name FROM Security.Roles"
+  if mask["," { set mask=$replace($ZStrip(mask,"<>W"),",","','")
+  	set sql=sql_" where ID in ('"_mask_"')"
+  } 
+  elseif mask'="" {
+	  set sql=sql_" where NameLowerCase like '%"_mask_"%'"
+  }
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare(sql)
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+	 	QUIT tSC
+	}
+	else {
+		while result.Next() {
+			set list(result.Data("NameLowerCase"))=$lb(result.Data("Name"),result.Data("Description"))
+		}
+	}
+	quit $$$OK
+}
+
+/// Get system users
+/// w ##class(App.sys).GetUsers("super",.users)
+ClassMethod GetUsers(mask = "", ByRef list) As %String
+{
+  NEW $NAMESPACE
+  SET $NAMESPACE = "%SYS"
+  set mask=$zconvert(mask,"L")
+  set sql="select NameLowerCase,FullName,Comment,Roles,EmailAddress FROM Security.Users"
+  if mask["," { set mask=$replace($ZStrip(mask,"<>W"),",","','")
+  	set sql=sql_" where NameLowerCase in ('"_mask_"')"
+  } 
+  elseif mask'="" {
+	  set sql=sql_" where NameLowerCase like '%"_mask_"%'"
+  }
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare(sql)
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+	 	QUIT tSC
+	}
+	else {
+		while result.Next() {
+			set list(result.Data("NameLowerCase"))=$lb(result.Data("FullName"),result.Data("Comment"),result.Data("Roles"),result.Data("EmailAddress"))
+		}
+	}
+	quit $$$OK
 }
 
 }

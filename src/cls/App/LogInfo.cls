@@ -18,7 +18,7 @@ ClassMethod GetDetailPane(pInstance As %CSP.Util.PageInstance) As %CSP.Util.Pane
 /// Получить INPUT кнопку для очистки полей формы
 /// fields - имена полей через запятую
 /// w ##class(App.LogInfo).ClearFields("a,b")
-ClassMethod ClearFields(fields = "")
+ClassMethod ClearFields(fields = "", onclick)
 {
 	;set res="<input type=button name='clearFields' id='clearFields' onclick=""#"" value=X title='Очистить поля'>"
 	set res="<span class='ui-icon ui-icon-trash' name='clearFields' id='clearFields' onclick=""#"" title='Очистить поля'></span>"

@@ -59,6 +59,7 @@ ClassMethod GetClientAddress()
 /// Add new log event
 /// Use via $$$LogEventTYPE().
 /// Return ID log
+/// Example do ##class(App.Log).AddRecord("Хочу", "протоколировать", "все", "INFO", "действия","пользователей")
 ClassMethod AddRecord(ClassName As %String = "", MethodName As %String = "", Source As %String = "", EventType As %String = "", Arguments As %String = "", Message As %String = "")
 {
 	try {
@@ -137,43 +138,50 @@ ClassMethod SerializeObject(Object, gn = "", mode = "") As %String
 	Return ..WriteJSONFromObject(Object)
 }
 
-/// w ##class(App.Log).WriteJSONFromObject(b)
-ClassMethod WriteJSONFromObject(Object) As %String [ ProcedureBlock = 0 ]
+/// w ##class(App.Log).WriteJSONFromObject(b) ;format As %String = "aeos" ;aceloqtw
+ClassMethod WriteJSONFromObject(obj, format As %String = "tw") As %String [ ProcedureBlock = 0 ]
 {
-    // Create a string that we will redirect to
-    Set zsStr = ""
+    set tOldIORedirected = ##class(%Device).ReDirectIO()
+    set tOldMnemonic = ##class(%Device).GetMnemonicRoutine()
+    set tOldIO = $io
+    try {
+        set str = ""
+        use $io::("^" _ $ZNAME)
+        do ##class(%Device).ReDirectIO(1)
+        do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(obj,,,format)
+    } catch ex {
+        set str = ""
+    }
+    if (tOldMnemonic '= "") {
+        use tOldIO::("^" _ tOldMnemonic)
+    } else {
+        use tOldIO
+    }
+    do ##class(%Device).ReDirectIO(tOldIORedirected)
+    return str
 
-    Use $io::("^"_$ZNAME)
-
-    // Enable redirection
-    Do ##class(%Device).ReDirectIO(1)
- 
-    // Any write statements here will be redirected to the labels defined below
-    Do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(Object)
- 
-    // Disable redirection
-    Do ##class(%Device).ReDirectIO(0)
-    
-    Return zsStr
- 
-    // Labels that allow for IO redirection
-    // Read Character - we don't care about reading
-rchr(c)      Quit
-    // Read a string - we don't care about reading
-rstr(sz,to)  Quit
-    // Write a character - call the output label
-wchr(s)      Do output($char(s))  Quit
-    // Write a form feed - call the output label
-wff()        Do output($char(12))  Quit
-    // Write a newline - call the output label
-wnl()        Do output($char(13,10))  Quit
-    // Write a string - call the output label
-wstr(s)      Do output(s)  Quit
-    // Write a tab - call the output label
-wtab(s)      Do output($char(9))  Quit
-    // Output label - this is where you would handle what you actually want to do.
-    // in our case, we want to write to Str
-output(s)    Set zsStr = zsStr_s Quit
+rchr(c)
+    quit
+rstr(sz,to)
+    quit
+wchr(s)
+    do output($char(s))
+    quit
+wff()
+    do output($char(12))
+    quit
+wnl()
+    do output($char(13,10))
+    quit
+wstr(s)
+    do output(s)
+    quit
+wtab(s)
+    do output($char(9))
+    quit
+output(s)
+    set str = str _ s
+    quit
 }
 
 /// Загрузить контекст из протокольного глобала

@@ -6,7 +6,7 @@ Class App.ChartPanel Extends App.LogInfoPane
 /// Отрисовка графиков
 Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what, field, value, type, typeclass, caption) ]
 {
- 	do ##class(App.LogInfoPane).AddJsScripts("chart")
+ 	write ##class(App.LogInfoPane).AddJsScripts("chart")
 	set $ZT="errors"
 	set nsp=%request.Get("NSP")
 	if nsp'="" try {zn nsp set NSpace=nsp } catch e {}

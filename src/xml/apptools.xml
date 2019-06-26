@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="26" zv="IRIS for Windows (x86-64) 2018.1.1 (Build 643U)" ts="2019-03-12 23:20:18">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-06-26 21:37:26">
 <Class name="App.Action">
 <Description>
 Выводить необходимые действия</Description>
@@ -7,7 +7,7 @@
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65071,53636.684807</TimeChanged>
+<TimeChanged>65189,55504.524424</TimeChanged>
 <TimeCreated>64746,75062.988786</TimeCreated>
 
 <Method name="OnPage">
@@ -16,73 +16,125 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	s $zt="Err"
+	set $zt="Err"
  	#dim %request as %CSP.Request
- 	set appNsp=%request.Get("appNsp")
-	set appMethod=%request.Get("appMethod")
-	set appClass=%request.Get("appClass")
-	set appPar=%request.Get("appPar")
-	set appJson=%request.Get("appJson")
-	s i=""
-	for { set i=$o(%request.Data(i)) quit:i=""
-			if i["appNsp" s appNsp=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-			if i["appMethod" s appMethod=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-			if i["appClass" s appClass=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-			if i["appPar" s appPar=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+
+ 	set $$$AppL("MSW","req")=$$$AppObJs(%request)
+ 	merge $$$AppL("MSW","%request.Data")=%request.Data
+	set $$$AppL("MSW","%request.AppData")=%request.AppData
+
+ 	if %request.Get("appAct")'="" { ;AppAct=NameSpace:Packet.ClassName:Method:@Par1=Val1@Par2=Val2...
+ 		set appPar=$p(%request.Get("appAct"),"AppAct=",2,*)
+		set i=""
+		for { set i=$o(%request.Data(i)) quit:i=""
+			set:$o(%request.Data(i,""),-1)'="" appPar("%request.Data",i)=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+		}
+		d ..RunMethod($p(appPar,":",1),$p(appPar,":",2),$p(appPar,":",3),.appPar)
+		q $$$OK
+ 	} else {
+	 	set appNsp=%request.Get("appNsp")
+		set appMethod=%request.Get("appMethod")
+		set appClass=%request.Get("appClass")
+		set appPar=%request.Get("appPar")
+		set appJson=%request.Get("appJson")
+		set i=""
+		for { set i=$o(%request.Data(i)) quit:i=""
+			if i["appNsp",appNsp="" s appNsp=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if i["appMethod",appMethod="" s appMethod=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if i["appClass",appClass="" s appClass=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if i["appPar",appPar="" s appPar=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
 			if i["appJson" s appJson=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
-	}
-	if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
-	set NSpace=$zu(5)
+			set:$o(%request.Data(i,""),-1)'="" appPar("%request.Data",i)=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+		}
+		;if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
+		;set NSpace=$zu(5)
 
- 	;s $$$AppL("MSW","req")=$$$AppObJs(%request)
- 	i $isobject(%request.Content) { //POST
-	 	s stream=%request.Content
-		s sc=##class(App.files).Stream2String(%request.Content,.str)
-		i 'sc q sc
-	 	i $g(stt)["{" d ..ParseJson(.str,.appClass,.appMethod,.appPar) ;m appPar("%request.Content")=str  m appPar("%request")=$$$AppObJs(%request)
-	 	m $$$AppL("MSW","Content")=str
- 	}
-  	i $g(appJson)["{" d ..ParseJson(.appJson,.appClass,.appMethod,.appPar) ;m appPar("%request")=$$$AppObJs(%request)
+	 	if $isobject(%request.Content) { //POST
+		 	set stream=%request.Content
+			set sc=##class(App.files).Stream2String(%request.Content,.str)
+			if 'sc quit sc
+		 	if $g(str)["{" d ..ParseJson(.str,.appClass,.appMethod,.appPar) ;m appPar("%request.Content")=str  m appPar("%request")=$$$AppObJs(%request)
+		 	;merge $$$AppL("MSW","Content")=str
+	 	}
+	  	i $g(appJson)["{" d ..ParseJson(.appJson,.appClass,.appMethod,.appPar) ;m appPar("%request")=$$$AppObJs(%request)
+  	}
  	
- 	;m $$$AppL("MSW","%request.Data")=%request.Data
-	;s $$$AppL("MSW","%request.AppData")=%request.AppData
-
 	if appMethod="" {
 		$$$jsstart
- 		w "alert('Параметр appMethod пустой');"
- 		;w "console.log('Параметр appMethod пустой');"
+ 		write "alert('Параметр appMethod пустой');"
  		$$$jsstop
-		q $$$OK
+		quit $$$OK
 	}
-	
-	if appMethod="ShowJson" {
-		set gn=appPar
-		try {
-			write "<h3>"_gn_"</h3>"
-			write "<pre>" write $g(@gn) write "</pre>" 
-		} catch e { w $ze }
+	elseif appMethod="ShowJson" {
+		d ..ShowJson(appPar)
 	}
 	elseif appMethod="ShowXML" {
-		set gn=appPar
-		try {
-			write $zconvert($g(@gn),"O","HTML")
-		} catch e { w $ze }
+		d ..ShowXML(appPar)
 	}
 	else {
-		set:appClass="" appClass="App.Action"
-		;s $$$AppL("MSW","OnPage")=$lb(appPar,appClass,appMethod)
-		if $e(appPar,1)="{" {
-			;Разбор json TODO
-		}
-		elseif appPar["~" {
-			d ##class(App.type).ParseURL(appPar,.appPar,"~")  ;разбор в массив 
-		}
-		Do $CLASSMETHOD(appClass,appMethod,.appPar)
+		d ..RunMethod(appNsp,appClass,appMethod,.appPar)
 	}
 	
 	quit $$$OK
 Err 
 	write $zconvert($ze,"O","HTML")
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="RunMethod">
+<Description>
+Выполнить метод</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>appNsp,appClass,appMethod,appPar</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
+	set NSpace=$zu(5)
+		set:appClass="" appClass="App.Action"
+		if $e(appPar,1)="{" {
+			;Parse json TODO
+		}
+		elseif appPar["~" {
+			do ##class(App.type).ParseURL(appPar,.appPar,"~")  ;parse in array
+		}
+		elseif appPar["&" {
+			d ##class(App.type).ParseURL(appPar,.appPar,"&")
+		}
+		Do $CLASSMETHOD(appClass,appMethod,.appPar)
+]]></Implementation>
+</Method>
+
+<Method name="ShowJson">
+<Description>
+Показать форматированный json </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>appPar</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set gn=$zconvert(appPar,"I","URL")
+	try {
+		write "<h3>"_gn_" in NameSpace :"_$zu(5)_"</h3>"
+		if '$d(@gn) w $$$appError("Global node does not exist") q
+		write "<pre>" write $g(@gn) write "</pre>" 
+	} catch e { w $ze }
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ShowXML">
+<Description>
+Показать форматированный XNL</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>appPar</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set gn=$zconvert(appPar,"I","URL")
+	try {
+		write "<h3>"_gn_" in NameSpace "_$zu(5)_"</h3>"
+		if '$d(@gn) w $$$appError("Global node does not exist") q
+		write $zconvert($g(@gn),"O","HTML")
+	} catch e { write $ze }
 	quit $$$OK
 ]]></Implementation>
 </Method>
@@ -94,9 +146,9 @@ Err
 <FormalSpec>appPar</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	w "ClassMethod Test."
-	zw appPar
-	q $$$OK
+	write "ClassMethod Test."
+	zwrite appPar
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -111,39 +163,12 @@ Err
 	set appClass={}.$$$jsonFromJSON(jsonStr).appClass
 	set appMethod={}.$$$jsonFromJSON(jsonStr).appMethod
 	set appPar={}.$$$jsonFromJSON(jsonStr).appPar
+	set appPar("jsonStr")=jsonStr
 	}
  catch e { 
  	write $zconvert($ze,"O","HTML")
  }
  quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="getActionJs">
-<Description>
-Получить js функцию</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>jsonStr,appClass,appMethod,appPar</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	$$$jsstart
-	w "function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNs){"
-		w "var $data ={};"
-		w "if (FormId) {$data = $('#'+FormId).serializeArray();}"
-		w "$data.push({name:""appClass"",value:appClass});"
-		w "$data.push({name:""appMethod"",value:appMethod});"
-		w "$data.push({name:""appNs"",value:appNs});"
-		w "$data.push({name:""appPar"",value:appPar});"
-	    w "$.ajax({"
-	    w "  url: 'App.Action.cls',"
-	    w "  type: 'post',"
-	    w "  data: $data,"
-	    w "  success: function(result) {"
-	    w "   if (ResultId) {$('#'+ResultId).html(result);}"
-	    w "  }"
-	    w "});"
-	w "}"
-	$$$jsstop
 ]]></Implementation>
 </Method>
 </Class>
@@ -279,7 +304,7 @@ Get the detail pane info object</Description>
 <Class name="App.ChartPanel">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.LogInfoPane</Super>
-<TimeChanged>65076,33301.717579</TimeChanged>
+<TimeChanged>65132,41955.937133</TimeChanged>
 <TimeCreated>64985,34799.861897</TimeCreated>
 
 <Method name="DrawBODY">
@@ -289,7 +314,7 @@ Get the detail pane info object</Description>
 <PublicList>nsp,what,field,value,type,typeclass,caption</PublicList>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- 	do ##class(App.LogInfoPane).AddJsScripts("chart")
+ 	write ##class(App.LogInfoPane).AddJsScripts("chart")
 	set $ZT="errors"
 	set nsp=%request.Get("NSP")
 	if nsp'="" try {zn nsp set NSpace=nsp } catch e {}
@@ -548,6 +573,176 @@ d ##class(App.ChartPanel).ChartDbSize(.arg,1200,.res,.list,.mm)</Description>
  }
  d ..FinishArg(.res, .data, .labels, .arg)
  q 1
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="App.DownloadCSP">
+<Description>
+// Класс на основе %CSP Page для создания ссылок</Description>
+<IncludeCode>App.LogMacro</IncludeCode>
+<Super>%CSP.Page</Super>
+<TimeChanged>65141,38370.642298</TimeChanged>
+<TimeCreated>60726,81968.378213</TimeCreated>
+
+<Method name="OnPreHTTP">
+<Description><![CDATA[
+Event handler for <b>PreHTTP</b> event: this is invoked before
+the HTTP headers for a CSP page have been sent.  All changes to the
+<class>%CSP.Response</class> class, such as adding cookies, HTTP headers,
+setting the content type etc. must be made from within the OnPreHTTP() method.
+Also changes to the state of the CSP application such as changing
+%session.EndSession or %session.AppTimeout must be made within the OnPreHTTP() method.
+It is prefered that changes to %session.Preserve are also made in the OnPreHTTP() method
+as this is more efficient, although it is supported in any section of the page.
+Return <b>0</b> to prevent <method>OnPage</method> from being called.]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	if %request.Get("fileName")'="" {
+		s file=%request.Get("fileName")
+	}
+	elseif %request.Get("fileId")'="" {
+		s file=..GetfileName(%request.Get("fileId"),,.origname)
+	}
+	elseif %request.Get("Id")'="" {
+		s file=..GetfileName(%request.Get("Id"),,.origname)
+	}
+	if file="" {set fileName=$$$aText("Link already invalid","Ссылка уже недействительна")}
+	else {set fileName = $p(file,$$$slash,*)}
+	s %response.ContentType="application/force-download"
+	;s %response.CharSet="windows-1251"
+	d %response.SetHeader("Expires", "0")
+	;d %response.SetHeader("Accept-Ranges","bytes")
+	set f=##class(%File).%New()
+ 	s size=f.GetFileSize(file)
+	d %response.SetHeader("Content-Length",size)
+	set name=fileName
+	if origname'="" set name=origname
+	set name=$ZCVT($ZCVT(name,"O","UTF8"),"O","URL")
+	d %response.SetHeader("Content-Disposition","attachment;filename="_name)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description><![CDATA[
+Event handler for <b>PAGE</b> event: this is invoked in order to  
+generate the content of a csp page.
+w "<a title=""Сохранить этот файл у себя на диске"" href=""App.DownloadCSP.cls?fileId=221212"">"]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	if %request.Get("fileName")'="" {
+		s file=%request.Get("fileName")
+	}
+	elseif %request.Get("fileId")'="" {
+		set fileId=%request.Get("fileId")
+		s file=..GetfileName(fileId)
+		d ..DeleteFileId(fileId)
+	}
+	elseif %request.Get("Id")'="" {
+		set fileId=%request.Get("Id")
+		s file=..GetfileName(fileId)
+	}
+	
+	set stream=##class(%FileBinaryStream).%New()
+	set stream.Filename=file
+	while 'stream.AtEnd {
+		set line=stream.Read()
+		write line
+	}
+	
+	/*
+	#dim f As %File
+	set f=##class(%File).%New(file)
+ 	set ok=f.Open("RS")     
+ 	if 'ok do f.%Close() Q ok
+ 	;set len=$zu(140,1,file)
+ 	d f.Rewind()
+ 	while 'f.AtEnd {
+    	Write f.Read($$$MaxLocalLength)
+	}
+ 	do f.%Close()
+ 	*/
+ 	if %request.Get("log")'="" {
+ 		try {
+ 			Do $classmethod(%request.Get("log"),"AddRecord","App.DownloadCSP","OnPage",$st($st(-1),"PLACE"),"INFO",file,"DownLoad")
+ 		} catch e {}
+ 	}
+     Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetGN">
+<Description>
+Получить глобальную ссылку</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	quit $na(^tmpDownloadCSP(+$h))
+]]></Implementation>
+</Method>
+
+<Method name="DeleteFileId">
+<Description>
+Удалить идентификатор для скачивания</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileId,gn=..GetGN()</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	KILL @gn@(FileId)
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetfileName">
+<Description>
+Получить полное имя файла по идентификатору для скачивания</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>FileId,gn=..GetGN(),origname=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	if '$d(@gn@(FileId)) quit ""
+	set origname=$g(@gn@(FileId,"origname"))
+	if $g(@gn@(FileId))'=""	quit $g(@gn@(FileId))
+	quit ""
+]]></Implementation>
+</Method>
+
+<Method name="GetFileId">
+<Description><![CDATA[
+Получить идентификатор для скачивания файла
+if ##class(App.DownloadCSP).GetFileId(fileName,.url) { set fn="<a href='"_url_"'>DownLoad</a>"	}
+cgivar="Id" отдавать файл в течении дня
+cgivar="fileId" отдавать файл только один раз
+cgivar="fileName" отдавать файл по полному пути (небезопасно)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[FileName,&URL,&id,cgivar="Id",gn=..GetGN()]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set URL=""
+	set st=$$$OK
+	set origname=$p(FileName,"*",2)
+	set FileName=$p(FileName,"*",1)
+	TRY {
+		set f=##class(%File).%New(FileName)
+ 		set st=f.Open("RS")     
+ 		if 'st do f.%Close() Q
+ 		if cgivar="fileName" {
+	 		s id=FileName
+	 	} else {
+ 			set id=$r(+$h)_$zcrc(7,FileName)_$r(+$h)
+ 			set @gn@(id)=FileName
+ 			set @gn@(id,"origname")=origname
+	 	}
+ 		set URL=..%ClassName(1)_".cls?"_cgivar_"="_id
+	} catch (e) {  
+		s st=$System.Status.GetErrorText(e) 
+	}
+ 	quit st
 ]]></Implementation>
 </Method>
 </Class>
@@ -981,7 +1176,7 @@ for controls.</Description>
 Представление хранимых классов для просмотра и редактирования</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65070,32912.768065</TimeChanged>
+<TimeChanged>65175,46848.217741</TimeChanged>
 <TimeCreated>64751,31992.250217</TimeCreated>
 
 <Parameter name="PREFIXFIELD">
@@ -1024,6 +1219,9 @@ for controls.</Description>
 			}
 			elseif $g(out("inputpattern"))="files" {
 				s out("filesMethod")={}.$$$jsonFromJSON(json).filesMethod
+				s out("filesStore")={}.$$$jsonFromJSON(json).filesStore
+				if out("filesMethod")="" set out("filesMethod")="##class(App.type).UploadFilesJS(%id)"
+				if "TempDir"[out("filesStore") set out("filesStore")=##class(%File).GetDirectory(##class(%File).TempFilename())
 			}
 			elseif $g(out("inputpattern"))["select" {
 				s out("selectMethod")={}.$$$jsonFromJSON(json).selectMethod
@@ -1063,30 +1261,34 @@ for controls.</Description>
 <Description>
 Вывести строку свойств объекта</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>obj,propName,gn,PrefixIdDIV</FormalSpec>
+<FormalSpec>obj,propName,gn,PrefixIdDIV,Mode</FormalSpec>
 <Implementation><![CDATA[
 	set sysType=..GetPropVal(obj,propName,.gn,"Type")
+	if sysType["%Stream." q $$$OK ;TODO исключения
 	set Name=..GetPropVal(obj,propName,.gn,"Name")
-	i Name="" q $$$ERROR($$$GeneralError,"No Exsist Property "_propName) 
+	if Name="" q $$$ERROR($$$GeneralError,"No Exsist Property "_propName) 
 	set Required=..GetPropVal(obj,propName,.gn,"Required")
 	set ReadOnly=..GetPropVal(obj,propName,.gn,"ReadOnly")
 	set Parameters=..GetPropVal(obj,propName,.gn,"Parameters")
 	set Value=$property(obj,Name)
-	set redstar="" i Required s redstar="<font color=red title='Обязательное поле'>*</font>"
+	set redstar="" if Required s redstar="<font color=red title='Обязательное поле'>*</font>"
 	
-	d ..GetJsonProp(obj, propName, .gn, .pr)
-	i 'ReadOnly s ReadOnly=$g(pr("readOnly"))
-
-	write "<tr title='"_$g(pr("title"))_"'>"
+	do ..GetJsonProp(obj, propName, .gn, .pr)
+	if 'ReadOnly set ReadOnly=$g(pr("readOnly"))
+	if 'Mode set ReadOnly=1
+	
 	set label=pr("description")_redstar
+	if Mode["ShowFieldName" set label=label_"<br>("_propName_")"
 	if $g(pr("inputpattern"))="hidden" set label=""
-	write "<td style='text-align: right;'><label>"_label_"</label></td>"
-	write "<td style='text-align: left;'>"
-	s pr("attr")=$g(pr("attr"))_" "_$s(Required:"Required",1:"")_$s(ReadOnly:"Disabled",1:"")
+	write "<td style='text-align: right;' title='"_$g(pr("title"))_"' ><label>"_label_"</label></td>"
+	write "<td style='text-align: left;' title='"_$g(pr("title"))_"' >"
+	s pr("attr")=$g(pr("attr"))_" "_$s(Required:"Required",1:"")_" "_$s(ReadOnly:"disabled",1:"")
+	
 	s %id=$g(PrefixIdDIV)_..#PREFIXFIELD_Name
 	s %val=$g(Value)
-	s size=" size=50 " if pr("attr")["size" set size=""
-	if sysType="%Boolean" {
+	s pr("WebComp-size")=" size=50 " if pr("attr")["size" set pr("WebComp-size")=""
+	
+	if sysType="%Boolean",pr("inputtype")'="checkbox" {
 		d ##class(App.Form).SelectFieldYesNo(%id,%val)
 	}
 	elseif sysType="%Date" {
@@ -1096,61 +1298,110 @@ for controls.</Description>
 		if $g(pr("inputpattern"))="textarea" {
 			if pr("attr")'["cols" s pr("attr")=pr("attr")_" cols=77 "
 			if pr("attr")'["rows" s pr("attr")=pr("attr")_" rows=3 "
-			w $$$appTextarea(%id,pr("attr"),%val)
+			write $$$appTextarea(%id,pr("attr"),%val)
 		}
 		elseif $g(pr("inputpattern"))="hidden" {
-			w "<input type='hidden' id='"_%id_"' name='"_%id_"' "_$g(pr("attr"))_" value='"_%val_"'>"
+			write "<input type='hidden' id='"_%id_"' name='"_%id_"' "_$g(pr("attr"))_" value='"_%val_"'>"
 		}
 		elseif $g(pr("inputpattern"))="autocomplete" {
-			s met=$g(pr("autocompleteMethod"))
-			if met'=""  x "do "_met
-			w $$$appAutocomplete(%id," "_pr("attr"),%val)
+			set met=$g(pr("autocompleteMethod"))
+			if met'=""  xecute "do "_met
+			write $$$appAutocomplete(%id," "_pr("attr"),%val)
 		}
 		elseif $g(pr("inputpattern"))="files" {
-			s met=$g(pr("filesMethod"))
-			if met'="" 	s %obj=obj  x "do "_met
-			w $$$appText(%id,size_pr("attr"),%val)
+			write ..WebCompShowFiles(obj,.pr,Mode,%id,%val)
 		}
 		elseif $g(pr("inputpattern"))="select" {
-			s met=$g(pr("selectMethod"))
+			set met=$g(pr("selectMethod"))
 			if met'="" {
 				;;w met
 				if (met["{") { //список из json
 					;TODO
 				}
 				else { //список из функции
-					x "do "_met
+					xecute "do "_met
 				}
 			}
 			;w $$$appInputHidden(.%id," "_attr,%val)
 		}
 		elseif $g(pr("inputpattern"))="selectize" {
 			s met=$g(pr("selectMethod"))
-			w "<input type='text' id='"_%id_"' name='"_%id_"' class='input-tags demo-default ui-corner-all ui-widget ui-widget-content' value='"_%val_"'>"
+			write "<input type='text' id='"_%id_"' name='"_%id_"' class='input-tags demo-default ui-corner-all ui-widget ui-widget-content' value='"_%val_"'>"
 			if met'="" {
-				x "do "_met
+				xecute "do "_met
 			}
 		}
+		elseif pr("inputtype")="checkbox" {
+			;set onclick="$('#"_%id_"').attr('value',$('#"_%id_"checkbox').prop('checked') ? 1 : 0 );"
+			;write $$$appInput(%id_"checkbox"," onclick="""_onclick_""" type='"_pr("inputtype")_"' "_pr("WebComp-size")_pr("attr")_" "_$s(%val:"checked ",1:""),%val)
+			;write $$$appInputHidden(%id,"",%val)
+			write ..WebCompShowCheckbox(,.pr,Mode,%id,%val)
+		}
 		elseif pr("inputtype")'="" {
-			write $$$appInput(%id," type='"_pr("inputtype")_"' "_size_pr("attr"),%val)
+			write $$$appInput(%id," type='"_pr("inputtype")_"' "_pr("WebComp-size")_pr("attr"),%val)
 		}
 		elseif Parameters["{" {
 			if {}.$$$jsonFromJSON(Parameters).VALUELIST'="" {
-			  s vl={}.$$$jsonFromJSON(Parameters).VALUELIST
-			  s dl={}.$$$jsonFromJSON(Parameters).DISPLAYLIST
+			  set vl={}.$$$jsonFromJSON(Parameters).VALUELIST
+			  set dl={}.$$$jsonFromJSON(Parameters).DISPLAYLIST
 			  ;	s ^tmpMSW(1,$i(^tmpMSW),"Parameters")=$lb(propName,vl,dl)
 			  set:dl="" dl=vl
 			  do ..SelectField($lfs(vl),,$lfs(dl),.gn2,,%id,%val,600)
 			} else {
-				w $$$appText(%id,size_pr("attr"),%val)
+				write $$$appText(%id,pr("WebComp-size")_pr("attr"),%val)
 			}
 		}
-		else {w $$$appText(%id,size_pr("attr"),%val)
+		else {write $$$appText(%id,pr("WebComp-size")_pr("attr"),%val)
 		}
 	}
-	write "</td></span>"
-	write "</tr>"
+	write "</td>"
 	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="WebCompShowCheckbox">
+<Description>
+Вывести компоненту checkbox</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[obj,&pr,Mode,%id,%val,&ext]]></FormalSpec>
+<Implementation><![CDATA[
+	set onclick="$('#"_%id_"').attr('value',$('#"_%id_"checkbox').prop('checked') ? 1 : 0 );"
+	;set ret=$$$appInput(%id_"checkbox"," onclick="""_onclick_""" type='checkbox' "_$g(pr("WebComp-size"))_$g(pr("attr"))_" "_$s(%val:"checked ",1:""),%val)
+	set ret=$$$appCheck(%id_"checkbox"," onclick="""_onclick_""" "_$g(pr("WebComp-size"))_$g(pr("attr"))_" "_$s(%val:"checked ",1:""),%val)
+	set ret=ret_$$$appInputHidden(%id,"",%val)
+	quit ret
+]]></Implementation>
+</Method>
+
+<Method name="WebCompShowFiles">
+<Description>
+Вывести компоненту Files</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[obj,&pr,Mode,%id,%val,&ext]]></FormalSpec>
+<Implementation><![CDATA[
+	set ret=""
+	set met=$g(pr("filesMethod"))
+	set attr=$g(pr("WebComp-size"))_$g(pr("attr"))
+	;if attr'["disabled" set attr=attr_" disabled "
+	for ff="filesStore" set %id(ff)=$g(pr(ff))
+	if Mode {
+		if met'="" 	s %obj=obj  x "set %ret="_$e(met,1,*-1)_",.%id)"
+		set ret=$g(%ret)_$$$appText(%id,attr,%val)
+	} else {
+		set ret=ret_$$$appText(%id,attr,%val)
+	}
+	;pr("sysType")
+	if %val'="" {
+		set fileName=$g(pr("filesStore"))_%val
+		;W fileName
+		if ##class(App.DownloadCSP).GetFileId(fileName,.url) { 
+			set ext("aurl")="<a href='"_url_"'>"_$$$aText("DownLoad","Загрузить")_"</a>"
+			set ext("url")=url
+			set ext("fileName")=fileName
+			s ret=ret_" "_ext("aurl")
+		}
+	}
+	quit ret
 ]]></Implementation>
 </Method>
 
@@ -1160,9 +1411,10 @@ for controls.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Param="",Ref=0</FormalSpec>
 <Implementation><![CDATA[
+	set id=$g(Param("objId")) ;$p(Param,",")
+	set Class=$g(Param("ClassName")) ;$p(Param,",",2)
+	set PrefixIdDIV=$g(Param("pref")) ;$p(Param,",",3)
 	#dim obj As %Persistent
-	set id=$p(Param,",")
-	set Class=$p(Param,",",2)
 	;m $$$AppL("MSW","req")=%request.Data
 	if id="" w $$$appError("Неопределен идентификатор объекта")_"<br>" d:'Ref ..ButtonRef() q
 	set obj=$classmethod(Class,"%OpenId",id)
@@ -1180,7 +1432,9 @@ for controls.</Description>
 Создать объект как новый</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Param=""</FormalSpec>
-<Implementation><![CDATA[ d ..ObjectSave(","_$p(Param,",",2))
+<Implementation><![CDATA[
+	s Param("objId")=""
+ d ..ObjectSave(.Param)
 ]]></Implementation>
 </Method>
 
@@ -1215,9 +1469,12 @@ for controls.</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Param="",Ref=0</FormalSpec>
 <Implementation><![CDATA[
-	set id=$p(Param,",")
-	set Class=$p(Param,",",2)
-	s PrefixIdDIV=$p(Param,",",3)
+	;AppAct('WinOpenEditObjMainForm','WinOpenEditObjMainContent','AppAct=APP:App.Form:ObjectSave:&objId=2&ClassName=App.Parameter&pref=WinOpenEditObj
+	set id=$g(Param("objId")) ;$p(Param,",")
+	set Class=$g(Param("ClassName")) ;$p(Param,",",2)
+	set PrefixIdDIV=$g(Param("pref")) ;$p(Param,",",3)
+	set Mode=$g(Param("mode"))
+	if Mode["WithoutRef" s Ref=1
 	if id="" s obj=$classmethod(Class,"%New")
 	else  s obj=$classmethod(Class,"%OpenId",id)
 	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:'Ref ..ButtonRef() q ""
@@ -1228,20 +1485,43 @@ for controls.</Description>
 	set i=prefix
 	;m $$$AppL("SPZ",".gn")=gn
 	;m m=%request.Data	zw m
+	;zw gn
 	for { set i=$o(%request.Data(i)) quit:i=""  quit:i'[prefix
 			set nameProp=$p(i,prefix,2)
 			s Value=$g(%request.Data(i,1))
+	
 			if ..GetPropVal(obj,nameProp,.gn,"Required"),Value="" {
 				;получить свойство - описание pr("description")
 				d ..GetJsonProp(obj, nameProp, .gn, .pr)
 				s err=$g(err)_"<li>"_nameProp_" Обязательное поле пусто ("_$g(pr("description"))_")</li>" continue
 			}
-			;write "<li>"_nameProp_" "_$g(%request.Data(i,1))
-			s $property(obj,nameProp)=Value
+			;write "<li>NameField: "_nameProp_" Value:("_$g(%request.Data(i,1))_")"
+			if $d(gn("Properties",nameProp)) {
+				;set sysType=..GetPropVal(obj,nameProp,.gn,"Type")
+				; если свойство - поток, то сохраняем из файла
+				if 0,sysType["%Stream." {
+					set filename=##class(%File).GetDirectory(##class(%File).TempFilename())_Value
+					Set file = ##class(%File).%New(filename)
+  					set sc=file.Open("RU") // same flags as the OPEN command
+					;Do $method(obj,nameProp,"CopyFrom",file)
+					;write "<br>"_filename ;continue
+					;s stream=##class(%Stream.FileBinary).%New()
+					;Set sc=stream.LinkToFile(filename)
+					if 'sc {
+						;write $$$appError($System.Status.GetErrorText(sc))
+					} else {
+						set $property(obj,nameProp)=file ;stream
+						set file=""
+					}
+				}
+				else {
+					set $property(obj,nameProp)=Value
+				}
+			}
 	}
 	if $d(err) w "<br><br>"_$$$appError("Ошибки проверки свойств<hr>"_$g(err)) d:'Ref ..ButtonRef() q ""
-	set st=obj.%Save(1)
-	if 'st w "<br><br>"_$$$appError($System.Status.GetErrorText(st))_"<br>" d:'Ref ..ButtonRef() q ""
+	set st=obj.%Save()
+	if 'st w "<br><br>"_$$$appError($System.Status.GetErrorText(st))_" <br>" d:'Ref ..ButtonRef() q ""
 	write "<br><br>"_$$$appMsg("Сохранено")_"<br>" d:'Ref ..ButtonRef()
 	quit obj
 ]]></Implementation>
@@ -1255,11 +1535,12 @@ for controls.</Description>
 <Implementation><![CDATA[
 	; Получим все свойства объекта
 	;s sql="SELECT cls.Name, prop.Name, prop.Type, prop.Description FROM ""%Dictionary"".ClassDefinition cls  JOIN ""%Dictionary"".PropertyDefinition prop ON cls.Name = prop.parent WHERE cls.Name = '"_obj.%ClassName(1)_"'"
-	set sql="SELECT * from ""%Dictionary"".PropertyDefinition where parent like '"_obj.%ClassName(1)_"'"
+	;set sql="SELECT * from ""%Dictionary"".PropertyDefinition where parent like '"_obj.%ClassName(1)_"'"
 	;set st=##class(App.sys).SaveSQL(sql,gn,1)
-	d ##class(App.LogInfoPane).GetClassDef(obj.%ClassName(1),"",.gn,0)
+	set st=##class(App.LogInfoPane).GetClassDef(obj.%ClassName(1),"",.gn,0)
+	if 'st q st
 	;zw gn("Properties")
-	quit 1
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -1307,14 +1588,13 @@ do ##class(App.Form).SelectField($lb("",0,1),"alert(1);",$lb("","Нет","Да")
 </Method>
 
 <Method name="SelectObj">
-<Description><![CDATA[
+<Description>
 Получить объектов в селекторе для небольших выборок 
 Возврат в одной строке или в глобале
 sql - запрос
 ONCHANGE = js функция на событие в селесторе ONCHANGE
 ValueList = список полей для выводе в Value
-gnRet - возвращаемый массив по ссылке
-do ##class(App.Form).SelectObj("select * from Spgz_model.Packets","$('#MainContent').load('App.Action.cls','appClass=AsuPriz.MVK.ExportPackets&appMethod=ShowObj&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);","segment1,segment1,Description,",.gn) ]]></Description>
+gnRet - возвращаемый массив по ссылке</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>sql,ONCHANGE="",ValueList="",gnRet,idSelect="selectmenu"</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -1367,48 +1647,63 @@ do ##class(App.Form).BlockUI(1,"Загрузка формы")</Description>
 Obj - экземпляр класса
 Mode = 0 режим просмотра
 Mode = 1 режим редактирования со всеми кнопками
-Mode = "1,WithoutSave,WithoutDel,WithCreate" режим редактирования без кнопок</Description>
+Mode = "1,WithoutSave,WithoutDel,WithCreate,WithoutRef" режим редактирования без кнопок
+Mode = "1,ShowFieldName" - показывать имена полей</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>obj,Mode=0,PrefixIdDIV=""</FormalSpec>
+<FormalSpec>obj,Mode=0,PrefixIdDIV="",orderProp=""</FormalSpec>
 <Implementation><![CDATA[
 	if '$isobject(obj) w "Нет объекта" quit
 	set st=..GetPropertyDefinition(obj,.gn)
 	if 'st w $System.Status.GetErrorText(st) quit  ;##class(%Library.Global).Quote(
-	set orderProp=obj.#AppORDERPROPERTY
+	if orderProp=""	set orderProp=obj.#AppORDERPROPERTY
 	write "<table>"
 	// Упорядоченный вывод полей
 	if orderProp'="" {
-		for i=1:1:$l(orderProp,",") { s nameProp=$ZStrip($p(orderProp,",",i),"<>WCP")
-		 	continue:nameProp=""
-			do ..ShowProp(obj,nameProp,.gn,PrefixIdDIV) ;gn("Properties")
+		if orderProp[":" { ;В несколько колонок
+			for ii=1:1:$l(orderProp,":") { s col=$ZStrip($p(orderProp,":",ii),"<>WCP")
+				continue:col=""
+				write "<tr>"
+				for i=1:1:$l(col,",") { s nameProp=$ZStrip($p(col,",",i),"<>WCP")
+			 		if nameProp="" w "<td></td><td></td>" continue
+					do ..ShowProp(obj,nameProp,.gn,PrefixIdDIV,Mode)
+				}
+				write "</tr>"
+			}
+		}
+		else { ;в одну колонку
+			for i=1:1:$l(orderProp,",") { s nameProp=$ZStrip($p(orderProp,",",i),"<>WCP")
+			 	continue:nameProp=""
+			 	write "<tr>"
+				do ..ShowProp(obj,nameProp,.gn,PrefixIdDIV,Mode) ;gn("Properties")
+				write "</tr>"
+			}
 		}
 	} //вывод полей по умочанию
 	else {
 		set p=""
 		for  { s p=$o(gn("Properties",p)) q:p=""  ;q:'$d(@gn@(p))  
-			do ..ShowProp(obj,p,.gn,PrefixIdDIV)
+			write "<tr>"
+			do ..ShowProp(obj,p,.gn,PrefixIdDIV,Mode)
+			write "</tr>"
 		}
 	}
 	write "<tr><td style='text-align: right;'>"
-		set onclick="$('#"_PrefixIdDIV_"MainContent').load('App.Action.cls',$('#"_PrefixIdDIV_"MainForm').serializeArray());"
+		set onclick="AppAct('"_PrefixIdDIV_"MainForm','"_PrefixIdDIV_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":*:&objId="_obj.%Id()_"&ClassName="_obj.%ClassName(1)_"&pref="_PrefixIdDIV_"&mode="_Mode_"');"
 		if Mode {
-			;write "<input type=hidden name="_PrefixIdDIV_"appNsp id="_PrefixIdDIV_"appNsp value='"_$zu(5)_"'>"
-			;write "<input type=hidden name="_PrefixIdDIV_"appClass id="_PrefixIdDIV_"appClass value='App.Form'>"
-			;write "<input type=hidden name="_PrefixIdDIV_"appMethod id="_PrefixIdDIV_"appMethod value=''>"
-			;write "<input type=hidden name="_PrefixIdDIV_"appPar id="_PrefixIdDIV_"appPar value='"_obj.%Id()_","_obj.%ClassName(1)_","_PrefixIdDIV_",~objId="_obj.%Id()_"~ClassName="_obj.%ClassName(1)_"~pref="_PrefixIdDIV_"'>"
-			w $$$appInputHidden(""_PrefixIdDIV_"appNsp","",$zu(5))
-			w $$$appInputHidden(""_PrefixIdDIV_"appClass","","App.Form")
-			w $$$appInputHidden(""_PrefixIdDIV_"appMethod","","")
-			w $$$appInputHidden(""_PrefixIdDIV_"appPar","",obj.%Id()_","_obj.%ClassName(1)_","_PrefixIdDIV_",~objId="_obj.%Id()_"~ClassName="_obj.%ClassName(1)_"~pref="_PrefixIdDIV)
+			;w $$$appInputHidden(""_PrefixIdDIV_"appNsp","",$zu(5))
+			;w $$$appInputHidden(""_PrefixIdDIV_"appClass","","App.Form")
+			;w $$$appInputHidden(""_PrefixIdDIV_"appMethod","","")
+			;w $$$appInputHidden(""_PrefixIdDIV_"appPar","",obj.%Id()_","_obj.%ClassName(1)_","_PrefixIdDIV_",~objId="_obj.%Id()_"~ClassName="_obj.%ClassName(1)_"~pref="_PrefixIdDIV_"~mode="_Mode)
+			
 			if Mode'["WithoutSave" {
 				set buttval=$s(obj.%Id()'="":"Сохранить",1:"Создать")
-				do ..ButtonMake(buttval,"$('#"_PrefixIdDIV_"appMethod').attr('value','ObjectSave');"_onclick,"appButtonSave")
+				do ..ButtonMake(buttval,$replace(onclick,"*","ObjectSave"),"appButtonSave") ;ObjectSaveAsNew
 			}
 			if Mode'["WithoutDel" {
-				if obj.%Id() w "&nbsp; " d ..ButtonMake("Удалить","if (confirm('Удалить, вы уверены ?')) {$('#"_PrefixIdDIV_"appMethod').attr('value','ObjectDelete');"_onclick_"}","appButtonDelete")
+				if obj.%Id() w "&nbsp; " d ..ButtonMake("Удалить","if (confirm('Удалить, вы уверены ?')) { "_$replace(onclick,"*","ObjectDelete")_"}","appButtonDelete")
 			}
 			if obj.%Id(),Mode["WithCreate" {
-			  w "&nbsp; " do ..ButtonMake("Сохранить как новый","$('#"_PrefixIdDIV_"appMethod').attr('value','ObjectSaveAsNew');"_onclick,"appButtonSaveAsNew")
+			  w "&nbsp; " do ..ButtonMake("Сохранить как новый",$replace(onclick,"*","ObjectSaveAsNew"),"appButtonSaveAsNew")
 			}
 		}
 		if Mode'["WithoutCancel" {
@@ -1455,6 +1750,129 @@ Mode = "1,WithoutSave,WithoutDel,WithCreate" режим редактирован
 	quit $$$OK
 ]]></Implementation>
 </Method>
+
+<Method name="GetValueByName">
+<Description>
+Получить значение свойства параметра по имени 
+ExtProp=1 получить расширенные свойства, напрмер для типа файл
+if ##class(App.Form).GetValueByName("App.Parameter","TestFiles","Value",.Val,1) zwrite Val</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[class,name,NameField="Value",&Val,ExtProp=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	KILL Val
+	set Val=""
+	set st=$$$OK
+	s gn="^||tmpGetValueName"
+	set tab=##class(App.type).GetTableName(class)
+	s st=##class(App.sys).SaveSQL("select top 1 * from "_tab_" where Name='"_name_"'",gn)
+	if 'st quit st
+	i $g(@gn@(-1,NameField))="" q $$$ERROR($$$GeneralError,"undefined field: "_NameField)
+ 	i '$d(@gn@(1)) q $$$ERROR($$$GeneralError,"undefined "_name)
+ 	s Val=$lg(@gn@(1),@gn@(-1,NameField))
+ 	if ExtProp {
+	 	set id=##class(App.sys).GetValue(gn,1,"ID")
+	 	set obj=##class(App.Form).GetObj(id_","_class)
+	 	if $isobject(obj) {
+			set st=..GetPropertyDefinition(obj,.prop)
+			if 'st quit st
+			m Val("Properties")=prop("Properties",NameField)
+			d ..GetJsonProp(obj, NameField, .prop, .pr)
+			m Val("PropJson")=pr
+			m Val("obj")=obj
+			if $g(pr("inputpattern"))="files" {
+				set comp=..WebCompShowFiles(obj,.pr,0,NameField,Val,.Ext)
+				m Val=Ext
+			}
+	 	}
+ 	}
+	q st
+]]></Implementation>
+</Method>
+
+<Method name="GetValueByIdField">
+<Description>
+Получить значение свойства параметра по идентификатору 
+ExtProp=1 получить расширенные свойства, напрмер для типа файл
+if ##class(App.Form).GetValueByIdField("App.Parameter","15","ImageFile",.Val,1) zwrite Val</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[class,id,NameField,&Val,ExtProp=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	KILL Val
+	set Val=""
+	set st=$$$OK
+	s gn="^||tmpGetValueName"
+	set tab=##class(App.type).GetTableName(class)
+	s st=##class(App.sys).SaveSQL("select top 1 * from "_tab_" where id='"_id_"'",gn)
+	if 'st quit st
+	i $g(@gn@(-1,NameField))="" q $$$ERROR($$$GeneralError,"undefined field: "_NameField)
+ 	i '$d(@gn@(1)) q $$$ERROR($$$GeneralError,"undefined "_name)
+ 	s Val=$lg(@gn@(1),@gn@(-1,NameField))
+ 	if ExtProp {
+	 	;set id=##class(App.sys).GetValue(gn,1,"ID")
+	 	set obj=##class(App.Form).GetObj(id_","_class)
+	 	if $isobject(obj) {
+			set st=..GetPropertyDefinition(obj,.prop)
+			if 'st quit st
+			m Val("Properties")=prop("Properties",NameField)
+			d ..GetJsonProp(obj, NameField, .prop, .pr)
+			m Val("PropJson")=pr
+		    m Val("obj")=obj
+			if $g(pr("inputpattern"))="files" {
+				set comp=..WebCompShowFiles(obj,.pr,0,NameField,Val,.Ext)
+				m Val=Ext
+			}
+	 	}
+ 	}
+	q st
+]]></Implementation>
+</Method>
+
+<Method name="DrawTable">
+<Description>
+Вывести таблицу из матрицы
+do ##class(App.Form).DrawTable(.matrix) </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>matrix</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set r=$o(matrix(""))
+	quit:r="" $$$OK
+	&html<
+ <table>
+    <thead>
+      <tr>
+        <th></th>>
+        s c=""
+        for { set c=$o(matrix(r,c)) quit:c=""
+        	write "<th>"_$g(matrix(r,c))_"</th>"
+        }
+      &html<
+      </tr>
+    </thead>
+    <tbody>
+>
+     for { set r=$o(matrix(r)) quit:r=""
+     	set c=""
+     	set first=1
+     	write "<tr>"
+ 		for { set c=$o(matrix(r,c)) quit:c=""
+        	if first {
+	        	write "<th>"_$g(matrix(r,c))_"</th>" set first=0
+        	}
+        	else {
+         		write "<td>"_$g(matrix(r,c))_"</td>"
+        	}
+ 		}
+ 		write "</tr>"
+       }
+    &html<
+    </tbody>
+   </table>
+	>
+]]></Implementation>
+</Method>
 </Class>
 
 
@@ -1493,7 +1911,7 @@ Get the detail pane info object</Description>
 </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.LogInfoPane</Super>
-<TimeChanged>65084,29017</TimeChanged>
+<TimeChanged>65132,41961.61785</TimeChanged>
 <TimeCreated>64760,79525.802682</TimeCreated>
 
 <Method name="DrawBODY">
@@ -1503,7 +1921,7 @@ Get the detail pane info object</Description>
 <PublicList>nsp,what,field,value,type,typeclass,caption</PublicList>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- 	do ##class(App.LogInfoPane).AddJsScripts("grid")
+ 	write ##class(App.LogInfoPane).AddJsScripts("grid")
 	set $ZT="errors"
 	set nsp=%request.Get("NSP")
 	if nsp'="" try {zn nsp set NSpace=nsp } catch e {}
@@ -1526,6 +1944,7 @@ Get the detail pane info object</Description>
 		<div id=aPRO></div>
 	 </div>
 	>
+	d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
 	$$$jsstart	// Загрузить список областей
 		w "$( '#accordion' ).accordion({"
 	 	w " collapsible: true, icons: { header: ""ui-icon-zoomin"",  headerSelected: ""ui-icon-zoomout"" }"
@@ -1565,7 +1984,7 @@ Get the detail pane info object</Description>
     });
 	</script>>
 	}
-	/// Навигатор из ниспадающих списков
+	/// Навигатор из selectors
 	else {
 	&html<
 		<!-- ui-dialog -->
@@ -1576,9 +1995,9 @@ Get the detail pane info object</Description>
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 		  <td>#(##class(App.LogInfo).GetInfoImg("search"))# 
-			 <DIV id=MainNamespaces></div>
-			 <DIV id=MainClasses></div>
-			 <DIV id=MainObjects></div>
+			 <DIV id='MainNamespaces'></div>
+			 <DIV id='MainClasses'></div>
+			 <DIV style='overflow: auto;' id='MainObjects'></div>
 			</td>
 		 </tr>
 		 <tr>
@@ -1589,7 +2008,11 @@ Get the detail pane info object</Description>
 		 </tr>
 		</table>
 		>
+		 d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
 		 $$$jsstart	// Загрузить список областей
+		   	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+		 	w "$('#MainObjects').height(window.innerHeight-200);"
+
 		 	write "$('#MainNamespaces').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectNsp&appNsp="_$zu(5)_"');"
 		 	write "$('#MainClasses').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectClasses&appNsp="_$zu(5)_"&appPar="_$g(SelClass)_"');"
 		 $$$jsstop
@@ -1609,15 +2032,15 @@ Cписок классов в виде таблицы</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Par</FormalSpec>
 <Implementation><![CDATA[
-	s ListClasses=""
-	d ..SelectClasses("",.ListClasses)
+	set ListClasses=""
+	do ..SelectClasses("",.ListClasses)
 	$$$jsstart	// Загрузить список классов
-    w " var classes = ["
-    	s i=""
-    	f { s i=$o(ListClasses(i)) q:i=""
-    		w "{ ""ClassNames"": """_i_""",""SuperClass"": """_$lg(ListClasses(i),3)_""" }"_$s($o(ListClasses(i))="":"",1:",")
+    write " var classes = ["
+    	set i=""
+    	for { s i=$o(ListClasses(i)) quit:i=""
+    		write "{ ""ClassNames"": """_i_""",""SuperClass"": """_$lg(ListClasses(i),3)_""" }"_$s($o(ListClasses(i))="":"",1:",")
     	}
-   		 w "];"
+   		 write "];"
     
     $$$jsstop
  	&js< <script>
@@ -1658,35 +2081,35 @@ Cписок экземпляров классов в виде таблицы</De
 <FormalSpec>Par</FormalSpec>
 <Implementation><![CDATA[
 	#define tra(%s) $zconvert(%s,"O","JS")
-	s count=..GetCountTab(Par,.tab)
-	s sql="select * from "_tab
-	s gn="^Obj2Grid"
-	d ##class(App.sys).SaveSQL(sql,gn)
-	s nl=$c(13,10)
+	set count=..GetCountTab(Par,.tab)
+	set sql="select * from "_tab
+	set gn="^||tmpAppExpObj2Grid"
+	do ##class(App.sys).SaveSQL(sql,gn)
+	set nl=$c(13,10)
 	$$$jsstart
    // Загрузить список полей запроса
-      s field = "["
-    	f f=1:1:$ll(@gn@(0)) { 
-    		s field=field_"{ name: """_$$$tra($lg(@gn@(0),f))_""", type: ""text"", validate: ""required"" }"_$s($ll(@gn@(0))'=f:",",1:"")
+      set field = "["
+    	for f=1:1:$ll(@gn@(0)) { 
+    		set field=field_"{ name: """_$$$tra($lg(@gn@(0),f))_""", type: ""text"", validate: ""required"" }"_$s($ll(@gn@(0))'=f:",",1:"")
     	}
-   		 s field=field_"]"
-   	w !,nl,"var field = "_field_";",!,nl
+   		 set field=field_"]"
+   	write !,nl,"var field = "_field_";",!,nl
    	;w "var field2=JSON.parse(field);",!,nl
     // Загрузить список классов
-    s max=$$$MAXSHOW
-    w " var objects = [",!
-    	s i="0"
-    	f { s i=$o(@gn@(i)) q:i=""  q:i>max  ;ограничим
-    		w "{ "
-    		f f=1:1:$ll(@gn@(0)) {
-	    		s val=$lg(@gn@(i),f)
-	    		s:$l(val)>80 val=$e(val,1,50)_"..."
-    			w """"_$$$tra($lg(@gn@(0),f))_""": """_$$$tra(val)_""" "_$s($ll(@gn@(0))'=f:",",1:"")
+    set max=$$$MAXSHOW
+    write " var objects = [",!
+    	set i="0"
+    	for { s i=$o(@gn@(i)) q:i=""  q:i>max  ;ограничим
+    		write "{ "
+    		for f=1:1:$ll(@gn@(0)) {
+	    		set val=$lg(@gn@(i),f)
+	    		set:$l(val)>80 val=$e(val,1,50)_"..."
+    			write """"_$$$tra($lg(@gn@(0),f))_""": """_$$$tra(val)_""" "_$s($ll(@gn@(0))'=f:",",1:"")
     		}
-    		w "}"_$s($o(@gn@(i))'="":",",1:""),!
+    		write "}"_$s($o(@gn@(i))'="":",",1:""),!
     	}
-   		 w "];",!,nl
-    	w "$('#aOBJhead').html('Total: "_+count_"');",!,nl
+   		 write "];",!,nl
+    	write "$('#aOBJhead').html('Total: "_+count_"');",!,nl
     $$$jsstop
  	&js< <script>
  	   $("#aPROhead").html("");
@@ -1727,25 +2150,23 @@ Cписок экземпляров классов в виде таблицы</De
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Par</FormalSpec>
 <Implementation><![CDATA[
-	w "<form id='MainForm'><div id='MainContent'>"
-	s class=$p(Par,",",2)
-	s id=$p(Par,",",1)
-	s obj=##class(App.Form).GetObj(Par)
+	write "<form id='MainForm'><div id='MainContent'>"
+	set class=$p(Par,",",2)
+	set id=$p(Par,",",1)
+	set obj=##class(App.Form).GetObj(Par)
 	if '$isobject(obj) { 
-		w $$$appError("Не удалось открыть объект")
+		write $$$appError("Не удалось открыть объект")
 	}
 	else {
-		;s mode="1,WithoutSave,WithoutDel,WithoutCancel"
-		;if $g(%session.Data("debug")) 
-		s mode=($roles["%All")_",WithoutCancel,WithCreate"
-		d ##class(App.Form).Show(obj,mode)
+		set mode=($roles["%All")_",WithoutCancel,WithCreate"
+		do ##class(App.Form).Show(obj,mode)
 	}
 	$$$jsstart
-	w "$('#aPRO').height('80%');"
-	w:id'="" "$('#aPROh').click();"
+	write "$('#aPRO').height('80%');"
+	write:id'="" "$('#aPROh').click();"
  	$$$jsstop
-	w "</div></form>"
-	q $$$OK
+	write "</div></form>"
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -1758,7 +2179,7 @@ Cписок экземпляров классов в виде таблицы</De
 	set NSpace=$zu(5)
 	// Получить список областей
 	set listNs=##class(App.sys).ListNS(.info)
-	s onc="$('#MainClasses').empty();$('#MainObjects').empty();$('#MainClasses').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectClasses&appNsp='+this.options[this.selectedIndex].value+'&appPar='+this.options[this.selectedIndex].value);"
+	set onc="$('#MainClasses').empty();$('#MainObjects').empty();$('#MainClasses').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectClasses&appNsp='+this.options[this.selectedIndex].value+'&appPar='+this.options[this.selectedIndex].value);"
 	set selectNS="<SELECT title=""Область"" name=""NSP"" id=""NSP""  > "
 	for ns=1:1:$l(listNs,",") { continue:$p(listNs,",",ns)=""
 		continue:$p(listNs,",",ns)["%ALL"
@@ -1783,26 +2204,26 @@ Cписок экземпляров классов в виде таблицы</De
 <Implementation><![CDATA[
 	set query=##class(%Library.ResultSet).%New("%Dictionary.ClassDefinition:Summary")
  	set st=query.Execute() ;"%Persistent")
-	s onc="$('#MainObjects').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectObjects&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
+	set onc="$('#MainObjects').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectObjects&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
  	set selectNS="<SELECT title=""Классы"" name=""SelClass"" id=""SelClass"" > "
  	while query.Next() { 
- 		i 'query.Get("Persistent") continue
-		s class=query.Get("Name"),f1=""
-		i $zu(5)'="%SYS" continue:$e(class,1)="%"  
-		i $e($zu(5),1,3)'="ENS" continue:$e(class,1,3)="Ens"
+ 		if 'query.Get("Persistent") continue
+		set class=query.Get("Name"),f1=""
+		if $zu(5)'="%SYS" continue:$e(class,1)="%"  
+		if $e($zu(5),1,3)'="ENS" continue:$e(class,1,3)="Ens"
 		set selected=""
 		if class=SelectClass s selected="selected",forceONC=1
 		if query.Get("Super")["App.Form" s f1="style='color:red;' title='Наследник App.Form'"
 		set selectNS=selectNS_" <OPTION "_$g(selected)_" "_f1_" VALUE="""_class_""">"_class_"</OPTION>"
-		i $D(ListClasses) s ListClasses(class)=$lb($g(selected),f1,query.Get("Super"),query.Get("System"),query.Get("TimeChanged"),,query.Get("SqlTableName"))
+		if $D(ListClasses) s ListClasses(class)=$lb($g(selected),f1,query.Get("Super"),query.Get("System"),query.Get("TimeChanged"),,query.Get("SqlTableName"))
 	}
-	q:$D(ListClasses) $$$OK
+	quit:$D(ListClasses) $$$OK
 	
 	set selectNS=selectNS_"</SELECT>"
 	write selectNS
 	$$$jsstart
-		w "$( '#SelClass' ).selectmenu({ change: function( event, data ) { "_onc_" }, width:1000 }).selectmenu('menuWidget');" ;;.selectmenu('refresh', true).addClass('overflow');"
-		w "$( '#SelClass-menu' ).css( 'max-height','500px');"
+		write "$( '#SelClass' ).selectmenu({ change: function( event, data ) { "_onc_" }, width:1000 }).selectmenu('menuWidget');" ;;.selectmenu('refresh', true).addClass('overflow');"
+		write "$( '#SelClass-menu' ).css( 'max-height','500px');"
 	$$$jsstop
 	if $g(forceONC) {
 		$$$jsstart
@@ -1819,15 +2240,12 @@ Cписок экземпляров классов в виде таблицы</De
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[SelectClass,&tab]]></FormalSpec>
 <Implementation><![CDATA[
-	s (tab,table)=$p(SelectClass,".",*)
-	//Если имя таблицы - ключевое слов, обрамим в кавычки
-	s:$SYSTEM.SQL.IsReservedWord(table) table = """"_table_""""
-	s tab=$tr($p(SelectClass,"."_tab,1),".","_")_"."_table
-	s sql="select * from "_tab
-	s gn="^||tmpCount"
-	d ##class(App.sys).SaveSQL("select count(*) from "_tab,gn)
-	s count=+$lg($g(@gn@(1)),1)
-	q count
+	set tab=##class(App.type).GetTableName(SelectClass)
+	set sql="select * from "_tab
+	set gn="^||tmpAppExpCount"
+	do ##class(App.sys).SaveSQL("select count(*) from "_tab,gn)
+	set count=+$lg($g(@gn@(1)),1)
+	quit count
 ]]></Implementation>
 </Method>
 
@@ -1835,19 +2253,21 @@ Cписок экземпляров классов в виде таблицы</De
 <Description>
 Получить список экземпляров класса в виде таблицы</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>SelectClass</FormalSpec>
+<FormalSpec>SelectClass,sql="",exec=""</FormalSpec>
 <Implementation><![CDATA[
-
-	s count=..GetCountTab(SelectClass,.tab)
-	s sql="select * from "_tab
-	s add=" <span style='"_$$$styleurl_"' onclick=""$('#MainObjEdit').load('App.Action.cls','appClass=App.FormExplorer&appMethod=PRO2Grid&appNsp="_$zu(5)_"&appPar=,"_SelectClass_"');"" title='Создать объект' >Создать</span><DIV id=MainObjEdit></div>"
+	set count=..GetCountTab(SelectClass,.tab)
+	set:sql="" sql="select * from "_tab
+	;set add=" <span style='"_$$$styleurl_"' onclick=""$('#MainObjEdit').load('App.Action.cls','appClass=App.FormExplorer&appMethod=PRO2Grid&appNsp="_$zu(5)_"&appPar=,"_SelectClass_"');"" title='Создать объект' >Создать</span><DIV id=MainObjEdit></div>"
+	set add=" <span style='"_$$$styleurl_"' onclick=""WinOpen('"_$zu(5)_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_SelectClass_"&ID=');"" title='Создать объект' >Создать</span>"
 	$$$jsstart
 		write "$('#MainObjEdit').empty();"
 	$$$jsstop
-	s %SelectClass=SelectClass
-	set exec="##class(App.FormExplorer).EditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
-	set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),sql_" <a target=SelectQ href='App.LogInfo.cls?NSP="_$zu(5)_"&WHAT="_sql_"' title='Перейти на панель запросов'>Запрос</a> count(*)="_count_" "_add,exec)
-	quit $$$OK
+	set %SelectClass=SelectClass
+	;if exec="" set exec="##class(App.FormExplorer).EditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
+	if exec="" set exec="##class(App.FormExplorer).WinEditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
+	;set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),sql_" <a target=SelectQ href='App.LogInfo.cls?NSP="_$zu(5)_"&WHAT="_sql_"' title='Перейти на панель запросов'>Запрос</a> count(*)="_count_" "_add,exec)
+	set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),"Экземпляры класса "_SelectClass_" "_add,exec)
+	quit st
 ]]></Implementation>
 </Method>
 
@@ -1857,16 +2277,53 @@ Cписок экземпляров классов в виде таблицы</De
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Val,Col,Head,Temp,nspace,DSN</FormalSpec>
 <Implementation><![CDATA[
-	s res=Val
+	set res=Val
 	if $g(Head) {
 		i $g(Val)="ID" s Temp("ID",Col)=""
 	}
 	else {
-		i $D(Temp("ID",Col)) {
-			s res=$replace(Val,Val,"<span style='"_$$$styleurl_"' onclick=""$('#MainObjEdit').load('App.Action.cls','appClass=App.FormExplorer&appMethod=PRO2Grid&appNsp="_nspace_"&appPar="_Val_","_%SelectClass_"');"" >"_Val_"</span>")
+		if $D(Temp("ID",Col)) {
+			set res=$replace(Val,Val,"<span style='"_$$$styleurl_"' onclick=""$('#MainObjEdit').load('App.Action.cls','appClass=App.FormExplorer&appMethod=PRO2Grid&appNsp="_nspace_"&appPar="_Val_","_%SelectClass_"');"" >"_Val_"</span>")
 		}
 	}
-	q res
+	quit res
+]]></Implementation>
+</Method>
+
+<Method name="WinEditObj">
+<Description>
+Формировать активные ссылки для редактирования в окне</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Val,Col,Head,Temp,nspace,DSN</FormalSpec>
+<Implementation><![CDATA[
+	set res=Val
+	if $g(Head) {
+		if $g(Val)="ID" s Temp("ID",Col)=""
+	}
+	else {
+		if $D(Temp("ID",Col)) {
+			set res=$replace(Val,Val,"<span title='Редактировать' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_%SelectClass_"&ID="_$zconvert(Val,"O","URL")_"');"" >"_Val_"</span>")
+		}
+	}
+	quit res
+]]></Implementation>
+</Method>
+
+<Method name="WinOpenEditObj">
+<Description>
+Открыть окно для редактирования экземпляра объекта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<Implementation><![CDATA[
+	set id=$g(Par("ID"))
+	set ClassName=$tr($get(Par("SelectClass")),"_",".")
+	//
+	set obj=##class(App.Form).GetObj(id_","_ClassName)
+	set PrefixIdDIV="WinOpenEditObj"
+	write "<form id='"_PrefixIdDIV_"MainForm'>"
+		do ##class(App.Form).Show(obj,"1,WithoutCancel,WithoutRef",PrefixIdDIV) 
+	write "</form><div id='"_PrefixIdDIV_"MainContent'></div>"
+	q $$$OK
 ]]></Implementation>
 </Method>
 </Class>
@@ -1878,7 +2335,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65084,30157.530543</TimeChanged>
+<TimeChanged>65114,29919.747187</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 
 <Parameter name="DispatchClass">
@@ -1935,11 +2392,11 @@ This method is invoked when a class is compiled.</Description>
 	if $g(@$$$GNEnsConf@("HomeNamespace"))="" {
 	;Заполнение глобала значениями по умолчанию
 	 set @$$$GNEnsConf@("DBCACHESizeMon")="CACHESYS,CACHEAUDIT"
-	 set @$$$GNEnsConf@("EMAILAUTH")="mail@server.com"
+	 set @$$$GNEnsConf@("EMAILAUTH")="user_from_send_mail@server.com"
 	 set @$$$GNEnsConf@("EMAILAUTHPASS")=12345
 	 set @$$$GNEnsConf@("EMAILSERVERIP")="127.0.0.1"
 	 set @$$$GNEnsConf@("EMAILSERVERPORT")=25
-	 set @$$$GNEnsConf@("EMAILSUPPORT")="admin@server.com"
+	 set @$$$GNEnsConf@("EMAILSUPPORT")="user_to_send_mail@server.com"
 	 set @$$$GNEnsConf@("EMAILXLSPATH")="c:\temp\"
 	 set @$$$GNEnsConf@("EXPORDPROJPATH")="c:\temp\source\"
 	 set @$$$GNEnsConf@("Language")="en"
@@ -1947,6 +2404,7 @@ This method is invoked when a class is compiled.</Description>
     set @$$$GNEnsConf@("HomeNamespace") = ns
     write !, "Installing "_..#AppName_" application to " _ ns
     set dbdir = $$$defdir
+    $$$NspGoto(curNs,"%SYS")
     try {
         set $Namespace = "%SYS"
     } catch (e) {
@@ -1970,19 +2428,18 @@ This method is invoked when a class is compiled.</Description>
 		}
 	}
     ;zw cspProperties
-    set cspProperties("AutheEnabled") = $$$AutheCache
+    set cspProperties("AutheEnabled") = $$$AutheCache ;$$$AutheUnauthenticated ;
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
     set cspProperties("IsNameSpaceDefault") = $$$NO
     set st = ..RegisterWebApplication("/"_..#AppCSP, .cspProperties)
     return:$$$ISERR(st) st
     
-    d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,cspProperties("Path"))
-    
+ 
 	s @$$$GNEnsConf@("CSP-Path")=cspProperties("Path")
 	KILL cspProperties("Path")
 	
-    set cspProperties("AutheEnabled") = $$$AutheCache
+    set cspProperties("AutheEnabled") = $$$AutheCache ;$$$AutheUnauthenticated
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
     set cspProperties("IsNameSpaceDefault") = $$$NO
@@ -2010,7 +2467,8 @@ This method is invoked when a class is compiled.</Description>
             "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
-    
+	$$$NspReturn(curNs)
+    d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
 ]]></Implementation>
 </Method>
@@ -2202,7 +2660,7 @@ This method is invoked when a class is 'uncompiled'.</Description>
 <Description>
 Updated at 12/08/2017 16:09:03</Description>
 <Super>%Persistent</Super>
-<TimeChanged>65078,29921</TimeChanged>
+<TimeChanged>65129,56510.929655</TimeChanged>
 <TimeCreated>63685,63064.148177</TimeCreated>
 
 <Parameter name="Null">
@@ -2329,7 +2787,8 @@ Determine user IP address</Description>
 <Description>
 Add new log event
 Use via $$$LogEventTYPE().
-Return ID log</Description>
+Return ID log
+Example do ##class(App.Log).AddRecord("Хочу", "протоколировать", "все", "INFO", "действия","пользователей")</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>ClassName:%String="",MethodName:%String="",Source:%String="",EventType:%String="",Arguments:%String="",Message:%String=""</FormalSpec>
 <Implementation><![CDATA[
@@ -2436,46 +2895,53 @@ w ##class(App.Log).SerializeObject(obj,"^gn","sveta")</Description>
 
 <Method name="WriteJSONFromObject">
 <Description>
-w ##class(App.Log).WriteJSONFromObject(b)</Description>
+w ##class(App.Log).WriteJSONFromObject(b) ;format As %String = "aeos" ;aceloqtw</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Object</FormalSpec>
+<FormalSpec>obj,format:%String="tw"</FormalSpec>
 <ProcedureBlock>0</ProcedureBlock>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-    // Create a string that we will redirect to
-    Set zsStr = ""
+    set tOldIORedirected = ##class(%Device).ReDirectIO()
+    set tOldMnemonic = ##class(%Device).GetMnemonicRoutine()
+    set tOldIO = $io
+    try {
+        set str = ""
+        use $io::("^" _ $ZNAME)
+        do ##class(%Device).ReDirectIO(1)
+        do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(obj,,,format)
+    } catch ex {
+        set str = ""
+    }
+    if (tOldMnemonic '= "") {
+        use tOldIO::("^" _ tOldMnemonic)
+    } else {
+        use tOldIO
+    }
+    do ##class(%Device).ReDirectIO(tOldIORedirected)
+    return str
 
-    Use $io::("^"_$ZNAME)
-
-    // Enable redirection
-    Do ##class(%Device).ReDirectIO(1)
- 
-    // Any write statements here will be redirected to the labels defined below
-    Do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(Object)
- 
-    // Disable redirection
-    Do ##class(%Device).ReDirectIO(0)
-    
-    Return zsStr
- 
-    // Labels that allow for IO redirection
-    // Read Character - we don't care about reading
-rchr(c)      Quit
-    // Read a string - we don't care about reading
-rstr(sz,to)  Quit
-    // Write a character - call the output label
-wchr(s)      Do output($char(s))  Quit
-    // Write a form feed - call the output label
-wff()        Do output($char(12))  Quit
-    // Write a newline - call the output label
-wnl()        Do output($char(13,10))  Quit
-    // Write a string - call the output label
-wstr(s)      Do output(s)  Quit
-    // Write a tab - call the output label
-wtab(s)      Do output($char(9))  Quit
-    // Output label - this is where you would handle what you actually want to do.
-    // in our case, we want to write to Str
-output(s)    Set zsStr = zsStr_s Quit
+rchr(c)
+    quit
+rstr(sz,to)
+    quit
+wchr(s)
+    do output($char(s))
+    quit
+wff()
+    do output($char(12))
+    quit
+wnl()
+    do output($char(13,10))
+    quit
+wstr(s)
+    do output(s)
+    quit
+wtab(s)
+    do output($char(9))
+    quit
+output(s)
+    set str = str _ s
+    quit
 ]]></Implementation>
 </Method>
 
@@ -2558,7 +3024,7 @@ LoadNode(GNkey,key)
 </Method>
 
 <Storage name="Default">
-<Type>%Storage.Persistent</Type>
+<Type>%Library.CacheStorage</Type>
 <DataLocation>^App.LogD</DataLocation>
 <DefaultData>LogDefaultData</DefaultData>
 <IdLocation>^App.LogD</IdLocation>
@@ -2613,7 +3079,7 @@ LoadNode(GNkey,key)
 <IncludeCode>App.LogMacro</IncludeCode>
 <Modified>0</Modified>
 <Super>App.AutoPage</Super>
-<TimeChanged>65072,59253.865314</TimeChanged>
+<TimeChanged>65120,33292.224963</TimeChanged>
 <TimeCreated>64621,44286.491046</TimeCreated>
 
 <Parameter name="CSPURL">
@@ -2644,7 +3110,7 @@ Get the detail pane info object</Description>
 fields - имена полей через запятую
 w ##class(App.LogInfo).ClearFields("a,b")</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>fields=""</FormalSpec>
+<FormalSpec>fields="",onclick</FormalSpec>
 <Implementation><![CDATA[
 	;set res="<input type=button name='clearFields' id='clearFields' onclick=""#"" value=X title='Очистить поля'>"
 	set res="<span class='ui-icon ui-icon-trash' name='clearFields' id='clearFields' onclick=""#"" title='Очистить поля'></span>"
@@ -2843,7 +3309,7 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65084,29017</TimeChanged>
+<TimeChanged>65189,58581.106892</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
 
 <Method name="GetLink">
@@ -2860,15 +3326,47 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Method name="AddJsScripts">
 <Description>
 Add libraries and functions js to the panel
-d ##class(App.LogInfoPane).AddJsScripts()</Description>
+write ##class(App.LogInfoPane).AddJsScripts()</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>mode</FormalSpec>
 <Implementation><![CDATA[
-	write "<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"
-	write "<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"
-	write:$g(mode)="grid" "<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>","<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"
-	write:$g(mode)="chart" "<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"
-	q
+	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script><script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"
+	set:$g(mode)="grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script><script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"
+	set:$g(mode)="chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"
+	q scr
+]]></Implementation>
+</Method>
+
+<Method name="AddCSS">
+<Description>
+write ##class(App.LogInfoPane).AddCSS()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>mode</FormalSpec>
+<Implementation><![CDATA[
+	/* https://habr.com/ru/post/453744/
+table {
+  overflow: hidden;
+}
+
+tr:hover {
+  background-color: #ffa;
+}
+
+td, th {
+  position: relative;
+}
+td:hover::after,
+th:hover::after {
+  content: "";
+  position: absolute;
+  background-color: #ffa;
+  left: 0;
+  top: -5000px;
+  height: 10000px;
+  width: 100%;
+  z-index: -1;
+}
+*/
 ]]></Implementation>
 </Method>
 
@@ -2890,7 +3388,7 @@ Drawing the form to enter information</Description>
 <PublicList>nsp,what,field,value,type,typeclass,caption</PublicList>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	d ##class(App.LogInfoPane).AddJsScripts() 
+	write ##class(App.LogInfoPane).AddJsScripts() 
 	set $ZT="errors"
 	set color="red"
 	if $zu(110)=$$$TESTSERVER s color="blue" 
@@ -2933,7 +3431,7 @@ Drawing the form to enter information</Description>
 		set ExecuteDraw="##class(App.LogInfoPane).DrawHelp(.%AppLogInfoVal,%AppLogInfoCol,%AppLogInfoHead,.%AppLogInfoTemp,"""_NSpace_""","""_DSN_""")"
 	}
 	#; queries and query results
-	elseif ",query,result,select,s,q,r,"[(","_$zconvert($p(what," ",1),"L")_",") {
+	elseif ",query,result,select,s,q,r,begin,"[(","_$zconvert($p(what," ",1),"L")_",") {
 			set sql=what
 			i sql["p.party_id( )" s sql=$replace(sql,"p.party_id( )","p.party_id(+)")
 	}
@@ -3009,7 +3507,8 @@ Drawing the form to enter information</Description>
 				 | <a name='Hist' href='#("App.LogInfo.cls?NSP="_$zu(5)_"&Next=-1&WHAT="_$zconvert($$$HISTORYGN,"O","URL")_"")#' title='#($$$aText("Show command input history","Показать историю ввода команд"))#' id='Hist'>#($$$aText("History","История"))#</a>
 				 | <a target='Explore' name='Explore' href='#("App.FormExp.cls?NSP="_$zu(5))#' id='Explorer'>#($$$aText("Selection Classes","Селектор Классов"))#</a>
 				 | <a target='ExploreTab' name='ExploreTab' href='#("App.FormExp.cls?panel=AccordionExp&NSP="_$zu(5))#'  id='ExplorerTab'>#($$$aText("Explorer tables","Табличный Навигатор"))#</a>
-				 | <a target='Param' name='Param' href='#("App.FormExp.cls?NSP="_$zu(5)_"&SelClass=App.Parameter")#' title='#($$$aText("Go to the options table","Перейти в таблицу параметров"))#' id='Param'>#($$$aText("Options","Параметры"))#</a>
+				 | <a target='Param' name='Param' href='#("App.FormExp.cls?NSP="_$zu(5)_"&SelClass=App.Parameter")#' title='#($$$aText("Go to the options table","Перейти в таблицу параметров"))#' id='Param'>#($$$aText("Parameters","Параметры"))#</a>
+				 | <a target='Tabs' name='Tabs' href='#("App.TabsPanelSample.cls")#' title='#($$$aText("Sample Tabs Application","Пример приложения с закладками"))#' id='Param'>#($$$aText("SampleTabsApplication","ПримерПриложения"))#</a>
 				 | <a target='Chart' name='Chart'  id='Chart' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartDbSize&NSP="_$zu(5))#'>#($$$aText("ChartDbSize","Размеры БазДанных"))#</a>
 				 | <a target='ChartAlert' name='ChartAlert'  id='ChartAlert' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartAlert&NSP="_$zu(5))#'>#($$$aText("ChartAlert","Важные события"))#</a>
  			 | 
@@ -3042,14 +3541,16 @@ Drawing the form to enter information</Description>
 		</table>
 		</form>
 	>
-	d ##class(App.LogInfoPane).AddJS("tWHAT") 
+	d ##class(App.LogInfoPane).AddJS(NSpace) 
 	if $g(execute)'="" {
 		write "<H3>"_$$$aText("Executing the command","Выполнение команды")_" "_execute_"</H3>"
 		x execute
 		q $$$OK
 	}
 	if what="trm" {
-		write !,"<iframe style='width:95%; height:70%' id='terminal"_NSpace_"' src='/terminal/?ns="_NSpace_"&clean=1' ></iframe>"
+		if ##class(App.sys).ClassExist("WebTerminal.Engine") {
+			write !,"<iframe style='width:95%; height:70%' id='terminal"_NSpace_"' src='/terminal/?ns="_NSpace_"&clean=1' ></iframe>"
+		}
 		quit $$$OK
 	}
 	#; Post request
@@ -3059,11 +3560,18 @@ Drawing the form to enter information</Description>
 		if $p(server,"@")'="" set user=$p($p(server,"@"),":"),pass=$p($p(server,"@"),":",2),server=$p(server,"@",2)
 		set postbody=$p($p(what," ",2,*),$C(13,10),2,*)
 		s st=##class(App.net).PostHttp(server, $p($p(posturl,"/",4,*),"?"),user ,pass ,postbody,.out)
-		w st w "<pre>" zw out("Data") w "</pre>" q $$$OK
+		w st w "<pre>" zw:$d(out("Data")) out("Data") w "</pre>" q $$$OK
 	}
-	if $g(SDNum)'="",$d(@$$$PROJGN) {
-		write "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
+	if $p($zconvert(what,"L")," ",1)="get" {
+		set url=$p($p(what," ",2,*),$C(13,10),1)
+		set server=$p(url,"/",3)
+		if $p(server,"@")'="" set user=$p($p(server,"@"),":"),pass=$p($p(server,"@"),":",2),server=$p(server,"@",2)
+		s st=##class(App.net).GetHttp(url,.out)
+		w "<pre>" zw out w ! if $d(out("content")) { while '(out("content").AtEnd) { w $zconvert(out("content").ReadLine(),"O","HTML") }} w "</pre>" q $$$OK
 	}
+
+	$$$SDNum
+	
 	set obj=""
 	#; arbitrary query
 	if $g(sql)'="" {
@@ -3178,6 +3686,7 @@ code for ison when outputting arrays</Description>
 <Implementation><![CDATA[
 	set res=Val
 	if Head {
+		 s %AppCol2="40%"
 		 q:Col=1 ""  
 		 if Col=2 {
 			set res=$$$aText("Command","Команда")
@@ -3274,7 +3783,7 @@ set st=##class(App.LogInfoPane).DrawArray(res,100,$zu(5),"Output a list 1111")</
 					</tr>
 					>
 				}
-				&html<</table>>
+				&html<</tbody></table>>
 				set gn=$q(@gn)
 			}
 		} 
@@ -3284,6 +3793,7 @@ set st=##class(App.LogInfoPane).DrawArray(res,100,$zu(5),"Output a list 1111")</
 		s num="#"
 		s ref=$$$aText("reference","Ссылка")
 		s data=$$$aText("Data","Данные")
+		s %AppCol2="9%"
 		if Execute'="" {
 			s %AppLogInfoHead=1
 			s %AppLogInfoTemp=data
@@ -3295,8 +3805,8 @@ set st=##class(App.LogInfoPane).DrawArray(res,100,$zu(5),"Output a list 1111")</
 			<h1>#($s(msg="":$$$aText("View array","Просмотр массива")_" : "_gn_" "_$$$aText("in namespace","в области")_" "_$zu(5),1:msg))#</h1>
 			<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" ><tbody>
 			<tr>
-				<th align="left" width="1%">#(num)#</th>
-				<th align="left" width="9%">#(ref)#</th>
+				<th title='Edit nodes and values global' align="left" width="1%">#(num)#</th>
+				<th align="left" width="#(%AppCol2)#">#(ref)#</th>
 				<th align="left" width="*">#(data)#</th>
 			</tr>
 			>
@@ -3314,18 +3824,22 @@ set st=##class(App.LogInfoPane).DrawArray(res,100,$zu(5),"Output a list 1111")</
   				if $g(iglast)'="" set ig=iglast
   			}
   			if ig'="" {
-	  			if next=-1 { set NoDraw=0
-		  			i $g(Filtr)'="" set NoDraw=$$ExpTestFiltr(ig,Filtr) 
+	  			if next=-1 { 
+	  				set NoDraw=0
+		  			if $g(Filtr)'="" set NoDraw=$$ExpTestFiltr(ig,Filtr) 
+		  			if $p(ig,"(",1)=$$$HISTORYGN,$g(NSpace)'="%SYS" set:$lg(@ig,2)'=$g(NSpace) NoDraw=1
 		  			do:'NoDraw ..DrawNodeGN(ig,$g(@ig),.count,,ig,$g(NSpace),Execute)
 	  			}
-	  			for { set ig=$q(@ig,$g(next)) quit:ig=""||(ig'[$e(igg,1,*-1))
+	  			for { set ig=$q(@ig,$g(next)) 
+	  				quit:ig=""||(ig'[$e(igg,1,*-1))
 	  				if $g(Filtr)'="" continue:$$ExpTestFiltr(ig,Filtr)
 	  				set node=$e($p(ig,$e(igg,1,*-1),2),2,*)
+					if $p(ig,"(",1)=$$$HISTORYGN,$g(NSpace)'="%SYS" continue:$lg(@ig,2)'=$g(NSpace)
 					do ..DrawNodeGN(node,@ig,.count,$g(job),ig,$g(NSpace),Execute)
 					Quit:count>MaxNode
 	  			}
   			}
-  			&html<</table>>
+  			&html<</tbody></table>>
 	if $g(exportXLSfile)'="" { 
 		d ..CloseXLSfile(fileXLS, .exportXLSfileEmail, .exportXLSfile,.io, .count, .msg, .gn)
 	}  	
@@ -3408,12 +3922,12 @@ Drawing the global node</Description>
 		} 
 		// If there is a serialized object, then open the browse window.
 		elseif $e(val,1)="{"&&($e(val,*)="}")||($e(val,1,4)="""\""{") {
-			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','ShowJson','"_$zconvert(gn,"O","URL")_"');"""
+			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowJson','"_$zconvert(gn,"O","URL")_"');"""
 			set title=$$$aText("Show formatted json","Показать форматированный json")
 			set node="<a title='"_title_"' "_href_" >"_node_"</a> "
 		}
 		elseif $e(val,1)="<"&&($e(val,*)=">") {
-			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','ShowXML','"_$zconvert(gn,"O","URL")_"');"""
+			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowXML','"_$zconvert(gn,"O","URL")_"');"""
 			set title=$$$aText("Show","Показать")_" XML"
 			set node="<a title='"_title_"' "_href_" >"_node_"</a> "
 			set val=$zconvert(val,"O","HTML")
@@ -3454,13 +3968,78 @@ Drawing the global node</Description>
 		s node=..AddExecute(Execute,node, 2, NSpace = "",.countEx) 
 		s val=..AddExecute(Execute,val, 3, NSpace = "",.countEx) 
 	}
+	s count2="<span title='Редактировать' style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','"_..%ClassName(1)_"','WinOpenEditNode','&node="_$zconvert(gn,"O","URL")_"','EditNode');"" >"_count_"</span>"
 	&html<
 	<tr class=trs >
-		<td align="left" >#(count)#</td>
+		<td align="left" >#(count2)#</td>
 		<td align="left" >#(node)#</td>
 		<td align="left" >#(val)#</td>
 	</tr>
 	>
+]]></Implementation>
+</Method>
+
+<Method name="WinOpenEditNode">
+<Description>
+WinOpenEditNode</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set gn=$zconvert($g(Par("node")),"I","URL")
+	if gn="" w $$$appError("Global link is empty") q
+	if '$d(@gn) w $$$appError("Global node does not exist") q
+	set PrefixIdDIV="WinOpenEdit"
+	set Node=$$$appText(PrefixIdDIV_"Node","size=80",gn)
+	set Value=@gn
+	set:$lv(Value) Value=##class(%Global).Quote(Value)
+	set Value=$$$appTextarea(PrefixIdDIV_"Value","rows=6 cols=80",Value)
+	
+	set onclick="ActionJs('"_PrefixIdDIV_"MainForm','"_PrefixIdDIV_"MainContent','"_..%ClassName(1)_"','WinOpenNodeSaveOrKill','~mode=*');"
+
+	set bsave=$$$appButton(PrefixIdDIV_"idButtSave","onclick="""_$replace(onclick,"*","Save")_"""","Save")
+	set bkill=$$$appButton(PrefixIdDIV_"idButtKill","onclick=""if (prompt('Delete you sure ?','Yes')) {"_$replace(onclick,"*","Kill")_"}""","Delete")
+	&html<
+	<center>
+	<form id='#(PrefixIdDIV_"MainForm")#'>
+		<table>
+			<tr>
+				<td style='text-align: right;'>Node</td>
+				<td style='text-align: left;'>#(Node)#</td>
+			</tr>
+			<tr>
+				<td style='text-align: right;'>Data</td>
+				<td style='text-align: left;'>#(Value)#</td>
+			</tr>
+			<tr>
+				<td style='text-align: right;'>#(bsave)#</td>
+				<td style='text-align: left;'>#(bkill)#</td>
+			</tr>
+		</table>
+	</form><div id='#(PrefixIdDIV_"MainContent")#'></div>
+	</center>
+	>
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="WinOpenNodeSaveOrKill">
+<Description>
+WinOpenNodeSaveOrKill</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set gn=$g(Par("%request.Data","WinOpenEditNode"))
+	set val=$g(Par("%request.Data","WinOpenEditValue"))
+	if $g(Par("mode"))="Save" {
+		s @gn=val
+		w $$$appMsg("Saved") q
+	}
+	elseif $g(Par("mode"))="Kill" {
+		k @gn	
+		w $$$appMsg("Killed") q
+	}
 ]]></Implementation>
 </Method>
 
@@ -3480,19 +4059,6 @@ Add an active link for the terminal</Description>
 	}
 	catch e { w $ze}
 	quit %AppLogInfoVal
-]]></Implementation>
-</Method>
-
-<Method name="AddWebTerm">
-<Description>
-Add an active link for the terminal</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[count,&node,Load,NSpace=""]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	set href="style=""text-decoration: underline; color: blue;"" d onclick=""copyToClipboard('p"_count_"');"""
-	set title=$$$aText("Put a link to the context restore in the terminal in the clipboard","Поместить в буфер обмена ссылку на восстановление контекста в терминале")
-	set node="<div id='p"_count_"' style='display:none' >d ##class(App.Log).Load("""_$replace(Load,$c(34),$c(34,34))_""")</div><a title='"_title_"' "_href_" >"_node_"</a> "
 ]]></Implementation>
 </Method>
 
@@ -3539,14 +4105,14 @@ Cell drawing</Description>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	set:$lv(str) str=##class(%Global).Quote(str)
-	
+	/*
 	if $l(str,".")>2 {
 		; TODO cycle through the line if there are a lot of classes
 		if $p($p(str,"(",2),")",1)["." {
 			set class=$p($p(str,"(",2),")",1)
 			if class'="" d ..AddClassRef(class, .str, NSpace)
 		}
-	}
+	}*/
 	if str["_class"":" {
 			set class=$p($p(str,"_class"":",2),$c(34),2)
 			set id=$p($p(str,"_id"":",2),",",1)
@@ -3630,7 +4196,7 @@ fileXLS - list of parameters for uploading to Excel and sending by mail
 	s exportXLSfileEmail=$lg(fileXLS,3) - parcel addresses separated by commas, to which to send the file
 	s exportXLSfile=$lg(fileXLS,2) - full path to the file where to write the table</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>SQL:%String="",MaxNode=$$$MAXSHOW,NSpace="",msg="",Execute="",fileXLS=""</FormalSpec>
+<FormalSpec>SQL:%String="",MaxNode=$$$MAXSHOW,NSpace="",msg="",Execute="",fileXLS="",Mode=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	if ($zconvert($e(SQL,1),"L")="q") {
@@ -3681,13 +4247,16 @@ fileXLS - list of parameters for uploading to Excel and sending by mail
 	}
 
 	&html<
-	<h1>#($s(msg'="":msg,1:"Запрос: "_SQL))#</h1>
-	<table style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%"><tbody>
-	<tr><th align="left" width="1%">#</th>
-	>
+	<h7>#($s(msg'="":msg,1:"Запрос: "_SQL))#</h7>
+	<table style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" width="90%">
+	<thead>
+		<tr class=trs >
+		>
+	if 'Mode write "<th width=""1%"">#</th>"
+	
 	s %AppLogInfoHead=1 //Processing title
 	For i=1:1:ColCount {
-		&html<	<th align="left" width="5%">>
+		&html<	<th width="5%">>
 		set %AppLogInfoCol=i
 		if $g(resGN)'="" {
 			if $d(@resGN@(0,i)) {set %AppLogInfoVal=$g(@resGN@(0,i))	if $lv(%AppLogInfoVal) set %AppLogInfoVal=$lg(%AppLogInfoVal,1)
@@ -3704,14 +4273,16 @@ fileXLS - list of parameters for uploading to Excel and sending by mail
 					if %AppLogInfoVal'=%AppLogInfoVal2 set countEx=$g(countEx)+1
 					set %AppLogInfoVal=%AppLogInfoVal2
 				}
-				catch e {}
+				catch e {
+					set %AppLogInfoVal=$zconvert($ze,"O","HTML")
+					}
 			}
 			else {set %AppLogInfoVal=..ShowCell(%AppLogInfoVal,NSpace)	
 			}
 			write %AppLogInfoVal
-		&html<</th>>	
+		&html<&nbsp;</th>>	
 	}
-	&html<	</tr>	>
+	&html<	</tr></thead><tbody>	>
 	s %AppLogInfoHead=0 //We process lines
 	if $g(resGN)'="" { set i=0
 		for { set i=$order(@resGN@(i))   quit:i=""
@@ -3725,7 +4296,7 @@ fileXLS - list of parameters for uploading to Excel and sending by mail
 			d qNext(.GetData) q:$g(stopWrite)
 		}
 	}
-	&html<</table>>
+	&html<</tbody></table>>
 	Write !,$$$aText("Number of records found","Количество записей найдено")_" :"_+$g(count)
 	if Execute'="" {
 		Write !,$$$aText("Contextual changes or allotments","Контекстных изменений или выделений")_" :"_+$g(countEx)
@@ -3746,8 +4317,9 @@ fileXLS - list of parameters for uploading to Excel and sending by mail
  // Handling one query string
 qNext(GetData)
 		set count=count+1
-		&html<<tr class=trs ><td>#(count)#</td>>
-		if count>MaxNode w "<td style='color:red'>... "_$$$aText("More entries","Записей больше")_" "_MaxNode_"</td></tr>" s stopWrite=1 QUIT
+		write "<tr class=trs >"
+		if 'Mode write "<th>"_(count)_"</th>"
+		if count>MaxNode w "<th style='color:red'>... "_$$$aText("More entries","Записей больше")_" "_MaxNode_"</th></tr>" s stopWrite=1 QUIT
 		for ii=1:1:ColCount {	
 			set %AppLogInfoVal=$g(GetData(ii))
 			set %AppLogInfoCol=ii
@@ -3763,7 +4335,7 @@ qNext(GetData)
 				set %AppLogInfoVal=..ShowCell(%AppLogInfoVal,NSpace)	
 			}
 			if $g(exportXLSfile)'="",%AppLogInfoVal?1.N s %AppLogInfoVal="&nbsp;"_%AppLogInfoVal
-			&html<<td>#(%AppLogInfoVal)#</td>>	
+			write "<t"_$s(ii=1:"h",1:"d")_">"_(%AppLogInfoVal)_"</t"_$s(ii=1:"h",1:"d")_">"	
 		}
 			&html<</tr> >
 	quit
@@ -3827,14 +4399,14 @@ Get call stack</Description>
 <Description><![CDATA[
 /*! \brief Parse class description into methods and properties
 <br>\ingroup class_definition
-\example d ##class(App.LogInfoPane).GetClassDef("mvk.utils.Log","",.out) */]]></Description>
+\example d ##class(App.LogInfoPane).GetClassDef("utils.Log","",.out) */]]></Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[aClassName:%String="",doc,&out,inSuper=1]]></FormalSpec>
 <Implementation><![CDATA[
 	if $g(doc)'="", $isobject(doc) set aClassName=doc.%ClassName(1)
 	set classDefinition=##class(%Dictionary.ClassDefinition).%OpenId(aClassName)
 	if ('$isobject(classDefinition)) {
-		quit
+		quit $g(%objlasterror)
 	}
 
 	// class description
@@ -3878,54 +4450,82 @@ Get call stack</Description>
 			set parameterDefinition=classDefinition.Parameters.GetNext(.key)
 			quit:(key="")
 			set out("Parameters",parameterDefinition.Name,"Description")=parameterDefinition.Description
+			set out("Parameters",parameterDefinition.Name,"Default")=parameterDefinition.Default
 		}
 	}
+	q $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="AddJS">
 <Description>
-Copy to clipboard
+add javascript
 /// /*! \example d ##class(App.LogInfoPane).AddJS("MSW")*/</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>textareaId</FormalSpec>
+<FormalSpec>ns="",class=""</FormalSpec>
 <Implementation><![CDATA[
- &html<	
- <script language="javascript">
-  function copyToClipboard(elementId) {
-  // Create a "hidden" input
-  var aux = document.createElement("input");
-  // Assign it the value of the specified element
-  aux.setAttribute("value", document.getElementById(elementId).innerHTML);
-  // Append it to the body
-  document.body.appendChild(aux);
-  // Highlight its content
-  aux.select();
-  // Copy the highlighted text
-  document.execCommand("copy");
-  // Remove it from the body
-  document.body.removeChild(aux);
+ 	$$$jsstart	
+ &js<	
+$('#tWHAT').keydown(function (e) {
+  	if (e.ctrlKey && e.keyCode == 13) {
+    // Ctrl-Enter pressed
+    document.getElementById('WHAT').value=document.getElementById('tWHAT').value;
+    document.forms['loginfo'].submit();
+   }
+});
+//
+function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
+	var $data ={};
+	var appNspace ='#(ns)#';
+	if (!appNsp) {appNsp =appNspace;}
+	var classname ='#(class)#';
+	if (!appClass) var appClass =classname;
+	if (FormId) {
+		$data = $('#'+FormId).serializeArray(); 
+		//alert(FormId);
+	}
+	$data.push({name:"appClass",value:appClass});
+	$data.push({name:"appMethod",value:appMethod});
+	$data.push({name:"appNsp",value:appNsp});
+	$data.push({name:"appPar",value:appPar});
+	$.ajax({
+	  url: 'App.Action.cls',
+	  type: 'post',
+	  data: $data,
+	  success: function(result) {
+	  if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
+}
+//
+function AppAct(FormId,ResultId,appAct){
+	var $data ={};
+	if (FormId) {$data = $('#'+FormId).serializeArray();}
+	$data.push({name:"appAct",value:appAct});
+	$.ajax({
+	  url: 'App.Action.cls',
+	  type: 'post',
+	  data: $data,
+	  success: function(result) {
+	  if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
 }
 
-$('##(textareaId)#').keydown(function (e) {
-  if (e.ctrlKey && e.keyCode == 13) {
-    // Ctrl-Enter pressed
-    document.getElementById('WHAT').value=document.getElementById('#(textareaId)#').value;
-    document.forms['loginfo'].submit();
-  }
-});
-
 // The function of opening the dialog box
-function WinOpen(ns,met,el) {
-	$("#dialogContent").load("App.Action.cls","appMethod="+met+"&appNsp="+ns+"&appPar="+el);
-	//$( "#dialog" ).dialog( "open" );
-	// position: { my: 'top', at: 'top+150' },
+function WinOpen(ns,classname,met,el,title) {
+	
+	var titlename="Method "+met+" parameter "+decodeURIComponent(el);
+	if (title) {titlename=title;}
+
+	//$("#dialogContent").load("App.Action.cls","appClass="+classname+"&appMethod="+met+"&appNsp="+ns+"&appPar="+el);
+	ActionJs('anyForm',"dialogContent",classname,met,el,ns);
 	$( "#dialog" ).dialog({
 		modal: true, 
-        title: "Method "+met+" parameter "+decodeURIComponent(el), 
+        title: titlename, 
         autoOpen: true, 
-        width:800, 
-        height:600,
+        width:window.innerWidth-200, 
+        height:window.innerHeight-300,
 		position: { my: 'top', at: 'top+150' },
 		buttons: [
 		{
@@ -3936,11 +4536,11 @@ function WinOpen(ns,met,el) {
 		}
 		]
 		});
-	
-	event.preventDefault();
+	try { event.preventDefault();
+	} catch (e){};
 }
-</script>
 >
+	$$$jsstop
 ]]></Implementation>
 </Method>
 
@@ -4014,7 +4614,7 @@ The method initializes the developer in the system
 	 | <a target="ensproderr" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.EventLog.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionErrors","ОшибкиПродукция"))#</a> 
 	 | <a target="query" href='#("/csp/sys/exp/%25CSP.UI.Portal.SQL.Home.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Query","Запросы"))# </a> 
 	 | <a target="globals" href='#("/csp/sys/exp/%25CSP.UI.Portal.GlobalList.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Globals","Глобалы"))# </a> 
-	 | #($$$addAppLog($$$aText("WebTerminal","ВебТерминал"),$$$aText("Load WebTerminal","Загрузить Веб Терминал"),"trm",""))#
+	#($s(##class(App.sys).ClassExist("WebTerminal.Engine"):" | "_$$$addAppLog($$$aText("WebTerminal","ВебТерминал"),$$$aText("Load WebTerminal","Загрузить Веб Терминал"),"trm",""),1:""))#
 	 | 
 	</td></tr>>
 	q ""
@@ -4035,24 +4635,27 @@ The method initializes the developer in the system
 <Implementation><![CDATA[
 	#define sH(%msg) set help($i(help))=%msg
 	$$$sH("Примеры вызова:")
-	$$$sH(" "_$$$addAppLog("^%App.Setting"," Перейти","^%App.Setting","")_" --- Просмотр основных параметров панели")
-	$$$sH("obj ##class(App.Log).%New() --- Получить информацию по классу")
-	$$$sH("obj ##class(App.Log).%OpenId(15) --- Получить информацию по классу и объекту")
-	$$$sH("obj =##class(App.Log).%OpenId(15) --- Получить информацию только по значениям объекта")
 	$$$sH(" ")
-	$$$sH("xec set obj=##class(App.Log).%OpenId(15)  write ""&lt;pre&gt;"" zw obj w ""&lt;/pre&gt;"" --- Выполнить команду : Показать dump объекта ")
-	$$$sH("xec zn ""%SYS"" do ##class(App.sys).SaveQuery(""SYS.Database:FreeSpace"",""^GN"") --- Выполнить команду : Сохранить результат запроса в глобале ")
+	$$$sH(" "_$$$addAppLog("^%App.Setting"," Перейти","^%App.Setting","")_" --- Просмотр глобала с основными параметрами панели")
+	$$$sH(" "_$$$addAppL("obj ##class(App.Log).%New()")_" --- Получить информацию по классу")
+	$$$sH(" "_$$$addAppL("obj ##class(App.Log).%OpenId(2)")_" --- Получить информацию по классу и объекту")
+	$$$sH(" "_$$$addAppL("obj =##class(App.Log).%OpenId(2)")_" --- Получить информацию только по значениям объекта")
 	$$$sH(" ")
-	$$$sH("query ##class(%Library.ResultSet).%New(""%SYSTEM.License:Counts"") --- Выполнить запрос и показать")
-	$$$sH("query %SYSTEM.License:Counts --- Выполнить запрос и показать использование лицензий")
-	$$$sH("query %SYS.GlobalQuery:NameSpaceList USER --- показать список глобалов в области USER")
-	$$$sH("query %SYS.GlobalQuery:Size /opt/isc/ensemble/mgr/USER/ --- посчитать размеры глобалов в базе USER")
-	$$$sH(" ")
-	$$$sH("select * FROM App.Log order by id desc --- Выполнить произвольный sql запрос")
-	$$$sH(" ")
-	$$$sH("result ^GN(""SYS.Database:FreeSpace"",""2018-03-27 22:35:20"") --- Вывести записанный в глобал результат запроса ##class(App.sys).SaveQuery")
+	$$$sH(" "_$$$addAppL("xec set obj=##class(App.Log).%OpenId(2) write ""<pre>"" zw obj w ""</pre>"" ")_"--- Выполнить команду : Показать dump объекта ")
+	;$$$sH(" "_$$$addAppL("xec zn ""%SYS"" do ##class(App.sys).SaveQuery(""SYS.Database:FreeSpace"",""^GN"")")_"--- Выполнить команду : Сохранить результат запроса в глобале ")
+	$$$sH(" "_$$$addAppL("xec do ##class(App.sys).SaveQuery(""%SYSTEM.License:Counts"",""^GN"",0)")_"--- Выполнить команду : Сохранить результат запроса в глобале ^GN")
 	$$$sH("--- Если создать регуляное <a href='/csp/sys/op/%25CSP.UI.Portal.TaskSchedule.zen?$NAMESPACE=%25SYS'>задание</a> с legacy методом: s st=##class(App.sys).SaveQuery(""%SYSTEM.License:Counts"")")
 	$$$sH("--- То можно будет смотреть динамику использования лицензий")
+	$$$sH(" ")	
+	$$$sH(" "_$$$addAppL("result ^GN(""%SYSTEM.License:Counts"",0)")_" --- Вывести записанный в глобал результат запроса ##class(App.sys).SaveQuery")
+	$$$sH(" ")
+	$$$sH(" "_$$$addAppL("query ##class(%Library.ResultSet).%New(""%SYS.Portal.Users:List"")")_"--- Выполнить запрос и показать фаворитные страницы для пользователя")
+	$$$sH(" "_$$$addAppL("query ##class(%Library.ResultSet).%New(""%SYSTEM.License:Counts"")")_"--- Выполнить запрос и показать использование лицензий")
+	$$$sH(" "_$$$addAppL("query %SYSTEM.License:Counts")_"--- Выполнить запрос и показать использование лицензий")
+	$$$sH(" "_$$$addAppL("query %SYS.GlobalQuery:NameSpaceList USER")_" --- показать список глобалов в области USER")
+	$$$sH(" "_$$$addAppL("query %SYS.GlobalQuery:Size /opt/isc/ensemble/mgr/USER/")_" --- посчитать размеры глобалов в базе USER")
+	$$$sH(" ")
+	$$$sH(" "_$$$addAppL("select * FROM App.Log order by id desc")_" --- Выполнить произвольный sql запрос")
 	
 	$$$sH(" "_$$$addAppLog("Log","Перейти к протоколу","log","")_" --- Получить sql запрос по протоколу App.Log "_" "_$$$addAppLog("log-  ","Очистить таблицу протокола","log","")_" Удалить таблицу протокола")
 	$$$sH(" ")
@@ -4067,37 +4670,21 @@ The method initializes the developer in the system
 	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log***","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
 	$$$sH(" ")
-	$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
+	if ##class(App.sys).ClassExist("WebTerminal.Engine") {
+		$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
+	}
 	$$$sH("--- Если этот макрос вставить в исследуемую программу $$$LogDebug(""Отладочная информация"") то в таблице App.Log появися новая запись")
 	$$$sH("--- Макрос $$$AppL("""_fio_""",""node"")=$$$AppObJs(object) позволит записать в глобал "_gn_" объект в формате json")
+	
 	$$$sH("--- Можно исследовать файлы  <a href='/csp/sys/mgr/%25CSP.UI.Portal.Journal.zen?$NAMESPACE=%25SYS'>журналов</a>")
 	$$$sH("--- Запустить в фоновом режиме сканирование журналов для сбора информации о модифицируемых глобалов за вчера")
-	$$$sH("xec job ##class(App.files).OneDayJournalCount()::0 if $test write ""Запустили"" --- Внимание! Процесс может быть долгим. Информация о глабалах по умолчанию запишется в "_$$$TEMPJRNL)
-	$$$sH("xec do ##class(App.files).Export2CSV() --- Вывести информацию о глобалах из "_$$$TEMPJRNL_" в "_$$$EMAILXLSPATH_"JrnCount*.csv")
+	$$$sH(" "_$$$addAppL("xec job ##class(App.files).OneDayJournalCount()::0 if $test write ""Запустили""")_" --- Внимание! Процесс может быть долгим. Информация о глабалах по умолчанию запишется в "_$$$TEMPJRNL)
+	$$$sH(" "_$$$addAppL("xec do ##class(App.files).Export2CSV()")_" --- Вывести информацию о глобалах из "_$$$TEMPJRNL_" в "_$$$EMAILXLSPATH_"JrnCount*.csv")
+	$$$sH(" "_$$$addAppL("xec Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(""AppTools"",""/apptools/App.LogInfo.cls?WHAT=%3F"") zw tSC")_" --- Добавить ссылку на AppTools в портал управления")
+	$$$sH(" --- Выполнение HttpRequest")
+	$$$sH(" "_$$$addAppL("post http://User:pass@localhost:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}")_" ---  Выполнить http запрос методом POST с телом JSON")
+	$$$sH(" "_$$$addAppL("get https://openexchange.intersystems.com/index.html")_" ---  Выполнить http запрос методом POST с телом JSON")
 	$$$sH(" ")
-	$$$sH("post http://User:pass@localhost:57772/apptoolsrest/jsonrpc"_$c(13,10)_"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1} ---  Выполнить http запрос методом POST с телом JSON")
-	$$$sH(" ")
-	
-	;set $$$AppL("MSW","%session3")=$$$AppObJs(##class(%MessageDictionary).GetLanguages())
-	quit
-	$$$sH(" Максрос $$$AppLog("""_fio_""",""node"",$lb(var1,var2),mode) позволит записать значений переменных var1,var2 в глобал "_gn)
-	$$$sH("	Где mode=""svetapdw"" строка симводов")
-	$$$sH("	s - Стэк сохраним")
-	$$$sH("	t - table App.Log")
-	$$$sH("	v - variables")
-	$$$sH("	e - записать стэк программой %ETN ") 
-	$$$sH(" Если (v)ar, то объекты сериализуются в формате Json, иначе:")
-	$$$sH(" a - перечень значений свойств и описание класса")
-	$$$sH(" p - только значения")
-	$$$sH(" d - zwrite obj вывести в терминале")
-	$$$sH(" w - write вывести в терминале")
-	
-	##;1. MSW tools Исправить ошибку в %ZEN.Generator).%FindLocalizedText()
-	;try { Set pTextList(tKey) = "" } catch e {}
-	##;2. MSW tools Добавить ссылку в %CSP.Portal.Home).%DrawLinks()
-	;Set tOptions($I(n)) = $LB($$$Text("<font color=red>Developers Tools</font>"),"",..Link("/apptools/App.LogInfo.cls?WHAT=%3F"),$$$Text("загрузить инструменты разработчика"))
-	##;3. Запретить обновление страницы при завершении сессии   %CSP.Util.AutoPage).DrawAutoLogout() 
-	;	If %request.URL '[ "UtilSqlQuery.csp" && ( %request.URL '[ "/App.") { ##; MSW
 ]]></Implementation>
 </Method>
 </Class>
@@ -4506,87 +5093,45 @@ Memory offset for journals</Description>
 
 <Class name="App.Parameter">
 <Description>
-Параметры для панели администратора</Description>
-<Super>%Persistent,App.Form</Super>
-<TimeChanged>65078,29921</TimeChanged>
+Пример Параметров</Description>
+<Super>%Persistent</Super>
+<TimeChanged>65141,34505.956065</TimeChanged>
 <TimeCreated>64695,66336.883011</TimeCreated>
 
 <Parameter name="AppORDERPROPERTY">
 <Description>
 Порядок свойств при выводе в форме</Description>
-<Default>Namespace,ServerName,PATHCSPUI,TESTSERVER,EMAILSERVERIP,EMAILSERVERPORT,EMAILAUTH,EMAILAUTHPASS,EMAILSUPPORT,EMAILXLSPATH,DateStart,DateFinish</Default>
+<Default>Name,Description,Value,Types,Namespace,DateStart,DateFinish,File,FileName,isEnabled,ImageFile,CustomFile,isEnabledCheck,OfficeFile</Default>
 </Parameter>
 
 <Property name="Namespace">
 <Description>
-Namespace $zu(5)</Description>
+Namespace $zu(5) применения параметра</Description>
+<Type>%String</Type>
+<InitialExpression>$zu(5)</InitialExpression>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="Name">
+<Description>
+Имя параметра</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="Value">
+<Description>
+Значение параметра по умолчанию</Description>
 <Type>%String</Type>
 <Parameter name="MAXLEN"/>
 </Property>
 
-<Property name="ServerName">
+<Property name="Description">
 <Description>
-ServerName $zu(110) </Description>
+Описание параметра
+{"displayname":"Описание параметра","title":"Описание параметра","inputpattern":"textarea"}</Description>
 <Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="PATHCSPUI">
-<Description>
-Путь к приложению jQuery-UI </Description>
-<Type>%String</Type>
-<InitialExpression>"/csp/log/jqueryui/"</InitialExpression>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="TESTSERVER">
-<Description>
-Имя тестового сервера (Для Админок проектов)</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="EMAILSERVERIP">
-<Description>
-Настройки почтового сервера IP (Для Админок проектов)</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="EMAILSERVERPORT">
-<Description>
-Порт почтового сервера (Для Админок проектов)</Description>
-<Type>%String</Type>
-<InitialExpression>25</InitialExpression>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="EMAILAUTH">
-<Description>
-Авторизация в почтовом сервера User (Для Админок проектов)</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="EMAILAUTHPASS">
-<Description>
-Авторизация в почтовом сервера Password (Для Админок проектов)</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="EMAILSUPPORT">
-<Description>
-Адрес админа техподдержки (Для Админок проектов)</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN"/>
-</Property>
-
-<Property name="EMAILXLSPATH">
-<Description>
-Путь для временного XLS файла перед посылкой на почту  (Для Админок проектов)</Description>
-<Type>%String</Type>
-<InitialExpression>"/backup/temp/integ/"</InitialExpression>
 <Parameter name="MAXLEN"/>
 </Property>
 
@@ -4602,14 +5147,58 @@ ServerName $zu(110) </Description>
 <Property name="DateFinish">
 <Description>
 ​​Дата выборки протокола по
-{"displayname":"Дата выборки протокола по","title":"введите дату","inputtype":"date"}</Description>
+{"displayname":"Дата выборки протокола по","title":"введите дату и время","inputtype":"datetime-local"}</Description>
 <Type>%String</Type>
 <InitialExpression>##class(App.type).GetYear($h)_"-12-31"</InitialExpression>
 <Parameter name="MAXLEN"/>
 </Property>
 
+<Property name="isEnabledCheck">
+<Description>
+​Тип Boolean в виде checkbox
+{"displayname":"Включен","inputtype":"checkbox"}</Description>
+<Type>%Boolean</Type>
+<InitialExpression>1</InitialExpression>
+</Property>
+
+<Property name="isEnabled">
+<Description>
+​Тип Boolean в виде списка
+{"displayname":"Включен","title":"введите (1 или 0)"}</Description>
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="File">
+<Description>
+​Выбор файла для загрузки на диск TempDir = ##class(%File).GetDirectory(##class(%File).TempFilename())
+{"displayname":"​Выбор шаблонного файла","title":"​Выбор шаблона","inputpattern":"files","filesMethod":"##class(App.type).UploadFilesJS(%id)","attr":"accept='.xls,.xlsx'","filesStore":"TempDir"}</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="Types">
+<Description>
+Список типов параметра
+{"displayname":"Типы параметра","title":"Выберите Тип"}</Description>
+<Type>%String</Type>
+<InitialExpression>"AppOption"</InitialExpression>
+<Required>1</Required>
+<Parameter name="DISPLAYLIST" value=",Проект,Параметр приложения,Системный параметр"/>
+<Parameter name="MAXLEN" value="1"/>
+<Parameter name="VALUELIST" value=",Projecr,AppOption,SysOption"/>
+</Property>
+
+<Property name="OfficeFile">
+<Description>
+​Выбор файла для загрузки на диск TempDir
+{"displayname":"​Выбор файла","title":"​Выбор файла","inputpattern":"files"}</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
 <Storage name="Default">
-<Type>%Storage.Persistent</Type>
+<Type>%Library.CacheStorage</Type>
 <DataLocation>^%App.ParameterD</DataLocation>
 <DefaultData>ParameterDefaultData</DefaultData>
 <IdLocation>^%App.ParameterD</IdLocation>
@@ -4667,16 +5256,381 @@ ServerName $zu(110) </Description>
 <Value name="17">
 <Value>DateFinish</Value>
 </Value>
+<Value name="18">
+<Value>Description</Value>
+</Value>
+<Value name="19">
+<Value>Name</Value>
+</Value>
+<Value name="20">
+<Value>isBiddingByOne</Value>
+</Value>
+<Value name="21">
+<Value>FileOther</Value>
+</Value>
+<Value name="22">
+<Value>FileOtherOriginalFileName</Value>
+</Value>
+<Value name="23">
+<Value>contractType</Value>
+</Value>
+<Value name="24">
+<Value>Types</Value>
+</Value>
+<Value name="25">
+<Value>isEnabled</Value>
+</Value>
+<Value name="26">
+<Value>File</Value>
+</Value>
+<Value name="27">
+<Value>FileName</Value>
+</Value>
+<Value name="28">
+<Value>ImageFile</Value>
+</Value>
+<Value name="29">
+<Value>ImageGlobal</Value>
+</Value>
+<Value name="30">
+<Value>isEnabledCheck</Value>
+</Value>
+<Value name="31">
+<Value>OfficeFile</Value>
+</Value>
+<Value name="32">
+<Value>Value</Value>
+</Value>
+<Value name="33">
+<Value>ImageFileName</Value>
+</Value>
+<Value name="34">
+<Value>ImageGlobalName</Value>
+</Value>
+<Value name="35">
+<Value>CustomFile</Value>
+</Value>
 </Data>
 </Storage>
+</Class>
+
+
+<Class name="App.PatternSimpleApp">
+<Description>
+Шаблон простого GUI приложения / Simple GUI Application Template</Description>
+<ClassType/>
+<IncludeCode>App.LogMacro</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeChanged>65070,31695</TimeChanged>
+<TimeCreated>65065,36454.902831</TimeCreated>
+
+<Parameter name="HeaderText">
+<Description>
+Заголовок приложения / Application title</Description>
+<Default>Application title</Default>
+</Parameter>
+
+<Parameter name="PrefixIdDIV">
+<Description>
+Префикс идентификатора контейнера</Description>
+<Default>Exp</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Главный метод формирования содержимого страницы</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s NSpace=$zu(5)
+ // Сохраним в параметрах сессии режим отладки (подразумевает расширенное информирование)
+ s %session.Data("debug")=%request.Get("debug")
+ &html<
+ <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>#(..#HeaderText)#</title>
+<script src="/csp/spgz/jqueryui/external/jquery/jquery.js"></script>
+<script src="/csp/spgz/jqueryui/jquery-ui.js"></script>
+<script src="/csp/spgz/jqueryui/jquery.blockui.js"></script>
+
+<!-- Контрол Множественного выбора -->
+<script src="/csp/spgz/jqueryui/selectize.js"></script>
+<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/selectize.default.css"/>
+
+<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/css/main.css"/>
+<link href="/csp/spgz/jqueryui/jquery-ui.css" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+ <style type="text/css">
+
+</style>
+</head>
+<body>
+ <div id="MainBody">
+  <nav style='background: #d7ebf9;' > 
+    &nbsp;&nbsp;&nbsp;  
+    	<img  title='заголовок' style='vertical-align: middle;' src="???.png" />  &nbsp;&nbsp;&nbsp; 
+ 	<div id="MainControlgroup" > </div>
+ 	<span id='status_nav'> Статус сессии </span>
+ 	<div id="logo" style='text-align: right;'>
+ 		<img  title='#(..GetSupportInfo())#' src="???.png" />
+ 	</div>
+  </nav> 
+ <div id="tabs"> </div>
+</div>
+>
+ // Режим отладки 1
+ q:..IsDebugMode(0) $$$OK
+ $$$jsstart
+ 	;w $$$blockui("Загрузка...")
+    // Загрузить доступные режимы меню
+ 	w "$('#MainControlgroup').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawMenu&appNsp="_NSpace_"&appPar=');"
+ 	//Загрузить статус
+ 	w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"
+    //Загрузить табы
+ 	w "$('#tabs').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawTabs&appNsp="_NSpace_"&appPar=');"
+ $$$jsstop
+ 
+ &html< 	
+ <script language="javascript">
+$( ".tip" ).tooltip();
+</script>
+<div id='MainHidden' style='display:none;'></div>
+</body>
+</html>
+	>
+ quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetSupportInfo">
+<Description>
+Получить информацию по техподдержке</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
+	q msg_"Support info mailto: sergey.mikhaylenko@gmail.com"
+]]></Implementation>
+</Method>
+
+<Method name="IsDebugMode">
+<Description>
+Добавить на форму  js код если режим разработки</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>mode=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ i mode,'%request.Get("debug") { 
+	$$$jsstart
+	  w $$$blockui(..GetSupportInfo())
+	$$$jsstop
+	w "</body></html>"
+  q $$$OK
+ }
+	q 0
+]]></Implementation>
+</Method>
+
+<Method name="DrawStatus">
+<Description>
+отрисовка меню</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;do ##class(App.Form).BlockUI(0)
+	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.MVK.EISinfo).GetFIO($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
+ 	$$$jsstart
+	w "$('.tip').tooltip();"
+	$$$jsstop
+ q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Permiss">
+<Description>
+какие доступны режимы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>opt</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	;TODO права доступа к страницам
+	;TODO сохранить в БД таблицы
+	s key="zspr"
+	s opt(key)="Справочники"
+	s opt(key,"id")="Class"
+	s opt(key,"TabName")="Справочники"
+	s opt(key,"ClassName")="App.PatternSimpleApp"
+	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Disable")=0 ;разрабатывается
+
+	s key="zspr2"
+	s opt(key)="Справочники2"
+	s opt(key,"id")="Class2"
+	s opt(key,"TabName")="Справочники2"
+	s opt(key,"ClassName")="App.PatternSimpleApp"
+	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Disable")=1 ;разрабатывается
+	
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ShowTabSample">
+<Description>
+отрисовка Вкладки ранее переданных
+Par - код пункта меню из ..Permiss</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ..Permiss(.opt) 
+	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
+	w "Hello world! Parameter: "_Par
+	w ..ButtonAgain()
+]]></Implementation>
+</Method>
+
+<Method name="ShowTab">
+<Description>
+отрисовка Вкладки
+Par - код пункта меню из ..Permiss</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ..Permiss(.opt) 
+	s tabId="tabs-"_opt(Par,"id")
+ 	$$$jsstart
+ 		w "var a = $('#li-"_tabId_"'); a.show();" ; откроем вкладку
+ 		w "var index = $('#tabs a[href=""#"_tabId_"""]').parent().index();"
+		w "$('#tabs').tabs({'active':index});" ;сделаем ее активной
+ 		;w "alert('"_tabId_"');"
+ 		if $g(opt(Par,"Url"))'="" w "$('#"_tabId_"').load('AsuPriz.MVK.Export.cls');"
+ 		else  w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+	$$$jsstop
+]]></Implementation>
+</Method>
+
+<Method name="DrawMenu">
+<Description>
+отрисовка меню</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	d ..Permiss(.opt) 
+	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
+	w "<select id=""menu-spgz"" >"
+	s i="" w "<option VALUE=0> </option>"
+	f { s i=$o(opt(i)) q:i=""  
+		w "<option VALUE="""_i_""">"_opt(i)_"</option>"
+	}
+ 	w "</select>"
+ 	w ..ButtonExit("MainBody")
+ 	$$$jsstart
+		w "$( ""#MainControlgroup"" ).controlgroup();"
+ 		w "$( ""#menu-spgz"" ).selectmenu({ change: function( event, data ) { "_onc_" }, width:600 }).selectmenu('menuWidget');"
+	$$$jsstop
+  q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DrawTabs">
+<Description>
+отрисовка табов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ..Permiss(.opt)
+	w "<ul>"
+	s i="" f { s i=$o(opt(i)) q:i=""  
+		s tabs(i)="tabs-"_$g(opt(i,"id"))
+		w "<li id=""li-"_tabs(i)_"""><a href=""#"_tabs(i)_""">"_opt(i,"TabName")_"</a></li>"
+	}
+ 	w "</ul>"
+ 	s i="" f { s i=$o(tabs(i)) q:i=""  
+ 		w "<div id='"_tabs(i)_"' style='height: 85%' ></div>"
+ 	}
+ 	$$$jsstart
+		w "$( ""#tabs"" ).tabs();"
+		;Все табы сразу скроем после инициализации, будем их открывать по мере выбора
+		s i="" f { s i=$o(tabs(i)) q:i=""  
+			w "var a = $('#li-"_tabs(i)_"'); a.hide();"
+		}
+	$$$jsstop
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ButtonExit">
+<Description>
+Вывод кнопки выхода</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>formName</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set onclick="$('#"_formName_"').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=Logout&appNsp="_$zu(5)_"&appPar=Выход произведен');"
+	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Выход")
+]]></Implementation>
+</Method>
+
+<Method name="AddToForm">
+<Description>
+Добавить на форму  js код</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Logout">
+<Description>
+Возврат в одной строке</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ##class(App.sys).logout()
+	w $$$appMsg($g(Par)) w "<br>"
+	d ##class(App.Form).ButtonRef("Вход")
+  	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ButtonAgain">
+<Description>
+Вывод кнопки Сначала для Вкладки TmcMainForm ShowTabTmc </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+   	s formName=..#PrefixIdDIV_"MainContent"
+	s Method="ShowTab"_..#PrefixIdDIV
+	set onclick="$('#"_formName_"').load('App.Action.cls','"_..#PrefixIdDIV_"appClass="_..%ClassName(1)_"&"_..#PrefixIdDIV_"appMethod="_Method_"&"_..#PrefixIdDIV_"appNsp="_$zu(5)_"&"_..#PrefixIdDIV_"appPar=1');"
+	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
+]]></Implementation>
+</Method>
 </Class>
 
 
 <Class name="App.RestMetrics">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.REST</Super>
-<TimeChanged>65073,42683.270826</TimeChanged>
+<TimeChanged>65104,59500.726183</TimeChanged>
 <TimeCreated>64939,46779.170246</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Default>application/json</Default>
+</Parameter>
+
+<Parameter name="CHARSET">
+<Default>UTF-8</Default>
+</Parameter>
 
 <Parameter name="ISCPREFIX">
 <Default>isc_cache</Default>
@@ -4690,98 +5644,18 @@ ServerName $zu(110) </Description>
 <XMLNamespace>http://www.intersystems.com/urlmap</XMLNamespace>
 <Data><![CDATA[
 <Routes>
-<Route Url="/jsonrpc" Method="POST" Call="jsonrpc"/>
+<Route Url="/finduser/:text" Method="GET" Call="App.rest:FindUser"/>
+<Route Url="/jsonrpc" Method="POST" Call="App.rest:jsonrpc"/>
 <Route Url="/cache" Method="GET" Call="getMetrics"/>
 <Route Url="/mgstat/:delay" Method="GET" Call="getMgstat"/>
 <Route Url="/db" Method="GET" Call="getDBsize"/>
 <Route Url="/dirsize/:path" Method="GET" Call="getDirSize"/>
-<Route Url="/proj/:proj/:metrics/:mode" Method="GET" Call="getProj"/>
+<Route Url="/proj/:proj/:metrics/:mode" Method="GET" Call="App.MVK.Metrics:getProj"/>
+
+<Route Url="/test" Method="POST" Call="Test"/>  
 </Routes>
 ]]></Data>
 </XData>
-
-<UDLText name="T">
-<Content><![CDATA[
-/*{"jsonrpc": "2.0", "result": {"likes": 123}, "id": 1}
-Если возникает ошибка — ответ об ошибке:
-{"jsonrpc": "2.0", "error": {"code": 666, "message": "Post not found"}, "id": "1"}
-И это всё!
-Бонусом поддерживаются batch-операции:
-Request:
-[
-  {"jsonrpc":"2.0","method":"server.shutdown","params":{"server":"42"},"id":1},
-  {"jsonrpc":"2.0","method":"server.remove","params":{"server":"24"},"id":2}
-]
-Response:
-[
-  {"jsonrpc":"2.0","result":{"status":"down"},"id":1}
-  {"jsonrpc":"2.0","error":{"code":1234,"message":"Server not found"},"id": 2}
-]
-*/
-]]></Content>
-</UDLText>
-
-<Method name="jsonrpc">
-<Description>
-JSON-RPC 2.0 https://www.jsonrpc.org/specification</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	set sc = $$$OK
-	;w !,"{""test"":123}",!
-	;s $$$AppL("MSW","jsonrpc-req")=$$$AppObJs(%request)
-	if %request.Method = "POST" {
-		if $isobject(%request.Content) { //POST
-	 		set stream=%request.Content
-			set sc=##class(App.files).Stream2String(stream,.json)
-			if 'sc q sc
-	 		if $g(json)["{" {
-	 			set method={}.$$$jsonFromJSON(json).method
-	 			set params={}.$$$jsonFromJSON(json).params
-	 			set jsonrpc={}.$$$jsonFromJSON(json).jsonrpc
-	 			set id={}.$$$jsonFromJSON(json).id
-	 			if jsonrpc'="2.0" q ..jsonrpcError(2,"Version not supported "_jsonrpc)
-	 			w params.$$$jsonToJSON() //write string json
-	 			
-	 		}
-	 		;d ..ParseJson(.str,.appClass,.appMethod,.appPar) ;m appPar("%request.Content")=str  m appPar("%request")=$$$AppObJs(%request)
-	 		m $$$AppL("MSW","Content")=str
- 		}
-	} else {
-		 q ..jsonrpcError(2,"Method not supported "_%request.Method)
-		;$$$ThrowStatus($$$ERROR($$$GeneralError, "Метод не POST")) 
-	}
-	try {
-		;
-	} catch ex {
-		set sc = ex.AsStatus()
-	}
-	return sc
-]]></Implementation>
-</Method>
-
-<Method name="jsonrpcError">
-<Description>
-JSON-RPC 2.0 https://www.jsonrpc.org/specification</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>code,msg</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	w "{""jsonrpc"":""2.0"",""error"":{""code"":"""_code_""",""message"":"""_msg_"""}}",!
-	q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="getProj">
-<Description>
-Получить отсортированные размеры подокаталогов
-w ##class(App.RestMetrics).getProj("/opt/isc/ensemble/mgr/")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>proj,metrics,mode</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	q ##class(App.MVK.Metrics).getProj(proj, metrics, mode)
-]]></Implementation>
-</Method>
 
 <Method name="getDirSize">
 <Description>
@@ -4978,6 +5852,18 @@ Sample: input = WriteDaemon, output = _write_daemon</Description>
 	quit result
 ]]></Implementation>
 </Method>
+
+<Method name="Test">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&html<<h1>Status: OK!</h1><br>>
+	zw %request
+	&html<<br><br>>
+	zw %response
+	quit $$$OK
+]]></Implementation>
+</Method>
 </Class>
 
 
@@ -4988,19 +5874,13 @@ Sample: input = WriteDaemon, output = _write_daemon</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65084,83405.547184</TimeChanged>
+<TimeChanged>65175,47503.603314</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 
 <Parameter name="HeaderText">
 <Description>
 Заголовок приложения / Application title</Description>
 <Default>Tabs Application title</Default>
-</Parameter>
-
-<Parameter name="PrefixIdDIV">
-<Description>
-Префикс идентификатора контейнера</Description>
-<Default>Exp</Default>
 </Parameter>
 
 <Method name="OnPage">
@@ -5018,11 +5898,72 @@ Sample: input = WriteDaemon, output = _write_daemon</Description>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>#(..#HeaderText)#</title>
 >
-	w ##class(App.LogInfoPane).GetLink()
-	d ##class(App.LogInfoPane).AddJsScripts() 
+	write ##class(App.LogInfoPane).GetLink()
+	write ##class(App.LogInfoPane).AddJsScripts() 
+    d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
  &html<
  <style type="text/css">
+ 
+ /*
+	div {
+  max-width: 400px;
+  max-height: 150px;
+  overflow: scroll;
+}
+*/
+
+/* Use position: sticky to have it stick to the edge
+ * and top, right, or left to choose which edge to stick to: */
+
+thead th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  top: 0;
+}
+
+tbody th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  left: 0;
+}
+
+
+/* To have the header in the first column stick to the left: */
+
+thead th:first-child {
+  left: 0;
+  z-index: 1;
+}
+
+
+/* Just to display it nicely: */
+
+thead th {
+  background: #E7EBF9;
+
+}
+
+tbody th {
+  background: #E7EBF9;
+
+}
+
+table {
+  border-radius: 10px; 
+  border: 1px solid #72a7cf
+}
+
+td,
+th {
+  padding: 0.5em;
+}
+
+.bigbox { 
+height: 20px; width: 20px 
+}
+ 
 </style>
+<script src="jqueryui/jquery.blockui.js"></script>
 </head>
 <body>
  <div id="MainBody">
@@ -5052,6 +5993,9 @@ Sample: input = WriteDaemon, output = _write_daemon</Description>
 $( ".tip" ).tooltip();
 </script>
 <div id='MainHidden' style='display:none;'></div>
+<div id="dialog" title="Dialog Title">
+	<div id=dialogContent></div>
+</div>
 </body>
 </html>
 	>
@@ -5096,7 +6040,7 @@ $( ".tip" ).tooltip();
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	;do ##class(App.Form).BlockUI(0)
-	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.MVK.EISinfo).GetFIO($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
+	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.sys).GetFullName($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
  	$$$jsstart
 	w "$('.tip').tooltip();"
 	$$$jsstop
@@ -5104,7 +6048,7 @@ $( ".tip" ).tooltip();
 ]]></Implementation>
 </Method>
 
-<Method name="Permiss">
+<Method name="GetAllApps">
 <Description>
 какие доступны режимы</Description>
 <ClassMethod>1</ClassMethod>
@@ -5126,37 +6070,176 @@ $( ".tip" ).tooltip();
 	s opt(key,"id")="About"
 	s opt(key,"TabName")="О программе"
 	s opt(key,"ClassName")=..%ClassName(1)
-	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Method")="ShowTabAbout"
 	s opt(key,"Disable")=1 ;разрабатывается
 	
 	q $$$OK
 ]]></Implementation>
 </Method>
 
-<Method name="ShowTabSample">
+<Method name="ShowTabAbout">
 <Description>
-отрисовка Вкладки ранее переданных
-Par - код пункта меню из ..Permiss</Description>
+отрисовка Вкладки О программе"
+Par - код пункта меню из ..GetAllApps</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Par=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	d ..Permiss(.opt) 
+	d ..GetAllApps(.opt) 
 	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
+	s divId=$g(opt(Par,"id"))
 	w "Hello world! Parameter: "_Par
-	w ..ButtonAgain()
+	w ..ButtonAgain(divId,,Par)
+]]></Implementation>
+</Method>
+
+<Method name="ShowTabSample">
+<Description>
+отрисовка Вкладки ранее переданных
+Par - код пункта меню из ..GetAllApps</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>key=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ..GetAllApps(.opt) 
+ i $g(opt(key,"Disable")) w ..GetSupportInfo() q $$$OK
+ s NSpace=$zu(5)
+ s pref=$g(opt(key,"id"))
+ s mhead=pref_"MainHeader"
+ s mcont=pref_"MainContent"
+ &html<
+<form id="#(pref_"MainForm")#">
+<table id="tbpage" cellspacing="0" width='100%' >
+  <tbody>
+   <tr height='10%' >
+   	<td>
+   		<DIV id="#(mhead)#"></div>
+	</td>
+   </tr>
+   <tr height='90%' >
+   	<td>
+ 		<div style='overflow: auto;' id="#(mcont)#"></div>
+	</td>
+ </tr>
+</tbody>
+</table>
+</form>
+>
+ ;d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
+ $$$jsstart
+  	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+ 	w "$('#"_mcont_"').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
+  	w $$$blockui("Загрузка...")
+	w "ActionJs('"_pref_"MainForm','"_mhead_"','','"_pref_"FirstHead','divId="_pref_"~key="_key_"');"
+ $$$jsstop
+ ;d ..AddToForm()
+ quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FindFirstHead">
+<Description>
+загрузить шаблон формы поиска</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	s key=Par("key")
+	s divId=Par("divId")
+	set onclick=$$$blockui("Ждите...")_";ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+		&html<
+		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<tr>
+			<td>
+			Контекст названия фильма
+			</td>
+			<td>
+			#($$$appText(divId_"Name","","New"))#
+			</td>
+			<td>
+
+			</td>
+			<td>
+
+			</td>
+			<td>
+		
+			</td>
+			<td>
+
+			</td>
+		</tr>
+		<tr>
+			<td>
+			
+			</td>
+			<td>
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Поиск фильма в SAMPLES"))#
+			</td>
+			<td>
+
+			</td>
+			<td>
+			</td>
+			<td>
+			
+			</td>
+			<td>
+
+			</td>
+		</tr>
+		</table>
+	>
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FindResult">
+<Description>
+Результат поиска</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+	set Name=$g(Par("%request.Data",divId_"Name"))
+	set Desc=$g(Par("%request.Data",divId_"Desc"))
+	set Date=$g(Par("%request.Data",divId_"Date"))
+	write ..ButtonAgain(divId,,key)
+	if mode=1 {
+		if Name="" w $$$appError("Контекст пустой") q $$$OK
+		zn "samples"
+		set sql="select * from Cinema.Film where title is not null "
+		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
+		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		set msg="Запрос : "_sql
+		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
+		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
+		quit $$$OK
+	} 
+	elseif mode=2 {
+
+	}
+	w "<br>"
+
+	;i 'st  w $$$appError($System.Status.GetErrorText(st))
+	q $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="ShowTab">
 <Description>
 отрисовка Вкладки
-Par - код пункта меню из ..Permiss</Description>
+Par - код пункта меню из ..GetAllApps</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Par</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	d ..Permiss(.opt) 
+	d ..GetAllApps(.opt) 
 	s tabId="tabs-"_opt(Par,"id")
  	$$$jsstart
  		w "var a = $('#li-"_tabId_"'); a.show();" ; откроем вкладку
@@ -5181,7 +6264,7 @@ Par - код пункта меню из ..Permiss</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	
-	d ..Permiss(.opt) 
+	d ..GetAllApps(.opt) 
 	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
 	w "<select id=""menu-spgz"" >"
 	s i="" w "<option VALUE=0> </option>"
@@ -5205,7 +6288,7 @@ Par - код пункта меню из ..Permiss</Description>
 <FormalSpec>Par</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	d ..Permiss(.opt)
+	d ..GetAllApps(.opt)
 	w "<ul>"
 	s i="" f { s i=$o(opt(i)) q:i=""  
 		s tabs(i)="tabs-"_$g(opt(i,"id"))
@@ -5263,14 +6346,338 @@ Par - код пункта меню из ..Permiss</Description>
 
 <Method name="ButtonAgain">
 <Description>
-Вывод кнопки Сначала для Вкладки TmcMainForm ShowTabTmc </Description>
+Вывод кнопки Сначала</Description>
 <ClassMethod>1</ClassMethod>
+<FormalSpec>Prefix="",Method="",appPar=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-   	s formName=..#PrefixIdDIV_"MainContent"
-	s Method="ShowTab"_..#PrefixIdDIV
-	set onclick="$('#"_formName_"').load('App.Action.cls','"_..#PrefixIdDIV_"appClass="_..%ClassName(1)_"&"_..#PrefixIdDIV_"appMethod="_Method_"&"_..#PrefixIdDIV_"appNsp="_$zu(5)_"&"_..#PrefixIdDIV_"appPar=1');"
+	i Method="" s Method="ShowTab"
+	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
+	set onclick="$('#MainHidden').load('App.Action.cls','"_Prefix_"appClass="_..%ClassName(1)_"&"_Prefix_"appMethod="_Method_"&"_Prefix_"appNsp="_$zu(5)_"&"_Prefix_"appPar="_appPar_"');"
 	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="App.TabsPanelSample">
+<Description>
+Шаблон GUI приложения с селектором и вкладками / Simple GUI Application Template</Description>
+<IncludeCode>App.LogMacro</IncludeCode>
+<Super>App.TabsPanel</Super>
+<TimeChanged>65132,55707.097405</TimeChanged>
+<TimeCreated>65098,29527.199416</TimeCreated>
+
+<Parameter name="HeaderText">
+<Description>
+Заголовок приложения / Application title</Description>
+<Default>Tabs Application Sample</Default>
+</Parameter>
+
+<Method name="GetAllApps">
+<Description>
+какие доступны приложения</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>opt</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s key="menu-first"
+	s opt(key)="Поиск" ;Имя меню
+	s opt(key,"id")="Find"
+	s opt(key,"TabName")="Вкладка поиска" ;имя вкладки
+	s opt(key,"ClassName")=..%ClassName(1)
+	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Disable")=0 ;разрабатывается
+
+	s key="menu-second"
+	s opt(key)="О программе"
+	s opt(key,"id")="About"
+	s opt(key,"TabName")="О программе"
+	s opt(key,"ClassName")=..%ClassName(1)
+	s opt(key,"Method")="ShowTabAbout"
+	s opt(key,"Disable")=1 ;разрабатывается
+	
+	s key="menu-param"
+	s opt(key)="Параметры"
+	s opt(key,"id")="Param"
+	s opt(key,"TabName")="Редактировать параметры"
+	s opt(key,"ClassName")=..%ClassName(1)
+	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Disable")=0
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ShowTabAbout">
+<Description>
+отрисовка Вкладки О программе"
+Par - код пункта меню из ..GetAllApps</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ..GetAllApps(.opt) 
+	$$$AppLogTab("INFO","Загрузка файла","d:\!\wwww.txt")
+	w "<pre>" w  w "</pre>"
+	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
+	s divId=$g(opt(Par,"id"))
+	w "Hello world! Parameter: "_Par
+	w ..ButtonAgain(divId,,Par)
+]]></Implementation>
+</Method>
+
+<Method name="ShowTabSample">
+<Description>
+отрисовка Вкладки
+Par - код пункта меню из ..GetAllApps</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>key=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ..GetAllApps(.opt) 
+ i $g(opt(key,"Disable")) w ..GetSupportInfo() q $$$OK
+ s NSpace=$zu(5)
+ s pref=$g(opt(key,"id"))
+ s mhead=pref_"MainHeader"
+ s mcont=pref_"MainContent"
+ &html<
+<form id="#(pref_"MainForm")#">
+<table id="tbpage" cellspacing="0" width='100%' >
+  <tbody>
+   <tr  >
+   	<td>
+   		<DIV style='overflow: auto;' id="#(mhead)#"></div>
+	</td>
+   </tr>
+   <tr >
+   	<td>
+ 		<div style='overflow: auto;' id="#(mcont)#"></div>
+	</td>
+ </tr>
+</tbody>
+</table>
+</form>
+
+>
+ $$$jsstart
+ 	;Для вкладки Param изменим высоту контейнера
+ 	;if pref="Param" w "$('#"_pref_"MainHeader').height($('#tabs-"_pref_"').height());"
+ 	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+ 	w "$('#"_pref_"MainContent').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
+  	;w "console.log($('#"_pref_"MainHeader').height());"
+  	;Затемнение экрана с надписью Загрузка
+  	w $$$blockui("Загрузка...")
+	
+	;Для организации выполнения по клику на кнопке применяем js функцию AppAct(From,To,Act), где
+	;From - ид контейнера откуда возьмем элементы с формы методом serialize
+	;To - ид контнейнера куда будем выводить резльтат выполнения
+	;AppAct=NameSpace:Packet.ClassName:Method:&Par1=Val1&Par2=Val2...
+	w "AppAct('"_pref_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_pref_"FirstHead:&divId="_pref_"&key="_key_"');"
+	
+ $$$jsstop
+ quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ParamFirstHead">
+<Description>
+загрузить форму редактирования</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set class="App.Parameter"
+	
+	set sql="select * from "_class_" where Name is not null order by id desc"
+	;Список полей выводимых в атрибуте Value тага Option, 
+	;Первое поле из запроса - должно быть идентификатором
+	set listFields="ID,ID,Name,Description"
+	write "Выберите параметров:"
+	s ONCHANGE=";$('#"_divId_"SelectId').attr('value',data.item.value);"
+	do ##class(App.Form).SelectObj(sql,ONCHANGE,listFields,.gn,divId_"Select")
+	
+	write "<br>"_$$$appInputHidden(divId_"SelectId","","")_"<br>"
+	
+	set onclick=$$$blockui("Ждите...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&class="_class_"&mode=*');"
+	write $$$appTable1(class)
+	set butt1=$$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Режим просмотра в две колонки")
+	set butt2=$$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",2)_"""","Режим редактирования в одну колонку")
+	set butt3=$$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",3)_"""","Режим просмотра из таблицы, редактирования из окна")
+	write $$$appTableTrTd1(butt1_butt2_butt3)
+	write $$$appTableEnd1
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Результат выбора режима редактирования параметров
+
+]]></Content>
+</UDLText>
+
+<Method name="ParamResult">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+	set class=Par("class")
+	set SelectId=$g(Par("%request.Data",divId_"SelectId"))
+	write ..ButtonAgain(divId,,key)
+	if mode=1 {
+		;порядок вывода полей в две колонки по разделителю :
+		set order="Name,Description:Value,Types:DateStart,DateFinish:isEnabled,isEnabledCheck:File,OfficeFile:ImageFile,ImageGlobal::,"
+		do Show(0,order)
+		quit $$$OK
+	} 
+	elseif mode=2 {
+		;порядок вывода полей по умолчанию
+		set order=""
+		do Show("1,ShowFieldName",order)
+		quit $$$OK
+	} 
+	elseif mode=3 {
+		set sql="select * from "_class
+		set exec="##class(App.FormExplorer).WinEditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
+		set st=##class(App.FormExplorer).SelectObjects(class,sql,exec)
+		;write 'st w $$$appError($System.Status.GetErrorText(st)) 
+	}
+	q $$$OK
+Show(modeShow,order)
+	set obj=##class(App.Form).GetObj(SelectId_","_class)
+	if '$isobject(obj) { 
+		set msg="Не удалось открыть объект "_SelectId_","_class
+		write $$$appError(msg) q $$$ERROR($$$GeneralError,msg)
+	}
+	do ##class(App.Form).Show(obj,modeShow,divId,order)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="FindFirstHead">
+<Description>
+загрузить шаблон формы поиска</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	s key=Par("key")
+	s divId=Par("divId")
+
+	set onclick=$$$blockui("Ждите...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&mode=*');"
+	
+	s fullPath="/opt/isc/ensemble/csp/spgz/template/samples-order-MSW-.docx"
+	if ##class(App.DownloadCSP).GetFileId(fullPath,.url) {
+		set fileDownload="<a href="""_url_"&log=App.Log"">fileDownload</a>"
+	}
+	&html<
+		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<tr>
+			<td>
+			Логин
+			</td>
+			<td>
+			#($$$appText(divId_"Name","","su"))#
+			</td>
+			<td>
+			Полное имя
+			</td>
+			<td>
+			#($$$appTextarea(divId_"fullName","rows=5",""))#
+			</td>
+			<td>
+			Дата
+			</td>
+			<td>
+			#($$$appDate(divId_"Date","",""))#
+			</td>
+		</tr>
+		<tr>
+			<td>
+			
+			</td>
+			<td>
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Поиск пользователя"))#
+			</td>
+			<td>
+			#($$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",2)_"""","Получить элементы с формы"))#
+			</td>
+			<td>
+			#($g(fileDownload))#
+			</td>
+			<td>
+			дата и время
+			</td>
+			<td>
+			#($$$appDateTime(divId_"DateTime","",""))#
+			</td>
+		</tr>
+		</table>
+	>
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FindResult">
+<Description>
+Результат поиска</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+	set Name=$g(Par("%request.Data",divId_"Name"))
+	set fullName=$g(Par("%request.Data",divId_"fullName"))
+	set Date=$g(Par("%request.Data",divId_"Date"))
+	set DateTime=$g(Par("%request.Data",divId_"DateTime"))
+	write ..ButtonAgain(divId,,key)
+	if mode=1 {
+		if Name="" w $$$appError("Контекст пустой") q $$$OK
+		zn "%SYS"
+		set sql="select ID,name,EmailAddress,fullName from Security.Users where Enabled [ '1' "
+		if Name'="" s sql=sql_" and (name like '%"_Name_"%') "
+		if fullName'="" s sql=sql_" and (fullName like '%"_fullName_"%') "
+		set msg="Запрос : "_sql
+		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_fullName_""")"
+		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
+		if 'st  w $$$appError($System.Status.GetErrorText(st)) 
+		quit $$$OK
+	} 
+	elseif mode=2 {
+		w "<br>" w $$$appMsg(Name_" "_fullName_" "_Date_" "_DateTime)
+	}
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="AddToForm">
+<Description>
+Добавить на форму  js код</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetSupportInfo">
+<Description>
+Получить информацию по техподдержке</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
+	q msg_"Support info mailto: sample@server.com"
 ]]></Implementation>
 </Method>
 </Class>
@@ -5575,6 +6982,128 @@ Get a comma-delimited list of databases</Description>
 </Class>
 
 
+<Class name="App.UploadCSP">
+<IncludeCode>App.LogMacro</IncludeCode>
+<Super>%CSP.Page</Super>
+<TimeChanged>65141,34804.884162</TimeChanged>
+<TimeCreated>65113,38880.765844</TimeCreated>
+
+<Parameter name="pathfiles">
+<Description>
+Путь к директории на сервере для хранения файлов</Description>
+<Expression>##class(%File).GetDirectory(##class(%File).TempFilename())</Expression>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    #; был передан файл, поэтому ответим браузеру, о том что приняли файл и как
+    s FieldName="loadFile"
+    if $g(%loadFileSuccess)'="" {
+	    if $lv(%loadFileSuccess) {
+	        if $lg(%loadFileSuccess,1) {
+		        if $lg(%loadFileSuccess,5)'=1 w "<H3>Произошла ошибка</h3>"_$System.Status.DisplayError($lg(%loadFileSuccess,5))_"<p><p>Попробуйте еще раз, в противном случае обратитесь к администратору через HelpDesk" q 1
+	    		s orig=$lg(%loadFileSuccess,6)
+	    		s orig=$s(orig["\":$p(orig,"\",*),1:$p(orig,"/",*))
+	    		s orig=$tr(orig," №`()\/*;'"":","_N---")
+	    		w "<script>"
+	    		w "window.opener.document.getElementById('"_$g(%request.Data("FieldName",1))_"').value='"_$lg(%loadFileSuccess,2)_"*"_orig_"';"
+	    		;w "alert('"_$g(%request.Data("FieldName",1))_"OriginalFileName'+'='+'"_orig_"');"
+	    		;w "try{ window.opener.document.getElementById('"_$g(%request.Data("FieldName",1))_idOrigNameReturn_"').value='"_orig_"';} catch(e){ };"
+	    		w "window.close();"
+	    		w "</script>"
+	    		q 1
+	            #; файл принят удачно, ответим об удачном приеме и отправим имя файла и его размер
+	            w "{""success"":true,",
+	                """fileName"":"""_$lg(%loadFileSuccess,2)_""",",
+	                """fileSize"":"""_$lg(%loadFileSuccess,3)_"""}"
+	        } else {
+	            #; произошла ошибка при приеме файла
+	            w "<H3>Произошла ошибка при приеме файла</h3> Попробуйте еще раз, в противном случае обратитесь к администратору через HelpDesk"
+	            q 1
+	            w "{""error"":""Error load file""}"
+	        }
+	        q $$$OK
+	    }
+    }
+    #; HTML форма для отправки файлов
+     ;m a=%request.Data     zw a
+    &html<<!DOCTYPE HTML>
+<html>
+<head>
+<title>Загрузка файлов</title>
+>
+ write ##class(App.LogInfoPane).GetLink()
+ &html<
+    <script>
+        $(document).ready(function(){
+            $(this).keydown(function(eventObject){
+                if (eventObject.which == 27)
+                    window.close();
+            });
+        });
+    </script>  
+</head>
+<body bgcolor="#f0f8ff" >
+<form action="#(..%ClassName(1)_".cls")#" enctype="multipart/form-data" method="post">
+    <br><center>
+     Выберите файл: <input class='ui-button ui-corner-all ui-widget' name='loadFile' id='loadFile' size=30 type='file' accept=".doc,.docx,.odt,.pdf,.xls,.xlsx" >
+    <br><br>
+    <input class='ui-button ui-corner-all ui-widget' type="submit" value="Загрузить файл"> <input class='ui-button ui-corner-all ui-widget' type="button" value="Отмена" onclick='window.close();'>
+    <input class='ui-button ui-corner-all ui-widget' type="hidden" name=FieldName id=FieldName value='#($g(%request.Data("idreturn",1)))#'>
+    <input class='ui-button ui-corner-all ui-widget' type="hidden" name=idOrigNameReturn id=idOrigNameReturn value='#($g(%request.Data("idOrigNameReturn",1)))#'>
+    <input class='ui-button ui-corner-all ui-widget' type="hidden" name=ServerDirPath id=ServerDirPath value='#($g(%request.Data("ServerDirPath",1)))#'>
+    </center>
+</form></body>
+</html>
+>
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<Description>
+ [ ServerOnly = 1 ]</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	set ServerDirPath=$zconvert($g(%request.Data("ServerDirPath",1)),"I","URL")
+	if ServerDirPath="" set ServerDirPath=..#pathfiles
+
+    #; Передан файл
+    ;if $d(%request.Data("loadFile")) {
+        s %loadFileSuccess=0
+        #; поле с файлом
+        s FieldName="loadFile"
+        #; получим содержимое файла
+        i %request.IsDefinedMimeData(FieldName,1) {
+            s ContentType=%request.MimeData(FieldName,1).ContentType
+            s Content=%request.MimeData(FieldName,1)
+        } else {
+            s ContentType=%request.ContentType
+            s Content=%request.Content
+        }
+        #; если файл получен, и он не нулевого размера, соберем информацию по нему
+        i $isobject(Content),Content.Size>0 {
+	        s fileName=Content.FileName
+	        ;s name=$tr(##class(App.type).GetDateTime($h),"T: ","_--")_"_"_$p(fileName,"\",*)
+	        s name=$tr(##class(App.type).GetDateTime($h),"T: ","_")_"_"_$tr(##class(App.type).Transliteration($p(fileName,"\",*))," №`()","_N---")
+	        s %loadFileSuccess=$lb(1,$g(name),Content.Size)
+	        s sc=##class(App.files).Stream2Log(Content, ServerDirPath,$zconvert( name,"O","UTF8"),.path) 
+	        if sc s %loadFileSuccess=%loadFileSuccess_$lb($g(path),1,fileName)
+	        else  s %loadFileSuccess=%loadFileSuccess_$lb($g(path),sc)
+	        
+        }
+    	;s ^logMSW2(1,$i(^logMSW2),"0 %request-%loadFileSuccess")=%loadFileSuccess
+        q 1
+    ;}
+    q 1
+]]></Implementation>
+</Method>
+</Class>
+
+
 <Class name="App.Use">
 <CompileAfter>App.Log</CompileAfter>
 <IncludeCode>App.LogMacro</IncludeCode>
@@ -5620,7 +7149,7 @@ do ##class(App.Use).TestLogObjects(4)</Description>
 Утилиты работы с файлами</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65084,48196.632996</TimeChanged>
+<TimeChanged>65108,29817</TimeChanged>
 <TimeCreated>64765,51020.18498</TimeCreated>
 
 <Method name="getSlash">
@@ -5804,8 +7333,8 @@ w ##class(App.files).Stream2Log(HttpResponse.Data, TempDir, fileName,.File) s aD
 
 <Method name="ReadFile2Arr">
 <Description>
-Открыть файл для записи 
-w ##class(App.files).ReadFile2Arr("/backup/temp/snmp/os-cip.mvk.ruRunCmd2018-10-03_14:31:00.txt","RSK",,"%tmp")</Description>
+Открыть файл и записать в массив 
+w ##class(App.files).ReadFile2Arr("/backup/temp/snmp/ruRunCmd2018-10-03_14:31:00.txt","RSK",,"%tmp")</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>file,mode="RSK",code="UTF8",gn="tmp"</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -5845,7 +7374,6 @@ w ##class(App.files).File2Arr("/backup/eaist/work/SPGZ.xml_2018-05-07_14.56.26.4
 <FormalSpec>file,Mas,Param="RSU"</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- //ПРОЧИТАТЬ ИЗ ФАЙЛА И ПОЛОЖИТЬ В МАССИВ
  set f=##class(%File).%New(file)
  set ok=f.Open(Param)     if 'ok do f.%Close() Q ok
  set len=$zu(140,1,file)
@@ -5861,8 +7389,7 @@ w ##class(App.files).File2Arr("/backup/eaist/work/SPGZ.xml_2018-05-07_14.56.26.4
 <Method name="LoadXML">
 <Description>
 Загрузка XML в класс объектов  
-d ##class(App.files).LoadXML("/backup/eaistprod/arhive/InfoObject.xml_2018-09-19_08.49.08.638","infoObject","Mvk.model.InfoObject") 
-d ##class(App.files).LoadXML("d:\!\InfoObject.xml","infoObject","Mvk.model.InfoObject") </Description>
+d ##class(App.files).LoadXML("d:\!\InfoObject.xml","infoObject","Model.InfoObject") </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>fn,tag,class</FormalSpec>
 <Implementation><![CDATA[
@@ -6267,7 +7794,7 @@ d ##class(App.files).GetAllDir("d:\dev\app1\src\",,.a)</Description>
 Утилита работ с %Net.HttpRequest и %Net.SMTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65084,34347.312559</TimeChanged>
+<TimeChanged>65160,43253.280942</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 
 <Method name="SendFilesToEmail">
@@ -6363,7 +7890,7 @@ attach - массив файлов по ссылке</Description>
 <Method name="LoadFileHttp">
 <Description>
 Загрузить файл и положить на сервер добавив к имени метку даты и времени
-w ##class(App.net).LoadFileHttp("http://kisu-apps.mvk.ru:8000/OA_HTML/XxkWebServ/download?fileId=5215954",.out,"/backup/temp/",1)</Description>
+w ##class(App.net).LoadFileHttp("http://localhost:8000/OA_HTML/XxkWebServ/download?fileId=5215954",.out,"/backup/temp/",1)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>aURL="",aDATA,TempDir="",fileName</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -6396,9 +7923,9 @@ w ##class(App.net).GetHttp("https://codeload.github.com/SergeyMi37/cache-iris-ap
 	set port=$p(part1,":",2)
 	#; Адрес
 	set location=$p(part2,"?",1) quit:(location="") $$$ERROR($$$GeneralError,"0: отсутствует адрес - "_location)
-	set location=$zcvt(location,"O","URL")
+	;!!!set location=$zcvt(location,"O","URL")
 	;i location="" s location="/"
-	
+	;w !,location,!,server
 	#; Создание HTTP-запроса для загрузки файла
 	set HttpRequest=##class(%Net.HttpRequest).%New()
 	set HttpRequest.Server=server
@@ -6462,15 +7989,13 @@ w ##class(App.net).GetHttp("https://codeload.github.com/SergeyMi37/cache-iris-ap
 <FormalSpec>name</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	set curNS=$zu(5)
-	try {
-		zn "%SYS"
-		quit:(##class(Security.SSLConfigs).Get(name))
-		d ##class(Security.SSLConfigs).Create(name)
-	} catch {
-	}
-	zn curNS
-	quit name
+  NEW $NAMESPACE
+  SET $NAMESPACE = "%SYS"
+  
+  IF '##class(Security.SSLConfigs).Exists(name) {
+    DO ##class(Security.SSLConfigs).Create(name)
+  }
+  QUIT name
 ]]></Implementation>
 </Method>
 
@@ -6583,8 +8108,9 @@ FTPSTOP If 'ftp.Logout() S ER="Failed to logout"
 
 <Method name="GetListIP">
 <Description>
-Получить IP адрес
-w ##class(App.net).GetIP()</Description>
+Получить IP адрес сервера
+w ##class(App.net).GetIP()
+$G(%request.CgiEnvs("REMOTE_ADDR")) - адроес клиента</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
@@ -6610,7 +8136,7 @@ w ##class(App.net).GetIP()</Description>
 <Method name="PostHttp">
 <Description>
 Получить ответ на Post Http запрос
-w ##class(App.net).PostHttp("cip-test.mvk.ru:57772", "/apptoolsrest/jsonrpc","msw" ,"S37@asu3" ,"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}",.out)</Description>
+w ##class(App.net).PostHttp("localhost:57772", "/apptoolsrest/jsonrpc","msw" ,"S37@asu3" ,"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}",.out)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[ServerPort,method,user,pass,&body,&out]]></FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -6687,22 +8213,18 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 <Class name="App.security">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65071,38858.848943</TimeChanged>
+<TimeChanged>65184,41715</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 
 <Method name="LockDown">
 <Description>
-Повышение безопасности системы
-Основные настройки системы как в LockDown, кроме InactiveLimit=90
-Метод отключает "лишние" сервисы и приложения. Удаляет области "DOCBOOK","ENSDEMO","SAMPLES","USER"
-Метод включает аудит и настраивает регистрацию в портале всех событий кроме переключения журнала
+Повышение безопасности системы до уровня LockDown, кроме параметра InactiveLimit=90
+Метод отключает сервисы и приложения как в LockDown. Удаляет области "DOCBOOK","ENSDEMO","SAMPLES"
+Метод включает аудит и настраивает регистрацию в портале всех событий, кроме переключения журнала
  и модификацию системных свойств
 Всем предустановленным пользователям сменим пароль и поменяем свойства как в LockDown
 	newPassword - новый единый пароль вместо SYS. Для уровня безопасности LockDown он имеет шаблон 8.32ANP
-	CSPAppName -  имя CSP приложения, для которых не устанавливается авторизация по паролю.
-        По умолчанию совпадает с именем области
-		Если в системе несколько приложений (областей), то через запятую 
-		sBindings =1 Сервис %service_bindings включить
+	sBindings =1 Сервис %service_bindings включить
 	sCachedirect =1 Сервис %service_cachedirect включить
 	sECP =1 Сервис %service_ecp включить
 	sBindingsIP - список ip адресов через точку с запятой для которых разрешить подключение CacheStudio.
@@ -6711,28 +8233,20 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 	sECPIP - список ip адресов через точку с запятой для которых разрешить подключение к серверу ECP.
     AuthLDAP=1 Включить дополнительно к парольному еще и LDAP аутотентификацию
  Пример применения: 
-	d ##class(App.security).LockDown("qwe123!@#",,.msg,1,1,0,"127.0.0.1","127.0.0.1")
-	d ##class(App.security).LockDown("qwe123!@#","AppTools",.msg,1,1,0,"127.0.0.1","127.0.0.1",,1)</Description>
+	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1")
+	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1",,1)</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>newPassword="",CSPAppName={$zconvert($zu(5),"L")},Warn,sBindings="",sCachedirect="",sECP="",sBindingsIP="",sCachedirectIP="",sECPIP="",AuthLDAP=0</FormalSpec>
+<FormalSpec>newPassword="",Warn,sBindings="",sCachedirect="",sECP="",sBindingsIP="",sCachedirectIP="",sECPIP="",AuthLDAP=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	s CSPAppName=$zconvert(CSPAppName,"L")
 	I newPassword'?8.32ANP s text="Пароль не удовлетворяет шаблону 8.32ANP" w !,text QUIT $$$ERROR(text)
 	s ons = $zu(5) ;текущая область
-	#; По другому найдем статик-приложение s virtualstatic=$$$GetSetting("VirtalStaticApplication")
-	f i=1:1:$l(CSPAppName,",") {
-		continue:$p(CSPAppName,",",i)=""
-		;s virtualstatic("/"_$p(CSPAppName,",",i)_"static")=1
-		;s appcsp("/"_$p(CSPAppName,",",i))=1
-		;s appcspmgr("/csp/"_$p(CSPAppName,",",i))=1
-	}
 	w !,"Для приложений и служб будет установлена аутентификация по "_$s('AuthLDAP:"паролю",1:"паролю и LDAP")
 	s AutheEnabled=$s(AuthLDAP:2080,1:32) ;с паролем = 32, паролем и LDAP =2080
 	zn "%sys"
 	w !,"Происходит смена пароля предустановленным пользователям"
 	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
-	s tSC=result.Prepare("select NameLowerCase FROM Security.Users")
+	s tSC=result.Prepare("select NameLowerCase FROM Security.Users") ;!!! prefered !!!
 	s:tSC tSC=result.Execute()
 	i '$$$ISOK(tSC) {
 		s text="Ошибка настройки пользователей :"_$SYSTEM.Status.GetErrorText(tSC) w !,text
@@ -6793,28 +8307,9 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 		}
 	}
 
-	w !,"Проиcходит создание новой роли для CSPAppName"
-	s nameR=$p(CSPAppName,","),desc="Роль для основного приложения CSPAppName" 
-	s pResources="%DB_%DEFAULT:RW,%DB_CACHE:RW,%DB_CACHELIB:RW,%DB_CACHESYS:RW,%DB_CACHETEMP:RW,%Service_CSP:U,%Service_SQL:U,%Service_CacheDirect:U" 
-	s pRolesGranted="%All" ;TODO  Пока нет решения для динамического назначения грантов SQL 
-	Set tExists = ##class(Security.Roles).Exists(nameR)
-	if 'tExists {
-		Set tSC = ##class(Security.Roles).Create(nameR,desc,pResources,pRolesGranted)
-		i '$$$ISOK(tSC) {
-			s text="Ошибка создании роли "_nameR_" :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
-		}
-	}
-	else {
-		k prop s prop("Description")=desc
-		s prop("GrantedRoles")=pRolesGranted
-		s prop("Resources")=pResources
-		Set tSC=##class(Security.Roles).Modify(nameR,.prop)
-		i '$$$ISOK(tSC) {
-			s text="Ошибка модификации роли "_nameR_" :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
-		}
-	}
+
 	
-	w !,"Проиcходит создание парольного входа всем CSP приложениям, кроме CSPAppName"
+	w !,"Проиcходит создание парольного входа всем CSP приложениям"
 	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
 	s tSC=result.Prepare("select Name FROM Security.Applications")
 	s:tSC tSC=result.Execute()
@@ -6836,32 +8331,19 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 			s csp=$zconvert(CSP,"L")
 			k prop
 			;w !,csp,"-----" d ##class(Security.Applications).Get(csp,.prop)	zw prop
-			#; Основное приложение CSPAppName
-			if $g(appcsp(csp)) {
-				s prop("AutheEnabled")=64 ;без пароля
-				#; Включение делегирование ролей пользователю самим приложеним
-				;s prop("MatchRoles")=":%DB_%DEFAULT:%DB_CACHE:%DB_CACHELIB:%DB_CACHESYS:%DB_CACHETEMP:%SQL"
-				w !,"Назначение приложению роли "_nameR
-				s prop("MatchRoles")=":"_nameR
+			if $g(appDisabled(csp)) {
+				s prop("Enabled")=0
+			} else {
+				  s prop("Enabled")=1
 			}
-			#; Портал управления CSPAppName
-			elseif $g(appcspmgr(csp)) {
-				s prop("AutheEnabled")=AutheEnabled ##; MSW4951b ;с паролем = 32, паролем и LDAP =2080
-				s prop("Resource")="%Development"
-			}
-			else {
-				i $g(appDisabled(csp)) s prop("Enabled")=0
-				e  s prop("Enabled")=1
-				i $g(virtualstatic(csp)) s prop("AutheEnabled")=64,prop("MatchRoles")=":"_nameR w !,"Для приложения "_csp_" присвоим безпарольный вход и роль "_nameR ##; MSW4951
-				e  s prop("AutheEnabled")=AutheEnabled ##; MSW4951b ;с паролем
-							
-			}
+		 s prop("AutheEnabled")=AutheEnabled 
+		
 			s tSC=##class(Security.Applications).Modify(CSP,.prop) ; MSW4343d
 			i '$$$ISOK(tSC) w !,csp_" : Error="_$SYSTEM.Status.GetErrorText(tSC)
 		}
 	}
 	WRITE !,"Происходит удаление демо областей"
-	for name="ENSDEMO","SAMPLES","USER" {
+	for name="ENSDEMO","SAMPLES" {
 		#; Удаление Ensemble-области
 		d:##class(%Dictionary.CompiledClass).%ExistsId("%Library.EnsembleMgr")
 		
@@ -6945,13 +8427,13 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 <Class name="App.sys">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65072,28915</TimeChanged>
+<TimeChanged>65175,36505.006433</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 
 <Method name="CreateTaskPurge">
 <Description>
 Create a task to clean the messages of the ensemble
-for ns="AISGSASUMS","MVK112","SPGZ","RDID","RDIDPROD" try {zn ns w !,ns," ",##class(App.sys).CreateTaskPurge("Ensemble message cleaning",ns,90)}catch{}</Description>
+for ns="AISGSASUMS","M112","SPGZ","RDID","RDIDPROD" try {zn ns w !,ns," ",##class(App.sys).CreateTaskPurge("Ensemble message cleaning",ns,90)}catch{}</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Name="",ns,days=90</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -7124,6 +8606,7 @@ Function to call the OS command in the result output
 	s gnTask=gn
 	set filename=dir_"RunCmd.log"
 	if AddDateTime set datetime=$tr($$$AppDT($h)," ","_") set gnTask=$na(@gn@(datetime)),filename=dir_"RunCmd"_datetime_".log"
+	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunCmd")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if ##class(App.files).ReadFile2Arr(filename,"RSK",,"^||tmpFile") MERGE @gnTask=^||tmpFile
 	q $$$OK
@@ -7133,13 +8616,14 @@ Function to call the OS command in the result output
 <Method name="RunTask">
 <Description><![CDATA[
 Function to call from a regular task
-%SYS>d ##class(App.sys).RunTask("snmpwalk -v 1 cip.mvk.ru -c public 1.3.6.1.4.1.16563.1.1.1.1.10","^%App.TaskLic","%SYSTEM.License:Counts","/backup/temp/snmp/")]]></Description>
+%SYS>d ##class(App.sys).RunTask("snmpwalk -v 1 server.ru -c public 1.3.6.1.4.1.16563.1.1.1.1.10","^%App.TaskLic","%SYSTEM.License:Counts","/backup/temp/snmp/")]]></Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>cmdOs="free",gn="^TaskGN",query="%SYSTEM.License:Counts",dir="/backup/temp/"</FormalSpec>
 <Implementation><![CDATA[
 	set datetime=$tr($$$AppDT($h)," ","_")
 	set gnTask=$na(@gn@(datetime))
 	set filename=dir_"RunTask"_datetime_".txt"
+	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunTask")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if query'="" d ##class(App.sys).SaveQuery(query,gn,datetime)
 	q $$$OK
@@ -7276,7 +8760,10 @@ w ##class(App.sys).ClassExist("Spgz.model.spgz")</Description>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	q:class="" ""
-	q $d($$$comClassRaw(class))
+	try {
+		s st=$d($$$comClassRaw(class))
+	} catch e { s st=$ze }
+  q $g(st)
 ]]></Implementation>
 </Method>
 
@@ -7369,24 +8856,20 @@ d ##class(App.sys).GlobalList("SAMPLES",.L)</Description>
 
 <Method name="GetObj">
 <Description>
-s a=##class(App.sys).GetObj("select top 1 * from Mvk_model.SPGZ where IdSPGZ=3620277 and deletedDate is null order by importDate desc") zw a</Description>
+s a=##class(App.sys).GetObj("select top 1 * from model.SP where deletedDate is null order by importDate desc") zw a</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Query</FormalSpec>
 <Implementation><![CDATA[
-	#dim sql As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare(Query)
-	s obj=$$$NULLOREF
-	while sql.%Next() {
-		s obj=sql
-		q
-	}
-	q obj
+	#dim rs As %ResultSet.SQL = ##class(%ResultSet.SQL).%Prepare(Query)
+	if 'rs.%Next() q $$$NULLOREF
+	q rs
 ]]></Implementation>
 </Method>
 
 <Method name="SqlToDSN">
 <Description>
 Get a DSN request
-w $System.Status.GetErrorText(##class(App.sys).SqlToDSN("SELECT * FROM xxmv.xxmvk_t359_pzn","OEBS-Daily","^tmMSWq"))</Description>
+w $System.Status.GetErrorText(##class(App.sys).SqlToDSN("SELECT * FROM xxmv.xx_t359_pzn","OEBS-Daily","^tmMSWq"))</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>sql,DSN,result,top=100000</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -7399,8 +8882,8 @@ w $System.Status.GetErrorText(##class(App.sys).SqlToDSN("SELECT * FROM xxmv.xxmv
 	set %JDBCGateway.StatementCache(conn) = st
 	set query = %JDBCGateway.execQuery(st)
 	
-	if (query = -1)
-	{
+	if (query = -1)	{
+		;w %JDBCGateway.getErrorText() q 0
 		set sc = $$$ERROR($$$GeneralError, %JDBCGateway.getErrorText())
 		do %JDBCGateway.removeStatement(conn)
 		;if $isObject($g(%JDBCGateway)) do %JDBCGateway.closeAll()
@@ -7477,14 +8960,14 @@ TODO save to gn</Description>
  	set sc=gc.DescribeColumns(hstmt, .columnlist) 
  	if $$$ISERR(sc) quit sc
  	
- 	i $g(result)'="" s gn=result k @gn
-	e  s gn="result" 
+ 	if $g(result)'="" s gn=result k @gn
+	else  s gn="result" 
  	//display column headers delimited by ":"
  	set numcols=$listlength(columnlist)-1  //get number of columns
  	for colnum=2:1:numcols+1 {
  		    ;Write $listget($listget(columnlist,colnum),1),":"
- 		    s name=$listget($listget(columnlist,colnum),1)
- 		    s @gn@(0,colnum-1)=$lb(name)
+ 		    set name=$listget($listget(columnlist,colnum),1)
+ 		    set @gn@(0,colnum-1)=$lb(name)
 	  		set @gn@(-1,name)=colnum-1 
  	  		}
  	;write !
@@ -7492,15 +8975,15 @@ TODO save to gn</Description>
  	//Return first 200 rows	  
  	set sc=gc.Fetch(hstmt)
  	if $$$ISERR(sc) quit sc
- 	s rownum=1
+ 	set rownum=1
  	while((gc.sqlcode'=100) && (rownum<=top)) {
  	      	for ii=1:1:numcols {
- 		      	s sc=gc.GetData(hstmt, ii, 1, .val)
+ 		      	set sc=gc.GetData(hstmt, ii, 1, .val)
  		      	;w " "_val
- 		      	s @gn@(rownum)=$g(@gn@(rownum))_$lb(val)
+ 		      	set @gn@(rownum)=$g(@gn@(rownum))_$lb(val)
  		      	if $$$ISERR(sc) break
  	      	}
- 	      	s rownum=rownum+1
+ 	      	set rownum=rownum+1
  	 		;write !
  	 		set sc=gc.Fetch(hstmt)
  			if $$$ISERR(sc) break
@@ -7511,10 +8994,95 @@ TODO save to gn</Description>
  	set sc=gc.CloseCursor(hstmt)
  	if $$$ISERR(sc) quit sc
  	set sc=gc.Disconnect()
-	s @gn=rownum-1
-	s @gn@(-3,"sql")=$lb(sql,pDSN,top,usr,pwd)
-	s @gn@(-3,"timestamp")=$lb(ts,$$$AppDT($h),##class(App.type).GetCountSec($h)-##class(App.type).GetCountSec(hr))
+	set @gn=rownum-1
+	set @gn@(-3,"sql")=$lb(sql,pDSN,top,usr,pwd)
+	set @gn@(-3,"timestamp")=$lb(ts,$$$AppDT($h),##class(App.type).GetCountSec($h)-##class(App.type).GetCountSec(hr))
  	Quit sc
+]]></Implementation>
+</Method>
+
+<Method name="GetFullName">
+<Description>
+Sample  w ##class(App.sys).GetFullName("superuser")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>login</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ try {
+	$$$NspGoto(curNs,"%SYS")
+	if ##class(Security.Users).Exists(login,.User,.Status) {
+			if $isobject(User) {
+				s fullName=User.FullName 
+			}
+		}
+  $$$NspReturn(curNs) 
+ } catch e {}
+  q $g(fullName)
+]]></Implementation>
+</Method>
+
+<Method name="GetRoles">
+<Description>
+Sample  w ##class(App.sys).GetRoles(mask,.roles)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[mask="",&list]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  NEW $NAMESPACE
+  SET $NAMESPACE = "%SYS"
+  set mask=$zconvert(mask,"L")
+  set sql="select NameLowerCase,Description,Name FROM Security.Roles"
+  if mask["," { set mask=$replace($ZStrip(mask,"<>W"),",","','")
+  	set sql=sql_" where ID in ('"_mask_"')"
+  } 
+  elseif mask'="" {
+	  set sql=sql_" where NameLowerCase like '%"_mask_"%'"
+  }
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare(sql)
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+	 	QUIT tSC
+	}
+	else {
+		while result.Next() {
+			set list(result.Data("NameLowerCase"))=$lb(result.Data("Name"),result.Data("Description"))
+		}
+	}
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetUsers">
+<Description>
+Get system users
+w ##class(App.sys).GetUsers("super",.users)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[mask="",&list]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  NEW $NAMESPACE
+  SET $NAMESPACE = "%SYS"
+  set mask=$zconvert(mask,"L")
+  set sql="select NameLowerCase,FullName,Comment,Roles,EmailAddress FROM Security.Users"
+  if mask["," { set mask=$replace($ZStrip(mask,"<>W"),",","','")
+  	set sql=sql_" where NameLowerCase in ('"_mask_"')"
+  } 
+  elseif mask'="" {
+	  set sql=sql_" where NameLowerCase like '%"_mask_"%'"
+  }
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare(sql)
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+	 	QUIT tSC
+	}
+	else {
+		while result.Next() {
+			set list(result.Data("NameLowerCase"))=$lb(result.Data("FullName"),result.Data("Comment"),result.Data("Roles"),result.Data("EmailAddress"))
+		}
+	}
+	quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>
@@ -7525,7 +9093,7 @@ TODO save to gn</Description>
 Утилиты работы с типами</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65069,48965.59222</TimeChanged>
+<TimeChanged>65141,34463.702825</TimeChanged>
 <TimeCreated>64735,32446.061315</TimeCreated>
 
 <Method name="GetCountSec">
@@ -7550,6 +9118,17 @@ w ##class(App.type).GetTextMonth("05")</Description>
 <FormalSpec>mm</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[	q $s(+mm="1":"январь",+mm="2":"февраль",+mm="3":"март",+mm="4":"апрель",+mm="5":"май",+mm="6":"июнь",+mm="7":"июль",+mm="8":"август",+mm="9":"сентябрь",+mm="10":"октябрь",+mm="11":"ноябрь",1:"декабрь")
+]]></Implementation>
+</Method>
+
+<Method name="GetMonth">
+<Description>
+Получить месяц
+w ##class(App.type).GetMonth($h)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>h</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	q $p($zd(h,3),"-",2)
 ]]></Implementation>
 </Method>
 
@@ -7753,6 +9332,174 @@ w ##class(App.type).ParseURL("aaa=sfdsds&bbb=dfываыавапв")]]></Descript
 		continue:$p($p(str,del,i),"=")=""
 		s out($p($p(str,del,i),"="))=$p($p(str,del,i),"=",2)
 	}
+]]></Implementation>
+</Method>
+
+<Method name="UploadFilesJS">
+<Description>
+Вывести js код для выбора файла в новом окне и загрузки его на сервер
+##class(App.type).UploadFilesJS(%id)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id,%id</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s onclick="win=window.open('App.UploadCSP.cls?idreturn="_id_"&ServerDirPath="_$zconvert($g(%id("filesStore")),"O","URL")_"', 'winupload', 'location=no,left=200,top=300,width=800,height=300,scrollbars=no,status=no,toolbar=no,menubar=no');"
+	q $$$appButton("appButtonUpload"_id,"onclick="""_$g(onclick)_"""","Загрузить файл")
+]]></Implementation>
+</Method>
+
+<Method name="GetTableName">
+<Description>
+Получить имя таблицы из Класса
+w ##class(App.type).GetTableName("App.sss.user")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SelectClass</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set (tab,table)=$p(SelectClass,".",*)
+	//Если имя таблицы - ключевое слов, обрамим в кавычки
+	set:$SYSTEM.SQL.IsReservedWord(table) table = """"_table_""""
+	set tab=$tr($p(SelectClass,"."_tab,1),".","_")_"."_table
+	q tab
+]]></Implementation>
+</Method>
+
+<Method name="SummaProp">
+<Description>
+Вывести сумму прописью
+w ##class(App.type).SummaProp(1111111.11)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>n</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q $$sump(n)
+sump(n) ;$$;преобразование
+ s n=+$j($tr(n,","),"",2)
+ ;w !,$fn(num,",",2),!
+ s n=$$tran(n)_"k"
+ ;составляем разряды
+ s n=$$repl(n,",,,,,,,","eT")
+ s n=$$repl(n,",,,,,,","eM")
+ s n=$$repl(n,",,,,,","em")
+ s n=$$repl(n,",,,,","et")
+ s n=$$repl(n,",,,","e")
+ s n=$$repl(n,",,","d")
+ s n=$$repl(n,",","c")
+ ;убрать пустые значения
+ s n=$$repl(n,"0c0d0eT","")
+ s n=$$repl(n,"0c0d0et","")
+ s n=$$repl(n,"0c0d0em","")
+ s n=$$repl(n,"0c0d0eM","")
+ ;заменяем соответвующие значения на пропись
+ s n=$$repl(n,"0c","")
+ s n=$$repl(n,"1c","сто ")
+ s n=$$repl(n,"2c","двести ")
+ s n=$$repl(n,"3c","триста ")
+ s n=$$repl(n,"4c","четыреста ")
+ s n=$$repl(n,"5c","пятьсот ")
+ s n=$$repl(n,"6c","шестьсот ")
+ s n=$$repl(n,"7c","семьсот ")
+ s n=$$repl(n,"8c","восемьсот ")
+ s n=$$repl(n,"9c","девятьсот ")
+ ;
+ s n=$$repl(n,"1d0e","десять ")
+ s n=$$repl(n,"1d1e","одиннадцать ")
+ s n=$$repl(n,"1d2e","двенадцать ")
+ s n=$$repl(n,"1d3e","тринадцать ")
+ s n=$$repl(n,"1d4e","четырнадцать ")
+ s n=$$repl(n,"1d5e","пятнадцать ")
+ s n=$$repl(n,"1d6e","шестнадцать ")
+ s n=$$repl(n,"1d7e","семьнадцать ")
+ s n=$$repl(n,"1d8e","восемнадцать ")
+ s n=$$repl(n,"1d9e","девятнадцать ")
+ ;
+ s n=$$repl(n,"0d","")
+ s n=$$repl(n,"2d","двадцать ")
+ s n=$$repl(n,"3d","тридцать ")
+ s n=$$repl(n,"4d","сорок ")
+ s n=$$repl(n,"5d","пятьдесят ")
+ s n=$$repl(n,"6d","шестьдесят ")
+ s n=$$repl(n,"7d","семьдесят ")
+ s n=$$repl(n,"8d","восемьдесят ")
+ s n=$$repl(n,"9d","девяносто ")
+ ;
+ s n=$$repl(n,"0e","")
+ s n=$$repl(n,"5e","пять ")
+ s n=$$repl(n,"6e","шесть ")
+ s n=$$repl(n,"7e","семь ")
+ s n=$$repl(n,"8e","восемь ")
+ s n=$$repl(n,"9e","девять ")
+ ;
+ s n=$$repl(n,"1e.","один рубль ")
+ s n=$$repl(n,"2e.","два рубля ")
+ s n=$$repl(n,"3e.","три рубля ")
+ s n=$$repl(n,"4e.","четыре рубля ")
+ s n=$$repl(n,"1et","одна тысяча ")
+ s n=$$repl(n,"2et","две тысячи ")
+ s n=$$repl(n,"3et","три тысячи ")
+ s n=$$repl(n,"4et","четыре тысячи ")
+ s n=$$repl(n,"1em","один миллион ")
+ s n=$$repl(n,"2em","два миллиона ")
+ s n=$$repl(n,"3em","три миллиона ")
+ s n=$$repl(n,"4em","четыре миллиона ")
+ s n=$$repl(n,"1eM","один милиард ")
+ s n=$$repl(n,"2eM","два милиарда ")
+ s n=$$repl(n,"3eM","три милиарда ")
+ s n=$$repl(n,"4eM","четыре милиарда ")
+ s n=$$repl(n,"1eT","один триллион ")
+ s n=$$repl(n,"2eT","два триллиона ")
+ s n=$$repl(n,"3eT","три триллиона ")
+ s n=$$repl(n,"4eT","четыре триллиона ")
+ ;копейки
+ s n=$$repl(n,"11k","11 копеек")
+ s n=$$repl(n,"12k","12 копеек")
+ s n=$$repl(n,"13k","13 копеек")
+ s n=$$repl(n,"14k","14 копеек")
+ s n=$$repl(n,"1k","1 копейка")
+ s n=$$repl(n,"2k","2 копейки")
+ s n=$$repl(n,"3k","3 копейки")
+ s n=$$repl(n,"4k","4 копейки")
+ ;пустые позиции
+ s n=$$repl(n,"et","")
+ s n=$$repl(n,"em","")
+ s n=$$repl(n,"eM","")
+ s n=$$repl(n,"eT","")
+ ;если число <1
+ s:$p(n,".")="" n="ноль "_n
+ ;
+ s n=$$repl(n,".","рублей ")
+ s n=$$repl(n,"t","тысяч ")
+ s n=$$repl(n,"m","миллионов ")
+ s n=$$repl(n,"M","милиардов ")
+ s n=$$repl(n,"T","триллионов ")
+ s n=$$repl(n,"k"," копеек")
+ ;НЕРАСПОЗНАННЫЕ ОСТАТКИ ОТ ПРЕОБРАЗОВАНИЯ
+ s n=$tr(n,".ecdtmMkT")
+ ;w !,n
+ q n
+ ;
+tran(n) ;$$;приводим в форму пригодную для замены
+ s n=$tr($j(n,18,2)," ","0")
+ s n=$tr("q,w,,e,,,,,,,r,t,,y,,,,,,u,i,,o,,,,,p,a,,s,,,,d,f,,g,,,.hj","qwertyuiopasdfg.hj",n)
+ ;w !,n
+ q n
+ 
+repl(s,s0,sn)
+ q $replace(s,s0,sn)
+]]></Implementation>
+</Method>
+
+<Method name="tempGN">
+<Description>
+Получить временную глобальну ссылку
+w ##class(App.type).tempGN("GN")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GN,NoKill=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s gn=$na(^tmpSPGZ(GN,$j)) 
+	if 'NoKill KILL @gn	s @gn=$$$AppDT($h)
+	q gn
 ]]></Implementation>
 </Method>
 </Class>

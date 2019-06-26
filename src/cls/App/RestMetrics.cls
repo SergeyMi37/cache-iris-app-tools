@@ -3,6 +3,10 @@ Include App.LogMacro
 Class App.RestMetrics Extends %CSP.REST
 {
 
+Parameter CONTENTTYPE = "application/json";
+
+Parameter CHARSET = "UTF-8";
+
 Parameter ISCPREFIX = "isc_cache";
 
 Parameter DASHPREFIX = {..#ISCPREFIX_"_dashboard"};
@@ -10,78 +14,16 @@ Parameter DASHPREFIX = {..#ISCPREFIX_"_dashboard"};
 XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 {
 <Routes>
-<Route Url="/jsonrpc" Method="POST" Call="jsonrpc"/>
+<Route Url="/finduser/:text" Method="GET" Call="App.rest:FindUser"/>
+<Route Url="/jsonrpc" Method="POST" Call="App.rest:jsonrpc"/>
 <Route Url="/cache" Method="GET" Call="getMetrics"/>
 <Route Url="/mgstat/:delay" Method="GET" Call="getMgstat"/>
 <Route Url="/db" Method="GET" Call="getDBsize"/>
 <Route Url="/dirsize/:path" Method="GET" Call="getDirSize"/>
-<Route Url="/proj/:proj/:metrics/:mode" Method="GET" Call="getProj"/>
+<Route Url="/proj/:proj/:metrics/:mode" Method="GET" Call="App.MVK.Metrics:getProj"/>
+
+<Route Url="/test" Method="POST" Call="Test"/>  
 </Routes>
-}
-
-/*{"jsonrpc": "2.0", "result": {"likes": 123}, "id": 1}
-Если возникает ошибка — ответ об ошибке:
-{"jsonrpc": "2.0", "error": {"code": 666, "message": "Post not found"}, "id": "1"}
-И это всё!
-Бонусом поддерживаются batch-операции:
-Request:
-[
-  {"jsonrpc":"2.0","method":"server.shutdown","params":{"server":"42"},"id":1},
-  {"jsonrpc":"2.0","method":"server.remove","params":{"server":"24"},"id":2}
-]
-Response:
-[
-  {"jsonrpc":"2.0","result":{"status":"down"},"id":1}
-  {"jsonrpc":"2.0","error":{"code":1234,"message":"Server not found"},"id": 2}
-]
-*/
-/// JSON-RPC 2.0 https://www.jsonrpc.org/specification
-ClassMethod jsonrpc() As %Status
-{
-	set sc = $$$OK
-	;w !,"{""test"":123}",!
-	;s $$$AppL("MSW","jsonrpc-req")=$$$AppObJs(%request)
-	if %request.Method = "POST" {
-		if $isobject(%request.Content) { //POST
-	 		set stream=%request.Content
-			set sc=##class(App.files).Stream2String(stream,.json)
-			if 'sc q sc
-	 		if $g(json)["{" {
-	 			set method={}.$$$jsonFromJSON(json).method
-	 			set params={}.$$$jsonFromJSON(json).params
-	 			set jsonrpc={}.$$$jsonFromJSON(json).jsonrpc
-	 			set id={}.$$$jsonFromJSON(json).id
-	 			if jsonrpc'="2.0" q ..jsonrpcError(2,"Version not supported "_jsonrpc)
-	 			w params.$$$jsonToJSON() //write string json
-	 			
-	 		}
-	 		;d ..ParseJson(.str,.appClass,.appMethod,.appPar) ;m appPar("%request.Content")=str  m appPar("%request")=$$$AppObJs(%request)
-	 		m $$$AppL("MSW","Content")=str
- 		}
-	} else {
-		 q ..jsonrpcError(2,"Method not supported "_%request.Method)
-		;$$$ThrowStatus($$$ERROR($$$GeneralError, "Метод не POST")) 
-	}
-	try {
-		;
-	} catch ex {
-		set sc = ex.AsStatus()
-	}
-	return sc
-}
-
-/// JSON-RPC 2.0 https://www.jsonrpc.org/specification
-ClassMethod jsonrpcError(code, msg) As %Status
-{
-	w "{""jsonrpc"":""2.0"",""error"":{""code"":"""_code_""",""message"":"""_msg_"""}}",!
-	q $$$OK
-}
-
-/// Получить отсортированные размеры подокаталогов
-/// w ##class(App.RestMetrics).getProj("/opt/isc/ensemble/mgr/")
-ClassMethod getProj(proj, metrics, mode) As %Status
-{
-	q ##class(App.MVK.Metrics).getProj(proj, metrics, mode)
 }
 
 /// Получить отсортированные размеры подокаталогов для Linux
@@ -248,6 +190,15 @@ ClassMethod camelCase2Underscore(metrics As %String) As %String
 	set result = $replace(result, "_c_s_p", "_csp")
 	
 	quit result
+}
+
+ClassMethod Test() As %Status
+{
+	&html<<h1>Status: OK!</h1><br>>
+	zw %request
+	&html<<br><br>>
+	zw %response
+	quit $$$OK
 }
 
 }

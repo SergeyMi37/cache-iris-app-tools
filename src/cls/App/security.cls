@@ -3,17 +3,13 @@ Include App.LogMacro
 Class App.security [ Abstract ]
 {
 
-/// Повышение безопасности системы
-/// Основные настройки системы как в LockDown, кроме InactiveLimit=90
-/// Метод отключает "лишние" сервисы и приложения. Удаляет области "DOCBOOK","ENSDEMO","SAMPLES","USER"
-/// Метод включает аудит и настраивает регистрацию в портале всех событий кроме переключения журнала
+/// Повышение безопасности системы до уровня LockDown, кроме параметра InactiveLimit=90
+/// Метод отключает сервисы и приложения как в LockDown. Удаляет области "DOCBOOK","ENSDEMO","SAMPLES"
+/// Метод включает аудит и настраивает регистрацию в портале всех событий, кроме переключения журнала
 ///  и модификацию системных свойств
 /// Всем предустановленным пользователям сменим пароль и поменяем свойства как в LockDown
 /// 	newPassword - новый единый пароль вместо SYS. Для уровня безопасности LockDown он имеет шаблон 8.32ANP
-/// 	CSPAppName -  имя CSP приложения, для которых не устанавливается авторизация по паролю.
-///         По умолчанию совпадает с именем области
-/// 		Если в системе несколько приложений (областей), то через запятую 
-/// 		sBindings =1 Сервис %service_bindings включить
+/// 	sBindings =1 Сервис %service_bindings включить
 /// 	sCachedirect =1 Сервис %service_cachedirect включить
 /// 	sECP =1 Сервис %service_ecp включить
 /// 	sBindingsIP - список ip адресов через точку с запятой для которых разрешить подключение CacheStudio.
@@ -22,26 +18,18 @@ Class App.security [ Abstract ]
 /// 	sECPIP - список ip адресов через точку с запятой для которых разрешить подключение к серверу ECP.
 ///     AuthLDAP=1 Включить дополнительно к парольному еще и LDAP аутотентификацию
 ///  Пример применения: 
-/// 	d ##class(App.security).LockDown("qwe123!@#",,.msg,1,1,0,"127.0.0.1","127.0.0.1")
-/// 	d ##class(App.security).LockDown("qwe123!@#","AppTools",.msg,1,1,0,"127.0.0.1","127.0.0.1",,1)
-ClassMethod LockDown(newPassword = "", CSPAppName = {$zconvert($zu(5),"L")}, Warn, sBindings = "", sCachedirect = "", sECP = "", sBindingsIP = "", sCachedirectIP = "", sECPIP = "", AuthLDAP = 0) As %Status
+/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1")
+/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1",,1)
+ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", sECP = "", sBindingsIP = "", sCachedirectIP = "", sECPIP = "", AuthLDAP = 0) As %Status
 {
-	s CSPAppName=$zconvert(CSPAppName,"L")
 	I newPassword'?8.32ANP s text="Пароль не удовлетворяет шаблону 8.32ANP" w !,text QUIT $$$ERROR(text)
 	s ons = $zu(5) ;текущая область
-	#; По другому найдем статик-приложение s virtualstatic=$$$GetSetting("VirtalStaticApplication")
-	f i=1:1:$l(CSPAppName,",") {
-		continue:$p(CSPAppName,",",i)=""
-		;s virtualstatic("/"_$p(CSPAppName,",",i)_"static")=1
-		;s appcsp("/"_$p(CSPAppName,",",i))=1
-		;s appcspmgr("/csp/"_$p(CSPAppName,",",i))=1
-	}
 	w !,"Для приложений и служб будет установлена аутентификация по "_$s('AuthLDAP:"паролю",1:"паролю и LDAP")
 	s AutheEnabled=$s(AuthLDAP:2080,1:32) ;с паролем = 32, паролем и LDAP =2080
 	zn "%sys"
 	w !,"Происходит смена пароля предустановленным пользователям"
 	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
-	s tSC=result.Prepare("select NameLowerCase FROM Security.Users")
+	s tSC=result.Prepare("select NameLowerCase FROM Security.Users") ;!!! prefered !!!
 	s:tSC tSC=result.Execute()
 	i '$$$ISOK(tSC) {
 		s text="Ошибка настройки пользователей :"_$SYSTEM.Status.GetErrorText(tSC) w !,text
@@ -102,28 +90,9 @@ ClassMethod LockDown(newPassword = "", CSPAppName = {$zconvert($zu(5),"L")}, War
 		}
 	}
 
-	w !,"Проиcходит создание новой роли для CSPAppName"
-	s nameR=$p(CSPAppName,","),desc="Роль для основного приложения CSPAppName" 
-	s pResources="%DB_%DEFAULT:RW,%DB_CACHE:RW,%DB_CACHELIB:RW,%DB_CACHESYS:RW,%DB_CACHETEMP:RW,%Service_CSP:U,%Service_SQL:U,%Service_CacheDirect:U" 
-	s pRolesGranted="%All" ;TODO  Пока нет решения для динамического назначения грантов SQL 
-	Set tExists = ##class(Security.Roles).Exists(nameR)
-	if 'tExists {
-		Set tSC = ##class(Security.Roles).Create(nameR,desc,pResources,pRolesGranted)
-		i '$$$ISOK(tSC) {
-			s text="Ошибка создании роли "_nameR_" :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
-		}
-	}
-	else {
-		k prop s prop("Description")=desc
-		s prop("GrantedRoles")=pRolesGranted
-		s prop("Resources")=pResources
-		Set tSC=##class(Security.Roles).Modify(nameR,.prop)
-		i '$$$ISOK(tSC) {
-			s text="Ошибка модификации роли "_nameR_" :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
-		}
-	}
+
 	
-	w !,"Проиcходит создание парольного входа всем CSP приложениям, кроме CSPAppName"
+	w !,"Проиcходит создание парольного входа всем CSP приложениям"
 	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
 	s tSC=result.Prepare("select Name FROM Security.Applications")
 	s:tSC tSC=result.Execute()
@@ -145,32 +114,19 @@ ClassMethod LockDown(newPassword = "", CSPAppName = {$zconvert($zu(5),"L")}, War
 			s csp=$zconvert(CSP,"L")
 			k prop
 			;w !,csp,"-----" d ##class(Security.Applications).Get(csp,.prop)	zw prop
-			#; Основное приложение CSPAppName
-			if $g(appcsp(csp)) {
-				s prop("AutheEnabled")=64 ;без пароля
-				#; Включение делегирование ролей пользователю самим приложеним
-				;s prop("MatchRoles")=":%DB_%DEFAULT:%DB_CACHE:%DB_CACHELIB:%DB_CACHESYS:%DB_CACHETEMP:%SQL"
-				w !,"Назначение приложению роли "_nameR
-				s prop("MatchRoles")=":"_nameR
+			if $g(appDisabled(csp)) {
+				s prop("Enabled")=0
+			} else {
+				  s prop("Enabled")=1
 			}
-			#; Портал управления CSPAppName
-			elseif $g(appcspmgr(csp)) {
-				s prop("AutheEnabled")=AutheEnabled ##; MSW4951b ;с паролем = 32, паролем и LDAP =2080
-				s prop("Resource")="%Development"
-			}
-			else {
-				i $g(appDisabled(csp)) s prop("Enabled")=0
-				e  s prop("Enabled")=1
-				i $g(virtualstatic(csp)) s prop("AutheEnabled")=64,prop("MatchRoles")=":"_nameR w !,"Для приложения "_csp_" присвоим безпарольный вход и роль "_nameR ##; MSW4951
-				e  s prop("AutheEnabled")=AutheEnabled ##; MSW4951b ;с паролем
-							
-			}
+		 s prop("AutheEnabled")=AutheEnabled 
+		
 			s tSC=##class(Security.Applications).Modify(CSP,.prop) ; MSW4343d
 			i '$$$ISOK(tSC) w !,csp_" : Error="_$SYSTEM.Status.GetErrorText(tSC)
 		}
 	}
 	WRITE !,"Происходит удаление демо областей"
-	for name="ENSDEMO","SAMPLES","USER" {
+	for name="ENSDEMO","SAMPLES" {
 		#; Удаление Ensemble-области
 		d:##class(%Dictionary.CompiledClass).%ExistsId("%Library.EnsembleMgr")
 		

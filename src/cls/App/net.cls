@@ -85,7 +85,7 @@ ClassMethod SendMail(server, port, ssl, UseSTARTTLS, timezone, username, psw, fr
 }
 
 /// Загрузить файл и положить на сервер добавив к имени метку даты и времени
-/// w ##class(App.net).LoadFileHttp("http://kisu-apps.mvk.ru:8000/OA_HTML/XxkWebServ/download?fileId=5215954",.out,"/backup/temp/",1)
+/// w ##class(App.net).LoadFileHttp("http://localhost:8000/OA_HTML/XxkWebServ/download?fileId=5215954",.out,"/backup/temp/",1)
 ClassMethod LoadFileHttp(aURL = "", aDATA, TempDir = "", fileName) As %Status
 {
 	s st=##class(App.net).GetHttp(aURL,.aDATA)
@@ -111,9 +111,9 @@ ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 	set port=$p(part1,":",2)
 	#; Адрес
 	set location=$p(part2,"?",1) quit:(location="") $$$ERROR($$$GeneralError,"0: отсутствует адрес - "_location)
-	set location=$zcvt(location,"O","URL")
+	;!!!set location=$zcvt(location,"O","URL")
 	;i location="" s location="/"
-	
+	;w !,location,!,server
 	#; Создание HTTP-запроса для загрузки файла
 	set HttpRequest=##class(%Net.HttpRequest).%New()
 	set HttpRequest.Server=server
@@ -172,15 +172,13 @@ ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 /// для подключения к https серверу, этого достаточно
 ClassMethod CheckSSLCertificate(name) As %String
 {
-	set curNS=$zu(5)
-	try {
-		zn "%SYS"
-		quit:(##class(Security.SSLConfigs).Get(name))
-		d ##class(Security.SSLConfigs).Create(name)
-	} catch {
-	}
-	zn curNS
-	quit name
+  NEW $NAMESPACE
+  SET $NAMESPACE = "%SYS"
+  
+  IF '##class(Security.SSLConfigs).Exists(name) {
+    DO ##class(Security.SSLConfigs).Create(name)
+  }
+  QUIT name
 }
 
 /// fix by Eduard Lebedyuk 
@@ -282,8 +280,9 @@ FTPSTOP If 'ftp.Logout() S ER="Failed to logout"
  Q
 }
 
-/// Получить IP адрес
+/// Получить IP адрес сервера
 /// w ##class(App.net).GetIP()
+/// $G(%request.CgiEnvs("REMOTE_ADDR")) - адроес клиента
 ClassMethod GetListIP() As %String
 {
  set lsIface=##class(%SYSTEM.INetInfo).GetListOfConfiguredInterfaces()
@@ -302,7 +301,7 @@ ClassMethod GetIP() As %String
 }
 
 /// Получить ответ на Post Http запрос
-/// w ##class(App.net).PostHttp("cip-test.mvk.ru:57772", "/apptoolsrest/jsonrpc","msw" ,"S37@asu3" ,"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}",.out)
+/// w ##class(App.net).PostHttp("localhost:57772", "/apptoolsrest/jsonrpc","msw" ,"S37@asu3" ,"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}",.out)
 ClassMethod PostHttp(ServerPort, method, user, pass, ByRef body, ByRef out) As %String
 {
     set ht = ##class(%Net.HttpRequest).%New()

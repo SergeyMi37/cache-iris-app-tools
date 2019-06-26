@@ -1,5 +1,36 @@
 ROUTINE App.JsonUtils [Type=INC]
 #include %occReference
+
+#define formatJSON 		"aelotwc"
+#define formatJSONSQL	"tw"
+#define formatDate		3
+#define formatTime		7
+
+#define toJSONClassMethod "toJSON"
+#define updateClassMethod "updateIdFromObject"
+
+#if $$$comClassDefined("%Library.dynamicAbstractObject")
+    #define NewDynObj {}
+    #define NewDynDTList []
+    #define NewDynObjList $$$NewDynDTList
+    #define Insert(%obj,%element) do %obj.%Push(%element)
+    #define DynObjToJSON(%obj) w %obj.%ToJSON()
+    #define ListToJSON(%obj) $$$DynObjToJSON(%obj)
+    #define ListSize(%obj) %obj.%Size()
+    #define ListGet(%obj,%i) %obj.%Get(%i-1)
+#else
+    #define NewDynObj ##class(%ZEN.proxyObject).%New()
+    #define NewDynDTList ##class(%ListOfDataTypes).%New()
+    #define NewDynObjList ##class(%ListOfObjects).%New()
+    #define Insert(%obj,%element) do %obj.Insert(%element)
+    #define DynObjToJSON(%obj) do %obj.%ToJSON()
+    #define ListToJSON(%obj) do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(%obj)
+    #define ListSize(%obj) %obj.Count()
+    #define ListGet(%obj,%i) %obj.GetAt(%i)
+#endif
+#define IsNewJSON ##Expression($$$comClassDefined("%Library.DynamicAbstractObject"))
+
+
 #if $$$comClassDefined("%Library.Object")
     #define jsonClassIsLatestVersion $classIsLatestVersion 	
     						//usage: obj.$$$jsonClassIsLatestVersion()
