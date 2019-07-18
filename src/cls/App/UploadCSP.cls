@@ -45,6 +45,8 @@ ClassMethod OnPage() As %Status
 <title>Загрузка файлов</title>
 >
  write ##class(App.LogInfoPane).GetLink()
+ set Upload=$$$aText("Upload","Загрузить файл")
+ set Cancel=$$$aText("Cancel","Отмена")
  &html<
     <script>
         $(document).ready(function(){
@@ -60,7 +62,8 @@ ClassMethod OnPage() As %Status
     <br><center>
      Выберите файл: <input class='ui-button ui-corner-all ui-widget' name='loadFile' id='loadFile' size=30 type='file' accept=".doc,.docx,.odt,.pdf,.xls,.xlsx" >
     <br><br>
-    <input class='ui-button ui-corner-all ui-widget' type="submit" value="Загрузить файл"> <input class='ui-button ui-corner-all ui-widget' type="button" value="Отмена" onclick='window.close();'>
+    <input class='ui-button ui-corner-all ui-widget' type="submit" value="#(Upload)#"> 
+    <input class='ui-button ui-corner-all ui-widget' type="button" value="#(Cancel)#" onclick='window.close();'>
     <input class='ui-button ui-corner-all ui-widget' type="hidden" name=FieldName id=FieldName value='#($g(%request.Data("idreturn",1)))#'>
     <input class='ui-button ui-corner-all ui-widget' type="hidden" name=idOrigNameReturn id=idOrigNameReturn value='#($g(%request.Data("idOrigNameReturn",1)))#'>
     <input class='ui-button ui-corner-all ui-widget' type="hidden" name=ServerDirPath id=ServerDirPath value='#($g(%request.Data("ServerDirPath",1)))#'>

@@ -61,20 +61,10 @@ ClassMethod ShowTabSample(key = "") As %Status
  s mcont=pref_"MainContent"
  &html<
 <form id="#(pref_"MainForm")#">
-<table id="tbpage" cellspacing="0" width='100%' >
-  <tbody>
-   <tr  >
-   	<td>
-   		<DIV style='overflow: auto;' id="#(mhead)#"></div>
-	</td>
-   </tr>
-   <tr >
-   	<td>
- 		<div style='overflow: auto;' id="#(mcont)#"></div>
-	</td>
- </tr>
-</tbody>
-</table>
+<div class="uk-grid">
+    <div class="uk-width-1-1 " style='overflow: auto;' id="#(mhead)#" ></div>
+    <div class="uk-width-1-1 uk-margin-top uk-margin-bottom" style='overflow: auto;' id="#(mcont)#"></div>
+</div>
 </form>
 
 >

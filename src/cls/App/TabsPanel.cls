@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-/// Шаблон GUI приложения с селектором и вкладками / Simple GUI Application Template
+/// Шаблон GUI приложения с селектором и вкладками на основе jQueryUi / Simple GUI Application Template based jQueryUi
 Class App.TabsPanel Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
 {
 
@@ -21,76 +21,16 @@ ClassMethod OnPage() As %Status
 >
 	write ##class(App.LogInfoPane).GetLink()
 	write ##class(App.LogInfoPane).AddJsScripts() 
-    d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
- &html<
- <style type="text/css">
- 
- /*
-	div {
-  max-width: 400px;
-  max-height: 150px;
-  overflow: scroll;
-}
-*/
-
-/* Use position: sticky to have it stick to the edge
- * and top, right, or left to choose which edge to stick to: */
-
-thead th {
-  position: -webkit-sticky; /* for Safari */
-  position: sticky;
-  top: 0;
-}
-
-tbody th {
-  position: -webkit-sticky; /* for Safari */
-  position: sticky;
-  left: 0;
-}
-
-
-/* To have the header in the first column stick to the left: */
-
-thead th:first-child {
-  left: 0;
-  z-index: 1;
-}
-
-
-/* Just to display it nicely: */
-
-thead th {
-  background: #E7EBF9;
-
-}
-
-tbody th {
-  background: #E7EBF9;
-
-}
-
-table {
-  border-radius: 10px; 
-  border: 1px solid #72a7cf
-}
-
-td,
-th {
-  padding: 0.5em;
-}
-
-.bigbox { 
-height: 20px; width: 20px 
-}
- 
-</style>
-<script src="jqueryui/jquery.blockui.js"></script>
+   	   do ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
+   	   do ##class(App.LogInfoPane).AddStyle()
+ &html< 
 </head>
 <body>
  <div id="MainBody">
   <nav style='background: #d7ebf9;' > 
-    &nbsp;&nbsp;&nbsp;  
-    	<img  title='заголовок' style='vertical-align: middle;' src="jqueryui/favicon.ico" />  &nbsp;&nbsp;&nbsp; 
+  &nbsp;&nbsp;&nbsp;  
+  <span class="uk-margin-small-right uk-icon" uk-icon="album"></span>
+  &nbsp;&nbsp;&nbsp; 
  	<div id="MainControlgroup" > </div>
  	<span id='status_nav'> Статус сессии </span>
   </nav> 
@@ -201,6 +141,8 @@ ClassMethod ShowTabSample(key = "") As %Status
  s mcont=pref_"MainContent"
  &html<
 <form id="#(pref_"MainForm")#">
+
+
 <table id="tbpage" cellspacing="0" width='100%' >
   <tbody>
    <tr height='10%' >

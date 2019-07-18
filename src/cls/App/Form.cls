@@ -194,7 +194,7 @@ ClassMethod WebCompShowFiles(obj, ByRef pr, Mode, %id, %val, ByRef ext)
 		set fileName=$g(pr("filesStore"))_%val
 		;W fileName
 		if ##class(App.DownloadCSP).GetFileId(fileName,.url) { 
-			set ext("aurl")="<a href='"_url_"'>"_$$$aText("DownLoad","Загрузить")_"</a>"
+			set ext("aurl")="<a href='"_url_"'>"_$$$aText("DownLoad","Выгрузить")_"</a>"
 			set ext("url")=url
 			set ext("fileName")=fileName
 			s ret=ret_" "_ext("aurl")
@@ -482,9 +482,9 @@ ClassMethod ButtonBack(value = "Назад", onclick = "window.history.back();",
 }
 
 /// Вывеcти кнопку
-ClassMethod ButtonMake(value = "", onclick = "", id)
+ClassMethod ButtonMake(value = "", onclick = "", id, title = "")
 {
-  	write $$$appButton(id,"onclick="""_$g(onclick)_"""",value)
+  	write $$$appButton(id,"onclick="""_$g(onclick)_""" "_$s(title="":"",1:"title="""_title_""""),value)
   	;w " <input id='appButtonSave' class='ui-button ui-corner-all ui-widget' type=button onclick='"_$g(onclick)_"' value='"_value_"'>"
 	quit $$$OK
 }

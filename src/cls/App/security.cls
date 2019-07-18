@@ -204,5 +204,109 @@ ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", 
 	q $$$OK
 }
 
+///  Сохранить права доступа
+///  d ##class(App.security).UiSavePermiss(.Par)
+ClassMethod UiSavePermiss(Par = "") As %Status
+{
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+	set i=""
+	for { set i=$o(%request.Data(i)) quit:i=""
+		if i[(divId_"Matr0"),$o(%request.Data(i,""),-1)'="" {
+			set val=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+			if val'["unchecked" {
+				s chk(i)=val
+				s us=$p(i,"0",2)
+				s ro=$p(i,"0",3)
+				i $e(ro,1)="p" s ro="%"_$e(ro,2,*)
+				s users(us,ro)=val
+			}
+		}
+	}
+	NEW $NAMESPACE
+  	SET $NAMESPACE = "%SYS"
+	s us=""
+	for { set us=$o(users(us)) quit:us=""
+			s tSC=##class(Security.Users).Get(us,.prop)
+			i '$$$ISOK(tSC)  write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) q
+			s roles=","_prop("Roles")_","
+			kill prop
+			s ro=""
+			for { set ro=$o(users(us,ro)) quit:ro=""
+				if $g(users(us,ro)) {
+					if roles'[(","_ro_",") s roles=roles_ro_","
+				}else {
+					if roles[(","_ro_",") s roles=$replace(roles,ro_",","") s:$e(roles,*)'="," roles=roles_","
+				}
+			}
+			s:$e(roles,1)="," roles=$e(roles,2,*)
+			s:$e(roles,*)="," roles=$e(roles,1,*-1)
+			s prop("Roles")=roles
+			;zw prop
+			s tSC=##class(Security.Users).Modify(us,.prop)
+			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) q
+			;Проверка
+			s tSC=##class(Security.Users).Get(us,.pro)
+			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) q
+			write $$$appMsg(us_": "_pro("Roles"))
+	}
+	Quit $$$OK
+}
+
+/// Получить HTML контент формы матрицы доступа
+/// d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security","Ui"_"SavePermiss")
+ClassMethod UiMatrixPermission(name = "", rolesmask = "", divId = "", key = "", class = "", Method = "", blockui = 1) As %Status
+{
+		if name="" w $$$appError("Выберите фильтр по пользователям параметр Логин пустой (Имена через запятую или по контексту)") q 1
+		if rolesmask="" w $$$appError("Выберите фильтр по ролям, параметр Роли пустой (Роли через запятую или по контексту)") q 1
+		set msg="Матрица прав доступа"
+		
+		set:blockui onclick=$$$blockui("Ждите...")
+		set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
+		set butt=$$$appButton(divId_"appButtonSavePermiss","onclick="""_onclick_"""","Сохранить права доступа")
+		write butt_"<br><br>"
+		
+		write "<form id='"_divId_"FormContentSave'>"
+		d ##class(App.sys).GetRoles(rolesmask,.roles)
+		if '$d(roles) w $$$appError("По этому фильтру роли не найдены") q 1
+		;set roles("%all")=$lb("%All","The Super-User Role")
+		d ##class(App.sys).GetUsers(name,.users)
+		if '$d(users) w $$$appError("По этому фильтру пользователи не найдены") q 1
+		s r="UserName"
+  		s gn="matrix"
+ 	    set @gn@(0,1)=$lb(r)
+ 		set @gn@(-1,r)=1
+  		set col(1)=r
+  		set r=""
+        for col=2:1 { set r=$o(roles(r)) quit:r=""
+        	set NameRole=$lg(roles(r),1)
+   		    set @gn@(0,col)=$lb(NameRole)
+	  		set @gn@(-1,NameRole)=col
+	  		set col(col)=NameRole
+        }
+        set col=col-1
+		set u=""		
+		for row=1:1 { set u=$o(users(u)) quit:u=""
+			set usroles=$lg(users(u),3)
+			;zw usroles
+			set @gn@(row)=$g(@gn@(row))_$lb(u)
+			for c=2:1:col {
+				set yes="unchecked"
+				if $LISTFIND(usroles,col(c)) s yes="1unchecked"
+				set ret=##class(App.Form).WebCompShowCheckbox(,,,divId_"Matr0"_u_"0"_$tr(col(c),"%","p")_"0",yes)
+				set @gn@(row)=$g(@gn@(row))_$lb(ret)
+			}
+		}
+		;w "$('#"_pref_"MainContent').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
+		;w "<div id='TabViewCont' style='overflow: scroll;   max-width: 1200px;  max-height: 500px;'>"
+		set st=##class(App.LogInfoPane).DrawSQL("result "_gn,100000,$zu(5),$g(msg),$g(exec),,1)
+		;w "</div>"
+		;TODO do ##class(App.Form).DrawTable(.matrix) 
+		write "</form><div id='"_divId_"ContentSave'></div>"
+		quit $$$OK
+}
+
 }
 

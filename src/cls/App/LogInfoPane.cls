@@ -5,27 +5,116 @@ Class App.LogInfoPane Extends %CSP.Util.Pane
 
 ClassMethod GetLink()
 {
-	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_
-	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"
-	s icon="<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/img/apptools-ico-lofel.ico"" type=""image/x-icon""/>"_
-	"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/img/apptools-ico-lofel.ico"" type=""image/x-icon""/>"
-	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link ;_icon
+	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_$c(13,10)_
+	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"_$c(13,10)_
+	"<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_$c(13,10)_
+	"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_
+	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"uikit/css/uikit.min.css""/>"
+	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link_$c(13,10)
 }
 
 /// Add libraries and functions js to the panel
-/// write ##class(App.LogInfoPane).AddJsScripts()
+/// write ##class(App.LogInfoPane).AddJsScripts() 
 ClassMethod AddJsScripts(mode)
 {
-	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script><script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"
-	set:$g(mode)="grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script><script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"
-	set:$g(mode)="chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"
-	q scr
+	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"_$c(13,10)_"<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"_$c(13,10)_
+	"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script><script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script><script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
+	set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>"_$c(13,10)
+	set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"_$c(13,10)
+	q scr_$c(13,10)
 }
 
-/// write ##class(App.LogInfoPane).AddCSS()
-ClassMethod AddCSS(mode)
+/// add javascript
+/// /// /*! \example d ##class(App.LogInfoPane).AddJS("MSW")*/
+ClassMethod AddJS(ns = "", class = "")
 {
-	/* https://habr.com/ru/post/453744/
+ 	$$$jsstart	
+ &js<	
+$('#tWHAT').keydown(function (e) {
+  	if (e.ctrlKey && e.keyCode == 13) {
+    // Ctrl-Enter pressed
+    document.getElementById('WHAT').value=document.getElementById('tWHAT').value;
+    document.forms['loginfo'].submit();
+   }
+});
+//
+function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
+	var $data ={};
+	;var appNspace ='#(ns)#';
+	;if (!appNsp) {appNsp =appNspace;}
+	var classname ='#(class)#';
+	if (!appClass) var appClass =classname;
+	if (FormId) {
+		$data = $('#'+FormId).serializeArray(); 
+		//alert(FormId);
+	}
+	$data.push({name:"appClass",value:appClass});
+	$data.push({name:"appMethod",value:appMethod});
+	$data.push({name:"appNsp",value:appNsp});
+	$data.push({name:"appPar",value:appPar});
+	$.ajax({
+	  url: 'App.Action.cls',
+	  type: 'post',
+	  data: $data,
+	  success: function(result) {
+	  if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
+}
+//
+function AppAct(FormId,ResultId,appAct){
+	var $data ={};
+	if (FormId) {$data = $('#'+FormId).serializeArray();}
+	$data.push({name:"appAct",value:appAct});
+	$.ajax({
+	  url: 'App.Action.cls',
+	  type: 'post',
+	  data: $data,
+	  success: function(result) {
+	  if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
+}
+
+// The function of opening the dialog box
+function WinOpen(ns,classname,met,el,title) {
+	
+	var titlename="Method "+met+" parameter "+decodeURIComponent(el);
+	if (title) {titlename=title;}
+
+	//$("#dialogContent").load("App.Action.cls","appClass="+classname+"&appMethod="+met+"&appNsp="+ns+"&appPar="+el);
+	ActionJs('anyForm',"dialogContent",classname,met,el,ns);
+	$( "#dialog" ).dialog({
+		modal: true, 
+        title: titlename, 
+        autoOpen: true, 
+        width:window.innerWidth-200, 
+        height:window.innerHeight-300,
+		position: { my: 'top', at: 'top+150' },
+		buttons: [
+		{
+			text: "Cancel",
+			click: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+		]
+		});
+	try { event.preventDefault();
+	} catch (e){};
+}
+>
+	$$$jsstop
+}
+
+/// add javascript
+/// /// /*! \example d ##class(App.LogInfoPane).AddStyle()*/
+ClassMethod AddStyle()
+{
+ &html<
+ <style type="text/css">
+ 
+ 	/* https://habr.com/ru/post/453744/
 table {
   overflow: hidden;
 }
@@ -49,6 +138,74 @@ th:hover::after {
   z-index: -1;
 }
 */
+
+ 
+ /*
+	div {
+  max-width: 400px;
+  max-height: 150px;
+  overflow: scroll;
+}
+*/
+
+/* Use position: sticky to have it stick to the edge
+ * and top, right, or left to choose which edge to stick to: */
+
+thead th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  top: 0;
+}
+
+tbody th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  left: 0;
+}
+
+/* To have the header in the first column stick to the left: */
+
+thead th:first-child {
+  left: 0;
+  z-index: 1;
+}
+
+
+/* Just to display it nicely: */
+
+thead th {
+  background: #E7EBF9;
+
+}
+
+tbody th {
+  background: #E7EBF9;
+
+}
+
+table {
+  border-radius: 10px; 
+  border: 1px solid #72a7cf
+}
+
+td,
+th {
+  padding: 0.5em;
+}
+
+.bigbox { 
+height: 20px; width: 20px 
+}
+ 
+</style>
+>
+}
+
+/// The method initializes the developer in the system
+/// /// /*! \example d ##class(App.LogInfoPane).Init(,"MSW")*/
+ClassMethod Init(username = {$username}, fio = "DEV")
+{
+	set @$$$MgtPortalSettings@($Username,"DeveloperName")=$g(fio,"DEV")
 }
 
 /// Add libraries and functions js to the panel
@@ -172,6 +329,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 			<td>
 				#(##class(App.LogInfo).GetImg("tools"))#
 				 #(##class(App.LogInfoPane).GetSysinfo(color))#
+				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls")#' title='#($$$aText("Sample Application Access Matrix","Пример приложения с матрицей доступа"))#' id='Param'>#($$$aText("Access Matrix","Матрица доступа"))#</a>
 			</td>
 		</tr>
 		<tr>
@@ -182,6 +340,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 				 | <a target='ExploreTab' name='ExploreTab' href='#("App.FormExp.cls?panel=AccordionExp&NSP="_$zu(5))#'  id='ExplorerTab'>#($$$aText("Explorer tables","Табличный Навигатор"))#</a>
 				 | <a target='Param' name='Param' href='#("App.FormExp.cls?NSP="_$zu(5)_"&SelClass=App.Parameter")#' title='#($$$aText("Go to the options table","Перейти в таблицу параметров"))#' id='Param'>#($$$aText("Parameters","Параметры"))#</a>
 				 | <a target='Tabs' name='Tabs' href='#("App.TabsPanelSample.cls")#' title='#($$$aText("Sample Tabs Application","Пример приложения с закладками"))#' id='Param'>#($$$aText("SampleTabsApplication","ПримерПриложения"))#</a>
+				 
 				 | <a target='Chart' name='Chart'  id='Chart' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartDbSize&NSP="_$zu(5))#'>#($$$aText("ChartDbSize","Размеры БазДанных"))#</a>
 				 | <a target='ChartAlert' name='ChartAlert'  id='ChartAlert' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartAlert&NSP="_$zu(5))#'>#($$$aText("ChartAlert","Важные события"))#</a>
  			 | 
@@ -1040,96 +1199,6 @@ ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 	q $$$OK
 }
 
-/// add javascript
-/// /// /*! \example d ##class(App.LogInfoPane).AddJS("MSW")*/
-ClassMethod AddJS(ns = "", class = "")
-{
- 	$$$jsstart	
- &js<	
-$('#tWHAT').keydown(function (e) {
-  	if (e.ctrlKey && e.keyCode == 13) {
-    // Ctrl-Enter pressed
-    document.getElementById('WHAT').value=document.getElementById('tWHAT').value;
-    document.forms['loginfo'].submit();
-   }
-});
-//
-function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
-	var $data ={};
-	var appNspace ='#(ns)#';
-	if (!appNsp) {appNsp =appNspace;}
-	var classname ='#(class)#';
-	if (!appClass) var appClass =classname;
-	if (FormId) {
-		$data = $('#'+FormId).serializeArray(); 
-		//alert(FormId);
-	}
-	$data.push({name:"appClass",value:appClass});
-	$data.push({name:"appMethod",value:appMethod});
-	$data.push({name:"appNsp",value:appNsp});
-	$data.push({name:"appPar",value:appPar});
-	$.ajax({
-	  url: 'App.Action.cls',
-	  type: 'post',
-	  data: $data,
-	  success: function(result) {
-	  if (ResultId) {$('#'+ResultId).html(result);}
-	  }
-	});
-}
-//
-function AppAct(FormId,ResultId,appAct){
-	var $data ={};
-	if (FormId) {$data = $('#'+FormId).serializeArray();}
-	$data.push({name:"appAct",value:appAct});
-	$.ajax({
-	  url: 'App.Action.cls',
-	  type: 'post',
-	  data: $data,
-	  success: function(result) {
-	  if (ResultId) {$('#'+ResultId).html(result);}
-	  }
-	});
-}
-
-// The function of opening the dialog box
-function WinOpen(ns,classname,met,el,title) {
-	
-	var titlename="Method "+met+" parameter "+decodeURIComponent(el);
-	if (title) {titlename=title;}
-
-	//$("#dialogContent").load("App.Action.cls","appClass="+classname+"&appMethod="+met+"&appNsp="+ns+"&appPar="+el);
-	ActionJs('anyForm',"dialogContent",classname,met,el,ns);
-	$( "#dialog" ).dialog({
-		modal: true, 
-        title: titlename, 
-        autoOpen: true, 
-        width:window.innerWidth-200, 
-        height:window.innerHeight-300,
-		position: { my: 'top', at: 'top+150' },
-		buttons: [
-		{
-			text: "Cancel",
-			click: function() {
-				$( this ).dialog( "close" );
-			}
-		}
-		]
-		});
-	try { event.preventDefault();
-	} catch (e){};
-}
->
-	$$$jsstop
-}
-
-/// The method initializes the developer in the system
-/// /// /*! \example d ##class(App.LogInfoPane).Init(,"MSW")*/
-ClassMethod Init(username = {$username}, fio = "DEV")
-{
-	set @$$$MgtPortalSettings@($Username,"DeveloperName")=$g(fio,"DEV")
-}
-
 ///  d ##class(App.LogInfoPane).GetSysinfo()
 ClassMethod GetSysinfo(color) As %String
 {
@@ -1175,7 +1244,8 @@ ClassMethod AddProdQuery(SDNum, csp = "csp")
 {
 	&html< <tr style='vertical-align: middle;' >
 	<td> | <a target="ensprod" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.ProductionConfig.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Production","Продукция"))#</a> 
-	 | <a target="ensproderr" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.EventLog.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionErrors","ОшибкиПродукция"))#</a> 
+	 | <a target="ensproderr" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.EventLog.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionErrors","ОшибкиПродукции"))#</a> 
+	 | <a target="ensqueues" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.Queues.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionQueues","ОчередиПродукции"))#</a> 
 	 | <a target="query" href='#("/csp/sys/exp/%25CSP.UI.Portal.SQL.Home.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Query","Запросы"))# </a> 
 	 | <a target="globals" href='#("/csp/sys/exp/%25CSP.UI.Portal.GlobalList.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Globals","Глобалы"))# </a> 
 	#($s(##class(App.sys).ClassExist("WebTerminal.Engine"):" | "_$$$addAppLog($$$aText("WebTerminal","ВебТерминал"),$$$aText("Load WebTerminal","Загрузить Веб Терминал"),"trm",""),1:""))#

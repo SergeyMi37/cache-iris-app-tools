@@ -57,9 +57,11 @@ ClassMethod OnPage() As %Status
 		quit $$$OK
 	}
 	elseif appMethod="ShowJson" {
+		if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
 		d ..ShowJson(appPar)
 	}
 	elseif appMethod="ShowXML" {
+		if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
 		d ..ShowXML(appPar)
 	}
 	else {
