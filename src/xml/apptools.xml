@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-07-18 23:37:41">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-07-23 19:09:09">
 <Class name="App.Action">
 <Description>
 Выводить необходимые действия</Description>
@@ -7,7 +7,7 @@
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65212,72236</TimeChanged>
+<TimeChanged>65217,51978.46832</TimeChanged>
 <TimeCreated>64746,75062.988786</TimeCreated>
 
 <Method name="OnPage">
@@ -19,9 +19,9 @@
 	set $zt="Err"
  	#dim %request as %CSP.Request
 
- 	set $$$AppL("MSW","req")=$$$AppObJs(%request)
- 	merge $$$AppL("MSW","%request.Data")=%request.Data
-	set $$$AppL("MSW","%request.AppData")=%request.AppData
+ 	;set $$$AppL("MSW","req")=$$$AppObJs(%request)
+ 	;merge $$$AppL("MSW","%request.Data")=%request.Data
+	;set $$$AppL("MSW","%request.AppData")=%request.AppData
 
  	if %request.Get("appAct")'="" { ;AppAct=NameSpace:Packet.ClassName:Method:@Par1=Val1@Par2=Val2...
  		set appPar=$p(%request.Get("appAct"),"AppAct=",2,*)
@@ -2337,7 +2337,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65114,29919.747187</TimeChanged>
+<TimeChanged>65217,52162.762147</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 
 <Parameter name="DispatchClass">
@@ -2383,9 +2383,6 @@ This method is invoked when a class is compiled.</Description>
 <FormalSpec><![CDATA[cls:%String,&params]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	m $$$AppL("MSW","cls")=cls
-	m $$$AppL("MSW","params")=params
-	s $$$AppL("MSW","cls")=$$LOG^%ETN
 	new $Namespace
 	set ns = $Namespace // ought to be package home namespace!
 	if $g(@$$$GNEnsConf@("HomeNamespace"))'="",$g(@$$$GNEnsConf@("HomeNamespace"))'=ns {
@@ -3081,7 +3078,7 @@ LoadNode(GNkey,key)
 <IncludeCode>App.LogMacro</IncludeCode>
 <Modified>0</Modified>
 <Super>App.AutoPage</Super>
-<TimeChanged>65120,33292.224963</TimeChanged>
+<TimeChanged>65216,56982.899072</TimeChanged>
 <TimeCreated>64621,44286.491046</TimeCreated>
 
 <Parameter name="CSPURL">
@@ -3204,8 +3201,7 @@ w ##class(App.LogInfo).SendEmail("mihaylenko_sv@mosvodokanal.ru", "Тест", "�
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 		set subj="Сервер : "_$zu(110)_", "_subj
-		set text="<html><head></head><body color=greay><h4>Здравствуйте пользователь "_supportemail_"</h4>"_
-		"<br><br>"_msg
+		set text="<html><head></head><body color=greay><h4>Здравствуйте</h4><br><br>"_$g(msg)
 		set text=text_"</body></html>"
 		// support
 		if supportemail="" set supportemail=$$$EMAILSUPPORT		
@@ -3311,7 +3307,7 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65212,72236</TimeChanged>
+<TimeChanged>65217,52106.263686</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
 
 <Method name="GetLink">
@@ -3601,9 +3597,9 @@ Drawing the form to enter information</Description>
 			i sql["p.party_id( )" s sql=$replace(sql,"p.party_id( )","p.party_id(+)")
 	}
 	#; SQL table query 
-	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log" {
+	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log"||($e($zconvert($p(what," ",1),"L"),1,3)="tmp") {
 		#; Delete the protocol table
-		if $g(exp)="-" Do ##class(App.Log).%KillExtent() set msg=" "_$$$aText("Cleaned the protocol","Очистили протокол")_" App.Log"
+		if $g(exp)="-" Do ##class(App.Log).%KillExtent() set msg=" "_$$$aText("Cleaned the protocol","Очистили протокол")
 		set (what,sql)="select * FROM App.Log order by id desc"
 	}
 	#; Run class methods
@@ -3664,7 +3660,7 @@ Drawing the form to enter information</Description>
 			<td>
 				#(##class(App.LogInfo).GetImg("tools"))#
 				 #(##class(App.LogInfoPane).GetSysinfo(color))#
-				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls")#' title='#($$$aText("Sample Application Access Matrix","Пример приложения с матрицей доступа"))#' id='Param'>#($$$aText("Access Matrix","Матрица доступа"))#</a>
+				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix")#' title='#($$$aText("Sample Application Access Matrix","Пример приложения с матрицей доступа"))#' id='Param'>#($$$aText("Access Matrix","Матрица доступа"))#</a>
 			</td>
 		</tr>
 		<tr>
@@ -3765,7 +3761,6 @@ Drawing the form to enter information</Description>
 	#; If the output of Global
 	elseif $G(gn)'="" {
 		s a=$lb(gn,MaxNode,NSpace,Next,$g(Message),$g(exp),Filtr,$g(ExecuteDraw),exportXLS,exportXLSfile,exportXLSfileEmail)
-		s $$$AppL("MSS","job")=a
 		;d ##class(App.LogInfoPane).DrawGN(a) ;debug 
 		if exportXLS=1 { ;Running in the background
 			job ..DrawGN(a)::1
@@ -4344,11 +4339,11 @@ Close file XLS</Description>
 	s path=$p(exportXLSfile,slash,1,*-1)
 	s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
 	if sc s exportXLSfile=exportXLSfile_".zip"
-	i 'sc s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
+	i 'sc ;s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
 	// Send file to e-mail
 	i exportXLSfileEmail'="" {
 		s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
-		i 'sc s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
+		i 'sc ;s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
 		}
 	write !,"<br><h3>"_$$$aText("Query result","Результ запроса")_" ("_(+count)_" "_$$$aText("lines) uploaded to file","строк) выгружен в файл")_" "_exportXLSfile_"</h3>"
 	quit
@@ -4740,6 +4735,7 @@ Get call stack</Description>
 	$$$sH(" "_$$$addAppLog("^log*","Список глобалов по маске","^log*","")_" --- показать список глобалов по маске")
 	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log***","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
+	$$$sH(" "_$$$addAppLog("^tmp**","Список глобалов по маске с Allocated MB ","^tmp**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" ")
 	if ##class(App.sys).ClassExist("WebTerminal.Engine") {
 		$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
@@ -5383,309 +5379,6 @@ Namespace $zu(5) применения параметра</Description>
 </Value>
 </Data>
 </Storage>
-</Class>
-
-
-<Class name="App.PatternSimpleApp">
-<Description>
-Шаблон простого GUI приложения / Simple GUI Application Template</Description>
-<ClassType/>
-<IncludeCode>App.LogMacro</IncludeCode>
-<ProcedureBlock>1</ProcedureBlock>
-<Super>%CSP.Page</Super>
-<TimeChanged>65070,31695</TimeChanged>
-<TimeCreated>65065,36454.902831</TimeCreated>
-
-<Parameter name="HeaderText">
-<Description>
-Заголовок приложения / Application title</Description>
-<Default>Application title</Default>
-</Parameter>
-
-<Parameter name="PrefixIdDIV">
-<Description>
-Префикс идентификатора контейнера</Description>
-<Default>Exp</Default>
-</Parameter>
-
-<Method name="OnPage">
-<Description>
-Главный метод формирования содержимого страницы</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
- s NSpace=$zu(5)
- // Сохраним в параметрах сессии режим отладки (подразумевает расширенное информирование)
- s %session.Data("debug")=%request.Get("debug")
- &html<
- <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>#(..#HeaderText)#</title>
-<script src="/csp/spgz/jqueryui/external/jquery/jquery.js"></script>
-<script src="/csp/spgz/jqueryui/jquery-ui.js"></script>
-<script src="/csp/spgz/jqueryui/jquery.blockui.js"></script>
-
-<!-- Контрол Множественного выбора -->
-<script src="/csp/spgz/jqueryui/selectize.js"></script>
-<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/selectize.default.css"/>
-
-<link rel="stylesheet" type="text/css" href="/csp/spgz/jqueryui/css/main.css"/>
-<link href="/csp/spgz/jqueryui/jquery-ui.css" rel="stylesheet">
-<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
- <style type="text/css">
-
-</style>
-</head>
-<body>
- <div id="MainBody">
-  <nav style='background: #d7ebf9;' > 
-    &nbsp;&nbsp;&nbsp;  
-    	<img  title='заголовок' style='vertical-align: middle;' src="???.png" />  &nbsp;&nbsp;&nbsp; 
- 	<div id="MainControlgroup" > </div>
- 	<span id='status_nav'> Статус сессии </span>
- 	<div id="logo" style='text-align: right;'>
- 		<img  title='#(..GetSupportInfo())#' src="???.png" />
- 	</div>
-  </nav> 
- <div id="tabs"> </div>
-</div>
->
- // Режим отладки 1
- q:..IsDebugMode(0) $$$OK
- $$$jsstart
- 	;w $$$blockui("Загрузка...")
-    // Загрузить доступные режимы меню
- 	w "$('#MainControlgroup').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawMenu&appNsp="_NSpace_"&appPar=');"
- 	//Загрузить статус
- 	w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"
-    //Загрузить табы
- 	w "$('#tabs').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawTabs&appNsp="_NSpace_"&appPar=');"
- $$$jsstop
- 
- &html< 	
- <script language="javascript">
-$( ".tip" ).tooltip();
-</script>
-<div id='MainHidden' style='display:none;'></div>
-</body>
-</html>
-	>
- quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="GetSupportInfo">
-<Description>
-Получить информацию по техподдержке</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
-	q msg_"Support info mailto: sergey.mikhaylenko@gmail.com"
-]]></Implementation>
-</Method>
-
-<Method name="IsDebugMode">
-<Description>
-Добавить на форму  js код если режим разработки</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>mode=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
- i mode,'%request.Get("debug") { 
-	$$$jsstart
-	  w $$$blockui(..GetSupportInfo())
-	$$$jsstop
-	w "</body></html>"
-  q $$$OK
- }
-	q 0
-]]></Implementation>
-</Method>
-
-<Method name="DrawStatus">
-<Description>
-отрисовка меню</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Par</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	;do ##class(App.Form).BlockUI(0)
-	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.MVK.EISinfo).GetFIO($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
- 	$$$jsstart
-	w "$('.tip').tooltip();"
-	$$$jsstop
- q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="Permiss">
-<Description>
-какие доступны режимы</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>opt</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	;TODO права доступа к страницам
-	;TODO сохранить в БД таблицы
-	s key="zspr"
-	s opt(key)="Справочники"
-	s opt(key,"id")="Class"
-	s opt(key,"TabName")="Справочники"
-	s opt(key,"ClassName")="App.PatternSimpleApp"
-	s opt(key,"Method")="ShowTabSample"
-	s opt(key,"Disable")=0 ;разрабатывается
-
-	s key="zspr2"
-	s opt(key)="Справочники2"
-	s opt(key,"id")="Class2"
-	s opt(key,"TabName")="Справочники2"
-	s opt(key,"ClassName")="App.PatternSimpleApp"
-	s opt(key,"Method")="ShowTabSample"
-	s opt(key,"Disable")=1 ;разрабатывается
-	
-	q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="ShowTabSample">
-<Description>
-отрисовка Вкладки ранее переданных
-Par - код пункта меню из ..Permiss</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Par=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	d ..Permiss(.opt) 
-	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
-	w "Hello world! Parameter: "_Par
-	w ..ButtonAgain()
-]]></Implementation>
-</Method>
-
-<Method name="ShowTab">
-<Description>
-отрисовка Вкладки
-Par - код пункта меню из ..Permiss</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Par</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	d ..Permiss(.opt) 
-	s tabId="tabs-"_opt(Par,"id")
- 	$$$jsstart
- 		w "var a = $('#li-"_tabId_"'); a.show();" ; откроем вкладку
- 		w "var index = $('#tabs a[href=""#"_tabId_"""]').parent().index();"
-		w "$('#tabs').tabs({'active':index});" ;сделаем ее активной
- 		;w "alert('"_tabId_"');"
- 		if $g(opt(Par,"Url"))'="" w "$('#"_tabId_"').load('AsuPriz.MVK.Export.cls');"
- 		else  w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
-	$$$jsstop
-]]></Implementation>
-</Method>
-
-<Method name="DrawMenu">
-<Description>
-отрисовка меню</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Par</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	
-	d ..Permiss(.opt) 
-	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
-	w "<select id=""menu-spgz"" >"
-	s i="" w "<option VALUE=0> </option>"
-	f { s i=$o(opt(i)) q:i=""  
-		w "<option VALUE="""_i_""">"_opt(i)_"</option>"
-	}
- 	w "</select>"
- 	w ..ButtonExit("MainBody")
- 	$$$jsstart
-		w "$( ""#MainControlgroup"" ).controlgroup();"
- 		w "$( ""#menu-spgz"" ).selectmenu({ change: function( event, data ) { "_onc_" }, width:600 }).selectmenu('menuWidget');"
-	$$$jsstop
-  q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="DrawTabs">
-<Description>
-отрисовка табов</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Par</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	d ..Permiss(.opt)
-	w "<ul>"
-	s i="" f { s i=$o(opt(i)) q:i=""  
-		s tabs(i)="tabs-"_$g(opt(i,"id"))
-		w "<li id=""li-"_tabs(i)_"""><a href=""#"_tabs(i)_""">"_opt(i,"TabName")_"</a></li>"
-	}
- 	w "</ul>"
- 	s i="" f { s i=$o(tabs(i)) q:i=""  
- 		w "<div id='"_tabs(i)_"' style='height: 85%' ></div>"
- 	}
- 	$$$jsstart
-		w "$( ""#tabs"" ).tabs();"
-		;Все табы сразу скроем после инициализации, будем их открывать по мере выбора
-		s i="" f { s i=$o(tabs(i)) q:i=""  
-			w "var a = $('#li-"_tabs(i)_"'); a.hide();"
-		}
-	$$$jsstop
-	q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="ButtonExit">
-<Description>
-Вывод кнопки выхода</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>formName</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	set onclick="$('#"_formName_"').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=Logout&appNsp="_$zu(5)_"&appPar=Выход произведен');"
-	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Выход")
-]]></Implementation>
-</Method>
-
-<Method name="AddToForm">
-<Description>
-Добавить на форму  js код</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="Logout">
-<Description>
-Возврат в одной строке</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Par</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	d ##class(App.sys).logout()
-	w $$$appMsg($g(Par)) w "<br>"
-	d ##class(App.Form).ButtonRef("Вход")
-  	q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="ButtonAgain">
-<Description>
-Вывод кнопки Сначала для Вкладки TmcMainForm ShowTabTmc </Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-   	s formName=..#PrefixIdDIV_"MainContent"
-	s Method="ShowTab"_..#PrefixIdDIV
-	set onclick="$('#"_formName_"').load('App.Action.cls','"_..#PrefixIdDIV_"appClass="_..%ClassName(1)_"&"_..#PrefixIdDIV_"appMethod="_Method_"&"_..#PrefixIdDIV_"appNsp="_$zu(5)_"&"_..#PrefixIdDIV_"appPar=1');"
-	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
-]]></Implementation>
-</Method>
 </Class>
 
 
@@ -6693,7 +6386,7 @@ Show(modeShow,order)
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65212,77606.221133</TimeChanged>
+<TimeChanged>65216,37150.288611</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 
 <Parameter name="JSLIB">
@@ -6717,6 +6410,7 @@ Show(modeShow,order)
  set namespace=$zu(5)
  // Сохраним в параметрах сессии режим отладки (подразумевает расширенное информирование)
  set %session.Data("debug")=%request.Get("debug")
+ set autoloadmenu=%request.Get("autoload")
  &html<
 <html>
  <head>
@@ -6759,10 +6453,10 @@ Show(modeShow,order)
 
 <div class="uk-grid">
     <div class="uk-width-1-1 uk-margin-left uk-margin-right " style='overflow: auto;' id="mainApp" >
-		<ul id='tab0' class="uk-tab uk-tab-grid uk-tab-top" data-uk-tab="{connect:'#tabslist', animation: 'fade'}">
+		<ul id='tabMenu' class="uk-tab uk-tab-grid uk-tab-top" data-uk-tab="{connect:'#tabList', animation: 'fade'}">
 			<li id='t1' class="uk-active"><a href="#">Добро пожаловать в программу</a></li>
 		</ul>
-		<ul id="tabslist" class="uk-switcher uk-margin uk-tab-content">
+		<ul id="tabList" class="uk-switcher uk-margin uk-tab-content">
 			<li id='ta1' >
 			 <div class="uk-alert-success" uk-alert>
 				<p> Программа шаблон для типового приложения</p>
@@ -6774,7 +6468,18 @@ Show(modeShow,order)
 >
  $$$jsstart
  	//Загрузить статус
- 	w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_namespace_"&appPar=');"
+ 	write "$(document).ready(function(){"
+ 	write "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_namespace_"&appPar=');"
+ 	if autoloadmenu="" {
+	 	d ..GetAllApps(.opt) 
+	 	set i="" 
+	 	for { set i=$o(opt(i)) q:i=""
+	 		if $GET(opt(i,"Active")) write "$('#Menu"_opt(i,"id")_"').trigger('click');"
+	 	}
+ 	} else {
+	 	write "$('#Menu"_autoloadmenu_"').trigger('click');"
+ 	}
+ 	write "});"
  $$$jsstop
  
  &html< 	
@@ -6800,8 +6505,8 @@ Show(modeShow,order)
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
-	q msg_"Support info mailto: sergey.mikhaylenko@gmail.com"
+	set msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
+	quit msg_"Support info mailto: sergey.mikhaylenko@gmail.com"
 ]]></Implementation>
 </Method>
 
@@ -6812,8 +6517,8 @@ Show(modeShow,order)
 <FormalSpec>Par</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	write $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.sys).GetFullName($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
- q $$$OK
+ write $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span title='"_$username_"-"_$j_"'>Пользователь: "_##class(App.sys).GetFullName($username)_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
+ quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -6826,24 +6531,24 @@ Show(modeShow,order)
 <Implementation><![CDATA[
 	;TODO права доступа к страницам
 	;TODO сохранить в БД таблицы
-	s key="menu-first"
-	s opt(key)="Пример поиска в Samples" ;Имя меню
-	s opt(key,"id")="Find"
-	s opt(key,"TabName")="Пример поиска в Samples" ;имя вкладки
-	s opt(key,"ClassName")=..%ClassName(1)
-	s opt(key,"Method")="ShowTabSample"
-	s opt(key,"Disable")=0 ;разрабатывается
-	s opt(key,"TabMenu","Close")=1
+	set key="menu-first"
+	set opt(key)="Пример поиска в Samples" ;Имя меню
+	set opt(key,"id")="Find"
+	set opt(key,"TabName")="Пример поиска в Samples" ;имя вкладки
+	set opt(key,"ClassName")=..%ClassName(1)
+	set opt(key,"Method")="ShowTabSample"
+	set opt(key,"Disable")=0 ;разрабатывается
+	set opt(key,"TabMenu","Close")=1
 
-	s key="menuZ-about"
-	s opt(key)="О программе"
-	s opt(key,"id")="About"
-	s opt(key,"TabName")="О программе"
-	s opt(key,"ClassName")=..%ClassName(1)
-	s opt(key,"Method")="ShowTabAbout"
-	s opt(key,"Disable")=1 ;разрабатывается
-	
-	q $$$OK
+	set key="menuZ-about"
+	set opt(key)="О программе"
+	set opt(key,"id")="About"
+	set opt(key,"TabName")="О программе"
+	set opt(key,"ClassName")=..%ClassName(1)
+	set opt(key,"Method")="ShowTabAbout"
+	set opt(key,"Disable")=1 ;разрабатывается
+
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -6855,27 +6560,26 @@ Par - код пункта меню из ..GetAllApps</Description>
 <FormalSpec>Par</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	d ..GetAllApps(.opt) 
-	s tabId="tab-"_opt(Par,"id")
-	s tabIdMenu="tabMenu-"_opt(Par,"id")
+	do ..GetAllApps(.opt) 
+	set tabId="tab-"_opt(Par,"id")
+	set tabIdMenu="tabMenu-"_opt(Par,"id")
 	if $g(opt(Par,"TabMenu","Close"))'="" s IconMenu="<span class=""uk-margin-small-left uk-icon uk-close"" uk-icon=""close"" onclick=""$(\'#"_tabIdMenu_",#"_tabId_"\').remove();""></span>"
  	if $DATA(opt(Par,"TabMenu","Close"))>9 { //есть еще пункты
  		;TODO
  	}
  	$$$jsstart
- 	 w "if (!$('li').is('#"_tabId_"')) { $('.uk-active').removeClass('uk-active');"
- 		w " $('#ta1').after('<li id="_tabId_"></li>');"
- 		;w " $('#t1').after('<li id="_tabIdMenu_"><a>"_$g(opt(Par,"TabName"))_$g(IconMenu)_"</a></li>');"
- 		w " $('#tab0').append('<li id="_tabIdMenu_"><a>"_$g(opt(Par,"TabName"))_$g(IconMenu)_"</a></li>');"
- 		w " $('#t1').hide();" //" $('#t1').prop('disabled',true);"
+ 	 write "if (!$('li').is('#"_tabId_"')) { $('.uk-active').removeClass('uk-active');"
+ 		write " $('#tabList').append('<li id="_tabId_"></li>');"
+ 		write " $('#tabMenu').append('<li id="_tabIdMenu_"><a>"_$g(opt(Par,"TabName"))_$g(IconMenu)_"</a></li>');"
+ 		write " $('#t1,#ta1').hide();" //" $('#t1').prop('disabled',true);"
  		if $g(opt(Par,"Url"))'="" {
-	 		w "$('#"_tabId_"').load('"_$g(opt(Par,"Url"))_"');"
+	 		write "$('#"_tabId_"').load('"_$g(opt(Par,"Url"))_"');"
  		}
  		else {
-	 		w "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+	 		write "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
  		}
- 	 w "};"
- 	w " UIkit.tab('#tab0').show($('#"_tabIdMenu_"'));"
+ 	 write "};"
+ 	write " UIkit.tab('#tabMenu').show($('#"_tabIdMenu_"'));"
 	$$$jsstop
 ]]></Implementation>
 </Method>
@@ -6891,9 +6595,9 @@ Par - код пункта меню из ..GetAllApps</Description>
 	set i="",ret=""
 	for { set i=$o(opt(i)) quit:i=""  
 	   	set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
-		set ret=ret_"<li><a href='#' onclick="""_onclick_""">"_$g(opt(i))_"</a></li>"
+		set ret=ret_"<li><a id='Menu"_$g(opt(i,"id"))_"' href='#' onclick="""_onclick_""">"_$g(opt(i))_"</a></li>"
 	}
-  q ret
+  quit ret
 ]]></Implementation>
 </Method>
 
@@ -6916,7 +6620,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 	</center>
 </div>
 >
- 	q $$$OK
+ 	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -6927,10 +6631,10 @@ Par - код пункта меню из ..GetAllApps</Description>
 <FormalSpec>divId="",key=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	s mhead=divId_"MainHeader"
-	s mcont=divId_"MainContent"
+	set mhead=divId_"MainHeader"
+	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
 ]]></Implementation>
 </Method>
 
@@ -6942,11 +6646,11 @@ Par - код пункта меню из ..GetAllApps</Description>
 <FormalSpec>Par=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	d ..GetAllApps(.opt) 
-	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
-	s divId=$g(opt(Par,"id"))
-	w "Hello world! Parameter: "_Par
-	w ..ButtonAgain(divId,Par)
+	do ..GetAllApps(.opt) 
+	if $g(opt(Par,"Disable")) write ..GetSupportInfo() quit $$$OK
+	set divId=$g(opt(Par,"id"))
+	write "Hello world! Parameter: "_Par
+	write ..ButtonAgain(divId,Par)
 ]]></Implementation>
 </Method>
 
@@ -6958,12 +6662,12 @@ Par - код пункта меню из ..GetAllApps</Description>
 <FormalSpec>key=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- d ..GetAllApps(.opt) 
- i $g(opt(key,"Disable")) w ..GetSupportInfo() q $$$OK
- s NSpace=$zu(5)
- s pref=$g(opt(key,"id"))
- s mhead=pref_"MainHeader"
- s mcont=pref_"MainContent"
+ do ..GetAllApps(.opt) 
+ if $g(opt(key,"Disable")) write ..GetSupportInfo() quit $$$OK
+ set NSpace=$zu(5)
+ set pref=$g(opt(key,"id"))
+ set mhead=pref_"MainHeader"
+ set mcont=pref_"MainContent"
  &html<
 <form id="#(pref_"MainForm")#">
 <div class="uk-grid">
@@ -6991,8 +6695,8 @@ Par - код пункта меню из ..GetAllApps</Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	do ##class(App.Form).BlockUI(0)
-	s key=Par("key")
-	s divId=Par("divId")
+	set key=Par("key")
+	set divId=Par("divId")
 	set onclick=$$$blockui("Ждите...")_";ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
 		&html<
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
@@ -7037,7 +6741,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 		</tr>
 		</table>
 	>
-	q $$$OK
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -7058,7 +6762,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 	set st=$$$OK
 	write ..ButtonAgain(divId,key)
 	if mode=1 {
-		if Name="" w $$$appError("Контекст пустой") q $$$OK
+		if Name="" w $$$appError("Контекст пустой") quit $$$OK
 		zn "samples"
 		set sql="select * from Cinema.Film where title is not null "
 		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
@@ -7073,8 +6777,8 @@ Par - код пункта меню из ..GetAllApps</Description>
 	elseif mode=2 {
 
 	}
-	w "<br>"
-	q $$$OK
+	write "<br>"
+	quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>
@@ -7087,7 +6791,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65212,84830.16993</TimeChanged>
+<TimeChanged>65217,55271.941018</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 
 <Parameter name="HeaderText">
@@ -7124,7 +6828,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 <body>
 	<header class="cd-main-header">
 		<a href="#" class="cd-logo">
-			ExpressPixel
+			#(..#HeaderText)#
 		</a>
 		
 		<div class="cd-search is-hidden">
@@ -7137,16 +6841,14 @@ Par - код пункта меню из ..GetAllApps</Description>
 
 		<nav class="cd-nav">
 			<ul class="cd-top-nav">
-				<li><a href="#events/calendar">Tour</a></li>
-				<li><a href="#articles/comments">Support</a></li>
+				<!--<li><a href="#events/calendar">Tour</a></li>
+				<li><a href="#articles/comments">Support</a></li>-->
 				<li class="has-children account">
 					<a href="#">
 						<img src="uikit-dark-admin/img/cd-avatar.png" alt="avatar">
-						Account
+						<span id='status_nav'></span>
 					</a>
-
 					<ul>
-
 						<li><a href="#">My Account</a></li>
 						<li><a href="#">Edit Account</a></li>
 						<li><a href="#">Logout</a></li>
@@ -7162,7 +6864,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 			<ul class="uk-nav uk-nav-default">
 				
 				<li class="cd-label">Main</li>
-				<li class="has-children overview">
+				<li class="has-children overview active">
 					<a href="#">Articles</a>
 						<ul>
 							<li><a href="#articles/new">Write a new article</a></li>
@@ -7171,7 +6873,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 							<li><a href="#articles/categories">Manage Categories</a></li>
 						</ul>
 				</li>
-				<li class="has-children notifications active">
+				<li class="has-children overview">
 					<a href="#">Images</a>
 					
 					<ul>
@@ -7182,58 +6884,20 @@ Par - код пункта меню из ..GetAllApps</Description>
 					</ul>
 				</li>
 
-				<li class="has-children comments">
-					<a href="#">Widgets</a>
-					
-					<ul>
-						<li><a href="#widgets/tabs">Tabs</a></li>
-						<li><a href="#widgets/carousel">Carousel</a></li>
-						<li><a href="#widgets/modals">Modals</a></li>
-						<li><a href="#widgets/popups">Confirm boxes</a></li>
-						<li><a href="#widgets/charts">Charts</a></li>
-					</ul>
-				</li>
 			</ul>
-
-			<ul>
-				<li class="cd-label">Events</li>
-				<li class="has-children bookmarks">
-					<a href="#">Calendar</a>
-					
-					<ul>
-						<li><a href="#events/calendar">Calendar overview</a></li>
-						<li><a href="#events/event">Add a new event</a></li>
-						<li><a href="#events/appointments">Appointments</a></li>
-					</ul>
-				</li>
-				<li class="has-children images">
-					<a href="#">Elements</a>
-					
-					<ul>
-						<li><a href="#elements/buttons">Buttons</a></li>
-						<li><a href="#elements/badges">Labels & Badges</a></li>
-						<li><a href="#elements/cards">Cards and panels</a></li>
-						<li><a href="#elements/icons">Icons</a></li>
-						<li><a href="#elements/navs">Navigation menus</a></li>
-						<li><a href="#elements/alerts">Alerts</a></li>
-					</ul>
-				</li>
-				
-			</ul>
-
 
 		</nav>
 
 		<div class="content-wrapper">
         <!-- Page Content -->
-        11111111111111
 		<br />
 		<br />
         <div id="page-content-wrapper uk-margin-top">
 			<div class="uk-container uk-container-medium" id="content">
-			2222222222
+			
 			</div>
         </div>
+
         <!-- /#page-content-wrapper -->
 		</div> <!-- .content-wrapper -->
 	</main> <!-- .cd-main-content -->
@@ -7248,7 +6912,7 @@ Par - код пункта меню из ..GetAllApps</Description>
     // Загрузить доступные режимы меню
  	;w "$('#MainControlgroup').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawMenu&appNsp="_NSpace_"&appPar=');"
  	//Загрузить статус
- 	;w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"
+ 	w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"
     //Загрузить табы
  	;w "$('#tabs').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawTabs&appNsp="_NSpace_"&appPar=');"
  $$$jsstop
@@ -7649,7 +7313,7 @@ Par - код пункта меню из ..GetAllApps</Description>
 Шаблон GUI приложения с селектором и вкладками / Simple GUI Application Template</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanelUikit</Super>
-<TimeChanged>65212,75994.123402</TimeChanged>
+<TimeChanged>65216,36594.070507</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
 
 <Parameter name="HeaderText">
@@ -7700,6 +7364,8 @@ Par - код пункта меню из ..GetAllApps</Description>
 	s opt(key,"Method")="ShowTabItem"
 	s opt(key,"Disable")=0
 	s opt(key,"TabMenu","Close")=1
+	s opt(key,"Active")=1 ;Загрузить вкладку сразу
+
 	q $$$OK
 ]]></Implementation>
 </Method>

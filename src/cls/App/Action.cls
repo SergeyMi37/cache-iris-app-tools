@@ -10,9 +10,9 @@ ClassMethod OnPage() As %Status
 	set $zt="Err"
  	#dim %request as %CSP.Request
 
- 	set $$$AppL("MSW","req")=$$$AppObJs(%request)
- 	merge $$$AppL("MSW","%request.Data")=%request.Data
-	set $$$AppL("MSW","%request.AppData")=%request.AppData
+ 	;set $$$AppL("MSW","req")=$$$AppObJs(%request)
+ 	;merge $$$AppL("MSW","%request.Data")=%request.Data
+	;set $$$AppL("MSW","%request.AppData")=%request.AppData
 
  	if %request.Get("appAct")'="" { ;AppAct=NameSpace:Packet.ClassName:Method:@Par1=Val1@Par2=Val2...
  		set appPar=$p(%request.Get("appAct"),"AppAct=",2,*)

@@ -89,8 +89,7 @@ ClassMethod GetInputXLSTagsVal(exportXLS, exportXLSfile, exportXLSfileEmail, SDN
 ClassMethod SendEmail(supportemail = "", subj = "", msg = "", file = "") As %Status
 {
 		set subj="Сервер : "_$zu(110)_", "_subj
-		set text="<html><head></head><body color=greay><h4>Здравствуйте пользователь "_supportemail_"</h4>"_
-		"<br><br>"_msg
+		set text="<html><head></head><body color=greay><h4>Здравствуйте</h4><br><br>"_$g(msg)
 		set text=text_"</body></html>"
 		// support
 		if supportemail="" set supportemail=$$$EMAILSUPPORT		

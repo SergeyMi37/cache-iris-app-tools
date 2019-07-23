@@ -132,12 +132,12 @@ ROUTINE App.LogMacro [Type=INC]
 #define GNmessages "^%App.cconsolelog"
 #define DubledQuote(%s)	$replace(%s,"'","''")
 
-#If ##class(App.sys).ClassExist("App.MVK.docbook")
-#define  TESTSERVER "cip-test.mvk.ru"
+#If ##class(App.sys).ClassExist("App.SM.docbook")
+#define  TESTSERVER "test.ru"
 #define DEVELOPER "mihaylenko_sv"
 #; The module display links to the administrative application panel
-#define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)
-#define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.MVK.docbook") "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
+#define  DRAWAllApp ##class(App.SM.docbook).GetAllApp(0)
+#define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.SM.docbook") "<br>"_##class(App.SM.docbook).FindSDRef(SDNum)
 #Else 
 #define  TESTSERVER " "
 #define DEVELOPER "admin"

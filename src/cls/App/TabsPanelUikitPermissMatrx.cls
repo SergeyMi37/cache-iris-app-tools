@@ -45,6 +45,8 @@ ClassMethod GetAllApps(opt) As %Status
 	s opt(key,"Method")="ShowTabItem"
 	s opt(key,"Disable")=0
 	s opt(key,"TabMenu","Close")=1
+	s opt(key,"Active")=1 ;Загрузить вкладку сразу
+
 	q $$$OK
 }
 

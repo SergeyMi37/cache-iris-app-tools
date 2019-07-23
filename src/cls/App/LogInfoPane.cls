@@ -266,9 +266,9 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 			i sql["p.party_id( )" s sql=$replace(sql,"p.party_id( )","p.party_id(+)")
 	}
 	#; SQL table query 
-	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log" {
+	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log"||($e($zconvert($p(what," ",1),"L"),1,3)="tmp") {
 		#; Delete the protocol table
-		if $g(exp)="-" Do ##class(App.Log).%KillExtent() set msg=" "_$$$aText("Cleaned the protocol","Очистили протокол")_" App.Log"
+		if $g(exp)="-" Do ##class(App.Log).%KillExtent() set msg=" "_$$$aText("Cleaned the protocol","Очистили протокол")
 		set (what,sql)="select * FROM App.Log order by id desc"
 	}
 	#; Run class methods
@@ -329,7 +329,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 			<td>
 				#(##class(App.LogInfo).GetImg("tools"))#
 				 #(##class(App.LogInfoPane).GetSysinfo(color))#
-				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls")#' title='#($$$aText("Sample Application Access Matrix","Пример приложения с матрицей доступа"))#' id='Param'>#($$$aText("Access Matrix","Матрица доступа"))#</a>
+				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix")#' title='#($$$aText("Sample Application Access Matrix","Пример приложения с матрицей доступа"))#' id='Param'>#($$$aText("Access Matrix","Матрица доступа"))#</a>
 			</td>
 		</tr>
 		<tr>
@@ -430,7 +430,6 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	#; If the output of Global
 	elseif $G(gn)'="" {
 		s a=$lb(gn,MaxNode,NSpace,Next,$g(Message),$g(exp),Filtr,$g(ExecuteDraw),exportXLS,exportXLSfile,exportXLSfileEmail)
-		s $$$AppL("MSS","job")=a
 		;d ##class(App.LogInfoPane).DrawGN(a) ;debug 
 		if exportXLS=1 { ;Running in the background
 			job ..DrawGN(a)::1
@@ -937,11 +936,11 @@ ClassMethod CloseXLSfile(fileXLS, ByRef exportXLSfileEmail, ByRef exportXLSfile,
 	s path=$p(exportXLSfile,slash,1,*-1)
 	s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
 	if sc s exportXLSfile=exportXLSfile_".zip"
-	i 'sc s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
+	i 'sc ;s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
 	// Send file to e-mail
 	i exportXLSfileEmail'="" {
 		s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
-		i 'sc s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
+		i 'sc ;s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
 		}
 	write !,"<br><h3>"_$$$aText("Query result","Результ запроса")_" ("_(+count)_" "_$$$aText("lines) uploaded to file","строк) выгружен в файл")_" "_exportXLSfile_"</h3>"
 	quit
@@ -1297,6 +1296,7 @@ ClassMethod GetHelp(help)
 	$$$sH(" "_$$$addAppLog("^log*","Список глобалов по маске","^log*","")_" --- показать список глобалов по маске")
 	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log***","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
+	$$$sH(" "_$$$addAppLog("^tmp**","Список глобалов по маске с Allocated MB ","^tmp**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" ")
 	if ##class(App.sys).ClassExist("WebTerminal.Engine") {
 		$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")

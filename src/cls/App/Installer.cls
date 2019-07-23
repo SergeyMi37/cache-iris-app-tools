@@ -26,9 +26,6 @@ Parameter VERSION = 1.0;
 /// This method is invoked when a class is compiled.
 ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 {
-	m $$$AppL("MSW","cls")=cls
-	m $$$AppL("MSW","params")=params
-	s $$$AppL("MSW","cls")=$$LOG^%ETN
 	new $Namespace
 	set ns = $Namespace // ought to be package home namespace!
 	if $g(@$$$GNEnsConf@("HomeNamespace"))'="",$g(@$$$GNEnsConf@("HomeNamespace"))'=ns {

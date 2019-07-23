@@ -32,7 +32,7 @@ ClassMethod OnPage() As %Status
 <body>
 	<header class="cd-main-header">
 		<a href="#" class="cd-logo">
-			ExpressPixel
+			#(..#HeaderText)#
 		</a>
 		
 		<div class="cd-search is-hidden">
@@ -45,16 +45,14 @@ ClassMethod OnPage() As %Status
 
 		<nav class="cd-nav">
 			<ul class="cd-top-nav">
-				<li><a href="#events/calendar">Tour</a></li>
-				<li><a href="#articles/comments">Support</a></li>
+				<!--<li><a href="#events/calendar">Tour</a></li>
+				<li><a href="#articles/comments">Support</a></li>-->
 				<li class="has-children account">
 					<a href="#">
 						<img src="uikit-dark-admin/img/cd-avatar.png" alt="avatar">
-						Account
+						<span id='status_nav'></span>
 					</a>
-
 					<ul>
-
 						<li><a href="#">My Account</a></li>
 						<li><a href="#">Edit Account</a></li>
 						<li><a href="#">Logout</a></li>
@@ -70,7 +68,7 @@ ClassMethod OnPage() As %Status
 			<ul class="uk-nav uk-nav-default">
 				
 				<li class="cd-label">Main</li>
-				<li class="has-children overview">
+				<li class="has-children overview active">
 					<a href="#">Articles</a>
 						<ul>
 							<li><a href="#articles/new">Write a new article</a></li>
@@ -79,7 +77,7 @@ ClassMethod OnPage() As %Status
 							<li><a href="#articles/categories">Manage Categories</a></li>
 						</ul>
 				</li>
-				<li class="has-children notifications active">
+				<li class="has-children overview">
 					<a href="#">Images</a>
 					
 					<ul>
@@ -90,58 +88,20 @@ ClassMethod OnPage() As %Status
 					</ul>
 				</li>
 
-				<li class="has-children comments">
-					<a href="#">Widgets</a>
-					
-					<ul>
-						<li><a href="#widgets/tabs">Tabs</a></li>
-						<li><a href="#widgets/carousel">Carousel</a></li>
-						<li><a href="#widgets/modals">Modals</a></li>
-						<li><a href="#widgets/popups">Confirm boxes</a></li>
-						<li><a href="#widgets/charts">Charts</a></li>
-					</ul>
-				</li>
 			</ul>
-
-			<ul>
-				<li class="cd-label">Events</li>
-				<li class="has-children bookmarks">
-					<a href="#">Calendar</a>
-					
-					<ul>
-						<li><a href="#events/calendar">Calendar overview</a></li>
-						<li><a href="#events/event">Add a new event</a></li>
-						<li><a href="#events/appointments">Appointments</a></li>
-					</ul>
-				</li>
-				<li class="has-children images">
-					<a href="#">Elements</a>
-					
-					<ul>
-						<li><a href="#elements/buttons">Buttons</a></li>
-						<li><a href="#elements/badges">Labels & Badges</a></li>
-						<li><a href="#elements/cards">Cards and panels</a></li>
-						<li><a href="#elements/icons">Icons</a></li>
-						<li><a href="#elements/navs">Navigation menus</a></li>
-						<li><a href="#elements/alerts">Alerts</a></li>
-					</ul>
-				</li>
-				
-			</ul>
-
 
 		</nav>
 
 		<div class="content-wrapper">
         <!-- Page Content -->
-        11111111111111
 		<br />
 		<br />
         <div id="page-content-wrapper uk-margin-top">
 			<div class="uk-container uk-container-medium" id="content">
-			2222222222
+			
 			</div>
         </div>
+
         <!-- /#page-content-wrapper -->
 		</div> <!-- .content-wrapper -->
 	</main> <!-- .cd-main-content -->
@@ -156,7 +116,7 @@ ClassMethod OnPage() As %Status
     // Загрузить доступные режимы меню
  	;w "$('#MainControlgroup').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawMenu&appNsp="_NSpace_"&appPar=');"
  	//Загрузить статус
- 	;w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"
+ 	w "$('#status_nav').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"
     //Загрузить табы
  	;w "$('#tabs').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawTabs&appNsp="_NSpace_"&appPar=');"
  $$$jsstop
