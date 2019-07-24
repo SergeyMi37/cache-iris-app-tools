@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-07-23 19:09:09">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-07-24 22:27:35">
 <Class name="App.Action">
 <Description>
 Выводить необходимые действия</Description>
@@ -3307,7 +3307,7 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65217,52106.263686</TimeChanged>
+<TimeChanged>65218,53319.977121</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
 
 <Method name="GetLink">
@@ -3597,7 +3597,7 @@ Drawing the form to enter information</Description>
 			i sql["p.party_id( )" s sql=$replace(sql,"p.party_id( )","p.party_id(+)")
 	}
 	#; SQL table query 
-	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log"||($e($zconvert($p(what," ",1),"L"),1,3)="tmp") {
+	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log" {
 		#; Delete the protocol table
 		if $g(exp)="-" Do ##class(App.Log).%KillExtent() set msg=" "_$$$aText("Cleaned the protocol","Очистили протокол")
 		set (what,sql)="select * FROM App.Log order by id desc"
@@ -3910,10 +3910,11 @@ set st=##class(App.LogInfoPane).DrawArray(res,100,$zu(5),"Output a list 1111")</
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 		; Check if there is a record of the stack
-		if $e(gn,1,4)=($$$logdevGN)||($e(gn,1,6)=("^mtemp")) {
-			set:gn[$$$logdevGN stackGN=($$$logdevGN)_$e(gn,5,7)_"stack"
-			set:gn["mtemp" stackGN=("^mtemp")_$e(gn,7,9)_"stack"	
+		if $e(gn,1,4)=($$$logdevGN)||($e(gn,1,6)=("^mtemp"))||($e(gn,1,4)="^tmp") {
 			if $e($g(exp))="-" {
+				set:gn[$$$logdevGN stackGN=($$$logdevGN)_$e(gn,5,7)_"stack"
+				set:gn["mtemp" stackGN=("^mtemp")_$e(gn,7,9)_"stack"	
+				set:gn["tmp" stackGN="astack"	
 				set jo=$g(@gn@(0)) KILL @gn,exp,@stackGN set:jo @gn@(0)=jo  
 			}
 			#; Clean and initialize the debug isolation node
@@ -4339,11 +4340,11 @@ Close file XLS</Description>
 	s path=$p(exportXLSfile,slash,1,*-1)
 	s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
 	if sc s exportXLSfile=exportXLSfile_".zip"
-	i 'sc ;s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
+	;i 'sc ;s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
 	// Send file to e-mail
 	i exportXLSfileEmail'="" {
 		s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
-		i 'sc ;s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
+		;i 'sc ;s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
 		}
 	write !,"<br><h3>"_$$$aText("Query result","Результ запроса")_" ("_(+count)_" "_$$$aText("lines) uploaded to file","строк) выгружен в файл")_" "_exportXLSfile_"</h3>"
 	quit
@@ -8039,7 +8040,7 @@ Get a comma-delimited list of databases</Description>
 <Class name="App.UploadCSP">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Page</Super>
-<TimeChanged>65212,72236</TimeChanged>
+<TimeChanged>65218,38512.929633</TimeChanged>
 <TimeCreated>65113,38880.765844</TimeCreated>
 
 <Parameter name="pathfiles">
@@ -8152,7 +8153,6 @@ Get a comma-delimited list of databases</Description>
 	        else  s %loadFileSuccess=%loadFileSuccess_$lb($g(path),sc)
 	        
         }
-    	;s ^logMSW2(1,$i(^logMSW2),"0 %request-%loadFileSuccess")=%loadFileSuccess
         q 1
     ;}
     q 1
@@ -8851,7 +8851,7 @@ d ##class(App.files).GetAllDir("d:\dev\app1\src\",,.a)</Description>
 Утилита работ с %Net.HttpRequest и %Net.SMTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65160,43253.280942</TimeChanged>
+<TimeChanged>65218,38433.274101</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 
 <Method name="SendFilesToEmail">
@@ -9122,7 +9122,7 @@ w ##class(App.net).ListFtp()</Description>
  Write "-------- Length of file received: ",stream.Size," ------",!
  ;for  set len=32763,line=stream.Read(.len) write line  quit:stream.AtEnd
  for  {
-	 s line=stream.ReadLine() s ^logFTT(1,$i(^logFTT),"F")=$lb(line) 
+	 s line=stream.ReadLine() ;s ^logFTT(1,$i(^logFTT),"F")=$lb(line) 
 	 w !,line
 	 quit:stream.AtEnd
  }
@@ -9598,7 +9598,7 @@ d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security
 <Class name="App.sys">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65175,36505.006433</TimeChanged>
+<TimeChanged>65218,38532.259645</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 
 <Method name="CreateTaskPurge">
@@ -9777,7 +9777,6 @@ Function to call the OS command in the result output
 	s gnTask=gn
 	set filename=dir_"RunCmd.log"
 	if AddDateTime set datetime=$tr($$$AppDT($h)," ","_") set gnTask=$na(@gn@(datetime)),filename=dir_"RunCmd"_datetime_".log"
-	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunCmd")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if ##class(App.files).ReadFile2Arr(filename,"RSK",,"^||tmpFile") MERGE @gnTask=^||tmpFile
 	q $$$OK
@@ -9794,7 +9793,6 @@ Function to call from a regular task
 	set datetime=$tr($$$AppDT($h)," ","_")
 	set gnTask=$na(@gn@(datetime))
 	set filename=dir_"RunTask"_datetime_".txt"
-	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunTask")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if query'="" d ##class(App.sys).SaveQuery(query,gn,datetime)
 	q $$$OK

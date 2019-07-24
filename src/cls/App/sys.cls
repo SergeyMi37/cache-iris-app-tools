@@ -142,7 +142,6 @@ ClassMethod RunCmd(cmdOs = "free", gn = "^TaskGN", AddDateTime = 0, dir = "/back
 	s gnTask=gn
 	set filename=dir_"RunCmd.log"
 	if AddDateTime set datetime=$tr($$$AppDT($h)," ","_") set gnTask=$na(@gn@(datetime)),filename=dir_"RunCmd"_datetime_".log"
-	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunCmd")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if ##class(App.files).ReadFile2Arr(filename,"RSK",,"^||tmpFile") MERGE @gnTask=^||tmpFile
 	q $$$OK
@@ -155,7 +154,6 @@ ClassMethod RunTask(cmdOs = "free", gn = "^TaskGN", query = "%SYSTEM.License:Cou
 	set datetime=$tr($$$AppDT($h)," ","_")
 	set gnTask=$na(@gn@(datetime))
 	set filename=dir_"RunTask"_datetime_".txt"
-	s ^logZFC(1,$i(^logZFC),$zd(+$h,3)_" "_##class(App.type).GetValidZT($h)_"RunTask")=$lb($username,cmdOs_" > "_filename)
 	if cmdOs'="",$zf(-1,cmdOs_" > "_filename)
 	if query'="" d ##class(App.sys).SaveQuery(query,gn,datetime)
 	q $$$OK

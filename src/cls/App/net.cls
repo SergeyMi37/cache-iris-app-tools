@@ -240,7 +240,7 @@ ClassMethod ListFtp() As %String
  Write "-------- Length of file received: ",stream.Size," ------",!
  ;for  set len=32763,line=stream.Read(.len) write line  quit:stream.AtEnd
  for  {
-	 s line=stream.ReadLine() s ^logFTT(1,$i(^logFTT),"F")=$lb(line) 
+	 s line=stream.ReadLine() ;s ^logFTT(1,$i(^logFTT),"F")=$lb(line) 
 	 w !,line
 	 quit:stream.AtEnd
  }

@@ -104,7 +104,6 @@ ClassMethod OnPreHTTP() As %Boolean
 	        else  s %loadFileSuccess=%loadFileSuccess_$lb($g(path),sc)
 	        
         }
-    	;s ^logMSW2(1,$i(^logMSW2),"0 %request-%loadFileSuccess")=%loadFileSuccess
         q 1
     ;}
     q 1

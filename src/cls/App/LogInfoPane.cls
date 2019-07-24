@@ -266,7 +266,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 			i sql["p.party_id( )" s sql=$replace(sql,"p.party_id( )","p.party_id(+)")
 	}
 	#; SQL table query 
-	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log"||($e($zconvert($p(what," ",1),"L"),1,3)="tmp") {
+	elseif $e($zconvert($p(what," ",1),"L"),1,3)="log" {
 		#; Delete the protocol table
 		if $g(exp)="-" Do ##class(App.Log).%KillExtent() set msg=" "_$$$aText("Cleaned the protocol","Очистили протокол")
 		set (what,sql)="select * FROM App.Log order by id desc"
@@ -562,10 +562,11 @@ ClassMethod AddRefViewEditGlob(Val, Col, Head, Temp, nspace, DSN)
 ClassMethod DrawArray(gn As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", Next = "1", msg = "", exp = "", Filtr = "", Execute = "", fileXLS = "") As %Status
 {
 		; Check if there is a record of the stack
-		if $e(gn,1,4)=($$$logdevGN)||($e(gn,1,6)=("^mtemp")) {
-			set:gn[$$$logdevGN stackGN=($$$logdevGN)_$e(gn,5,7)_"stack"
-			set:gn["mtemp" stackGN=("^mtemp")_$e(gn,7,9)_"stack"	
+		if $e(gn,1,4)=($$$logdevGN)||($e(gn,1,6)=("^mtemp"))||($e(gn,1,4)="^tmp") {
 			if $e($g(exp))="-" {
+				set:gn[$$$logdevGN stackGN=($$$logdevGN)_$e(gn,5,7)_"stack"
+				set:gn["mtemp" stackGN=("^mtemp")_$e(gn,7,9)_"stack"	
+				set:gn["tmp" stackGN="astack"	
 				set jo=$g(@gn@(0)) KILL @gn,exp,@stackGN set:jo @gn@(0)=jo  
 			}
 			#; Clean and initialize the debug isolation node
@@ -936,11 +937,11 @@ ClassMethod CloseXLSfile(fileXLS, ByRef exportXLSfileEmail, ByRef exportXLSfile,
 	s path=$p(exportXLSfile,slash,1,*-1)
 	s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
 	if sc s exportXLSfile=exportXLSfile_".zip"
-	i 'sc ;s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
+	;i 'sc ;s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
 	// Send file to e-mail
 	i exportXLSfileEmail'="" {
 		s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
-		i 'sc ;s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
+		;i 'sc ;s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
 		}
 	write !,"<br><h3>"_$$$aText("Query result","Результ запроса")_" ("_(+count)_" "_$$$aText("lines) uploaded to file","строк) выгружен в файл")_" "_exportXLSfile_"</h3>"
 	quit
