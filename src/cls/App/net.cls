@@ -293,11 +293,12 @@ ClassMethod GetListIP() As %String
  }
 }
 
-/// Получить IP адрес
-/// w ##class(App.net).GetIP()
-ClassMethod GetIP() As %String
+/// Get IP address
+/// w ##class(App.net).GetIP("google.com")
+ClassMethod GetIP(host = "") As %String
 {
-	q $P($ZU(54,13,$zu(54,0)),",",1)
+	if host="" set host=$zu(54,0) ;current host
+	q $P($ZU(54,13,host),",",1)
 }
 
 /// Получить ответ на Post Http запрос

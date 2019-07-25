@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-07-24 22:27:35">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-07-25 20:00:48">
 <Class name="App.Action">
 <Description>
 Выводить необходимые действия</Description>
@@ -8851,7 +8851,7 @@ d ##class(App.files).GetAllDir("d:\dev\app1\src\",,.a)</Description>
 Утилита работ с %Net.HttpRequest и %Net.SMTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65218,38433.274101</TimeChanged>
+<TimeChanged>65219,34019.867418</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 
 <Method name="SendFilesToEmail">
@@ -9182,11 +9182,14 @@ $G(%request.CgiEnvs("REMOTE_ADDR")) - адроес клиента</Description>
 
 <Method name="GetIP">
 <Description>
-Получить IP адрес
-w ##class(App.net).GetIP()</Description>
+Get IP address
+w ##class(App.net).GetIP("google.com")</Description>
 <ClassMethod>1</ClassMethod>
+<FormalSpec>host=""</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	q $P($ZU(54,13,$zu(54,0)),",",1)
+<Implementation><![CDATA[
+	if host="" set host=$zu(54,0) ;current host
+	q $P($ZU(54,13,host),",",1)
 ]]></Implementation>
 </Method>
 
