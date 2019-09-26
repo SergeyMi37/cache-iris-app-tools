@@ -542,5 +542,141 @@ ClassMethod GetAllDir(dir, ext = "", ByRef out)
 	q $$$OK
 }
 
+/// Конвертировать XSL файл в формат CSV и загрузить в глобал
+/// d ##class(App.files).TransXLS2CSV
+/// 
+ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef error, tempDir = {##class(%File).GetDirectory(##class(%File).TempFilename())})
+{
+		;s path=;"/opt/isc/ensemble/csp/spgz/files/"
+		s path=$p(fileXSL,"/",1,*-1)
+		if path="" s error="Пустой путь "_path q $$$ERROR($$$GeneralError,error)
+		;	s fileXSL=path_NameFileXLS
+		;w "<br> "_fileXSL 
+		s gn2=..tempGN("Xls2") k @gn2
+
+		;Конвертировать xls в csv в формат UTF8 с разделителем по запятой, а значения полей в двойных кавычках
+		s cmd="cd "_path_"; export HOME=$(eval echo ~$(id -u -n)) && unset LD_LIBRARY_PATH && soffice --convert-to csv --infilter=CSV:44,34,76,1 --headless "_fileXSL
+
+		d ##class(App.sys).RunCmd(cmd,gn2,0,tempDir) h 1
+		k @gn2
+
+		s fileCSV=$p(fileXSL,".",1,*-1)_".csv"
+		;Загружаем и разбираем полученный CSV
+
+		s gn3=..tempGN("Xls3") k @gn3
+		s st=##class(App.files).ReadFile2Arr(fileCSV,"RSK","UTF8",gn3)
+		i 'st s error=$System.Status.GetErrorText(st) q st
+		i '$d(@gn3) s error="Нет файла "_fileCSV q $$$ERROR($$$GeneralError,error)
+		;zw @gn3
+		if FieldNameHead="" m out=@gn3 k @gn3 q $$$OK
+		s gn=..tempGN("CsvTable") kill @gn
+		s i=""
+		f { s i=$o(@gn3@(i),1,s) q:i=""
+			s ss=""
+			;Сначало пройдем по двойным кавычкам и на каждой четной запятые транслируем в Чар=1
+			f ii=1:1 { q:$p(s,$c(34),ii,ii+1)=""
+				s ss=ss_$s('(ii#2):$tr($p(s,$c(34),ii),",",$c(1)),1:$p(s,$c(34),ii))
+			}
+			i s[FieldNameHead { ;делаем шапку один раз
+				f ii=1:1 { q:$p(ss,",",ii,ii+1)=""
+					s name=$tr($ZStrip($p(ss,",",ii),"<>WP"),$c(1),",") ;обратная трансляция
+					continue:name=""
+					s @gn@(0,ii)=$lb(name)
+					s @gn@(-1,name)=ii
+				}
+			} elseif 1 { ;проход по всем остальным строкам
+				;w "<br>"_ss
+				s listval=""
+				;Пройдем по запятым и Чар=1 вернем обратно в запятие
+				f ii=1:1 { q:$p(ss,",",ii,ii+1)=""
+					s val=$tr($ZStrip($p(ss,",",ii),"<>W"),$c(1),",") ;обратная трансляция
+					s listval=listval_$lb(val)
+				}
+				s row=$g(row)+1
+				s @gn@(row)=listval
+			}
+		}
+		m out=@gn k @gn q $$$OK
+}
+
+/// Получить глобальну ссылку на временный глобал
+/// w ##class(App.files).tempGN("GN")
+ClassMethod tempGN(GN, NoKill = 0) As %String
+{
+	;не делать ^|| и ^mtemp
+	s gn=$na(^tmpAppFile(GN,$j)) 
+	if 'NoKill KILL @gn	s @gn=$$$AppDT($h)
+	q gn
+}
+
+/// Получить временную директорию
+/// w ##class(App.files).tempDir()
+ClassMethod tempDir() As %String
+{
+ q ##class(%File).GetDirectory(##class(%File).TempFilename())
+}
+
+/// Сформировать документ XLSX по шаблону трансформировав поля
+/// f - массив полей на замену
+/// ParamData - Значение имени парамера
+/// node - подузел временного глобала
+/// ParamClass - "Spgz.model.Param"
+/// ParamField - имя поля ;"OfficeFile"
+ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField, debug = 0, newfile = "", msg = "")
+{
+	///Формирование Заявки РГ
+	s st=##class(App.Form).GetValueByName(ParamClass,ParamData,ParamField,.Val,1)
+	i 'st {
+		w $System.Status.GetErrorText(st) q $$$OK
+	} else {
+		s desc=Val("obj").Description
+		s file=$p($g(Val("fileName")),"*",1)
+	}
+	if $g(file)="" w $$$appError("Пустой файл "_file) q 1
+	
+	s gn=..tempGN(node) k @gn
+	;d ##class(App.files).File2Arr(file,gn)
+	i debug s msg=msg_"<br>"_gn_" "_file
+	;Разархивировать
+	s tempDir=..tempDir()_$j
+	d ##class(App.files).UnzipToDirectory(file,tempDir)
+	
+	;Прочитаем в глобал исходник шаблона
+	s fileSource=tempDir_"/xl/sharedStrings.xml"
+	s st=##class(App.files).ReadFile2Arr(fileSource,"RSK",,gn) ;читаем файл в массив
+
+	i 'st s msg=msg_$$$appError($System.Status.GetErrorText(st)) w msg q 1
+	i '$d(@gn) w $$$appError("Нет файла") q 1
+
+	set fn=fileSource ;    $replace(file,"-doc","-order-"_$username_"-") ;_$tr($zts,",.")) 
+	if '##class(App.files).OpenFile(fn) s msg=msg_$$$appError("Нет прав доступа записать файл "_fn) w msg q 1
+	s curIo=$i
+	s i=""
+	f { s i=$o(@gn@(i),1,str) q:i=""
+		s fkey="" 
+		f { s fkey=$o(f(fkey),1,fdata) q:fkey=""
+			i str[fkey s str=$replace(str,fkey,fdata)
+		}
+		s @gn@(i)=str
+		use fn 	write @gn@(i),!	use curIo
+	}
+	close fn
+	
+	i debug s msg=msg_"<br>fn="_fn_"<br>tempDir="_tempDir
+	;Архивируем снова под новым именем
+	;i ##class(App.files).zipFile(tempDir,tempDir,newfilename,"/backup/temp/spgz-zip")
+	s newfile=..tempDir()_node_"-"_$username_"-"_$zd($h,3)_"-"_$tr($zt($p($h,",",2),1),":")_".xlsx"
+	set cmd="cd "_tempDir_"; zip -r "_newfile_" * ; rm -R "_tempDir
+	s gn=..tempGN(node_"Xlsx3") k @gn
+	i debug s msg=msg_"<br>"_cmd
+	d ##class(App.sys).RunCmd(cmd,gn) h 3
+	i debug zw @gn
+	;Ссылка временная
+	if ##class(App.DownloadCSP).GetFileId(newfile,.url) { 
+		s msg=msg_"<li><a title=""Сохранить этот файл у себя на диске"" href='"_url_"'>Получить сформированный документ по файлу "_$g(desc)_"</a>"
+		w msg
+	}
+}
+
 }
 

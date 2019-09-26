@@ -88,7 +88,7 @@ ClassMethod OnPage() As %Status [ ServerOnly = 1 ]
 /// Получить глобальную ссылку
 ClassMethod GetGN() As %String
 {
-	quit $na(^tmpDownloadCSP(+$h))
+	quit $na(^CacheTemp.App.tmpDownloadCSP(+$h)) ;глобал должен быть доступен из любой области
 }
 
 /// Удалить идентификатор для скачивания

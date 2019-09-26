@@ -3,7 +3,7 @@ Class App.Parameter Extends %Persistent
 {
 
 /// Порядок свойств при выводе в форме
-Parameter AppORDERPROPERTY = "Name,Description,Value,Types,Namespace,DateStart,DateFinish,File,FileName,isEnabled,ImageFile,CustomFile,isEnabledCheck,OfficeFile";
+Parameter AppORDERPROPERTY = "Name,Description,Value,Types,Namespace,DateStart,DateFinish,File,isEnabled,isEnabledCheck,OfficeFile";
 
 /// Namespace $zu(5) применения параметра
 Property Namespace As %String(MAXLEN = "") [ InitialExpression = {$zu(5)} ];

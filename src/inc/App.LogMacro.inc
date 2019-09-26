@@ -86,6 +86,8 @@ ROUTINE App.LogMacro [Type=INC]
 #define appTableTrTd3(%n1,%n2,%n3) "<tr class=""trs"" ><td style=""text-align:left"" >"_%n1_"</td><td style=""text-align:left"" >"_%n2_"</td><td style=""text-align:left"" >"_%n3_"</td></tr>"
 #define appTableEnd3 "</tbody></table>"_$s('$d(%DrawArray):"<script language='javascript'>$('.trs').hover(function(){ $(this).toggleClass( 'ui-widget-content' ) });</script>",1:"")
 
+#define appTab3(%n1,%n2,%n3) "<table cellpadding=2 cellspacing=0 border=1 class=""DetailTable"" width=""90%""><tbody><tr><th align=""left"" width=""5px"">"_%n1_"</th><th align=""left"" width=""50px"">"_%n2_"</th><th align=""left"" width=""50px"">"_%n3_"</th></tr>"
+
 #define jsstart w "<script language='javascript'>"
 #define jsstop w "</script>"
 #define styleurl "text-decoration:underline; color:blue; cursor:hand;"
@@ -132,12 +134,12 @@ ROUTINE App.LogMacro [Type=INC]
 #define GNmessages "^%App.cconsolelog"
 #define DubledQuote(%s)	$replace(%s,"'","''")
 
-#If ##class(App.sys).ClassExist("App.SM.docbook")
-#define  TESTSERVER "test.ru"
+#If ##class(App.sys).ClassExist("App.MVK.docbook")
+#define  TESTSERVER "cip-test.mvk.ru"
 #define DEVELOPER "mihaylenko_sv"
 #; The module display links to the administrative application panel
-#define  DRAWAllApp ##class(App.SM.docbook).GetAllApp(0)
-#define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.SM.docbook") "<br>"_##class(App.SM.docbook).FindSDRef(SDNum)
+#define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)
+#define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.MVK.docbook") "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
 #Else 
 #define  TESTSERVER " "
 #define DEVELOPER "admin"
@@ -145,7 +147,6 @@ ROUTINE App.LogMacro [Type=INC]
 #define  DRAWAllApp " "
 #define SDNum  
 #EndIf
-
 
 
 

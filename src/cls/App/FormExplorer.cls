@@ -324,7 +324,7 @@ ClassMethod SelectObjects(SelectClass, sql = "", exec = "")
 	;if exec="" set exec="##class(App.FormExplorer).EditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
 	if exec="" set exec="##class(App.FormExplorer).WinEditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
 	;set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),sql_" <a target=SelectQ href='App.LogInfo.cls?NSP="_$zu(5)_"&WHAT="_sql_"' title='Перейти на панель запросов'>Запрос</a> count(*)="_count_" "_add,exec)
-	set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),"Экземпляры класса "_SelectClass_" "_add,exec)
+	set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),"Экземпляры класса "_SelectClass_" в области "_$zu(5)_" "_add,exec)
 	quit st
 }
 
@@ -352,8 +352,9 @@ ClassMethod WinEditObj(Val, Col, Head, Temp, nspace, DSN)
 	}
 	else {
 		if $D(Temp("ID",Col)) {
-			set res=$replace(Val,Val,"<span title='Редактировать' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_%SelectClass_"&ID="_$zconvert(Val,"O","URL")_"');"" >"_Val_"</span>")
+			s %id=Val
 		}
+		set res=$replace(Val,Val,"<span title='Редактировать' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_%SelectClass_"&ID="_$zconvert(%id,"O","URL")_"');"" >"_Val_"</span>")
 	}
 	quit res
 }

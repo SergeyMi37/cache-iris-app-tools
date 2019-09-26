@@ -73,15 +73,42 @@ ClassMethod GetInputXLSTags(exportXLS, exportXLSfile, exportXLSfileEmail)
 
 /// Получить значения инпут элементов для выгрузки потока в ексель и посылки по почте
 /// d ##class(App.LogInfo).GetInputXLSTagsVal(.exportXLS, .exportXLSfile, .exportXLSfileEmail)
-ClassMethod GetInputXLSTagsVal(exportXLS, exportXLSfile, exportXLSfileEmail, SDNum)
+ClassMethod GetInputXLSTagsVal(exportXLS, exportXLSfile, exportXLSfileEmail, SDNum, suffix = "")
 {
 	set:$d(%request) exportXLSfile=%request.Get("exportXLSfile")
-	if $g(exportXLSfile)="" s exportXLSfile=$$$EMAILXLSPATH_$zd($h,3)_"_"_$p($h,",",2)_".xls"
+	if $g(exportXLSfile)="" s exportXLSfile=$$$EMAILXLSPATH_$zd($h,3)_"_"_$tr($zt($p($h,",",2),1),":")_"_"_suffix_".xls"
 	set:$d(%request) exportXLS=%request.Get("exportXLS")["on"
 	set:$d(%request) exportXLSfileEmail=%request.Get("exportXLSfileEmail")
 	if $g(exportXLSfileEmail)="" s exportXLSfileEmail=$$$EMAILSUPPORT
 	set:$d(%request) SDNum=%request.Get("SDNum")
 	quit ""
+}
+
+/// Сформировать XLS из Запроса и Послать пользователю файл с сообщением
+/// w ##class(App.LogInfo).SaveQueryXLS2jobSendEmail("mihaylenko_sv@mosvodokanal.ru", "select * from Mvk_model.SPGZ where (IdSPGZ='19902800' or entityIdSPGZ='19902800') and deletedDate is null", "qqqq",.msg)
+ClassMethod SaveQueryXLS2jobSendEmail(email = "", sql = "", name = "", msg = "") As %Status
+{
+	d ##class(App.LogInfo).GetInputXLSTagsVal(.exportXLS, .exportXLSfile, .exportXLSfileEmail,,##class(App.type).Transliteration(name))
+	i email="" {
+		i '##class(App.MVK.EISinfo).GetUserProp($username,"fullName,email",.prop) s msg="В КИП Нет пользователя "_$username q $$$ERROR($$$GeneralError,msg)
+		s email=$g(prop("email"))
+	}
+	i email="" {
+		s msg="У пользователя "_$username_" ("_$g(prop("fullName"))_") Нет адреса электронной почты"
+		q $$$ERROR($$$GeneralError,msg)
+	}
+	else {	
+		s exportXLS=$lb(1,exportXLSfile,email)
+		job ##class(App.LogInfoPane).DrawSQL(sql,1000000,$zu(5)," ","",exportXLS)::1
+		i $t {
+			s msg="Запущенный в фоновом режиме запрос '"_name_"' экспортируется в файла Excel: '"_$p(exportXLSfile,"/",*)_"' и результат заархивируется и отправится на почту: "_email
+			q $$$OK
+		} else {
+			s msg="ошибка запуска "_query_" "_sql_" и посылки на "_email
+			q $$$ERROR($$$GeneralError,msg)
+		}
+	}
+	q $$$OK
 }
 
 /// Послать пользователю файл с сообщением
@@ -165,6 +192,7 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 	*/
 	s list("App*.CLS")=""
 	s list("App*.INC")=""
+	s list("App*.GBL")=""
 	Write $SYSTEM.OBJ.Export(.list, pFileName)
 	k list
 	s list("/apptools/*.*")=""

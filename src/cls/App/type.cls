@@ -4,6 +4,13 @@ Include App.LogMacro
 Class App.type [ Abstract ]
 {
 
+/// Вернуть дату в формате 3 
+/// App.type_Date3(DateFrom)
+ClassMethod Date3(h As %String) As %String [ SqlProc ]
+{
+	return $zd(h,3)
+}
+
 /// Посчитать количество секунд в ГГГГ-ММ-ДД ЧЧ:ММ:СС или в $HOROLOG
 /// w ##class(App.type).GetCountSec("2018-07-06 08:14:47")
 /// w ##class(App.type).GetCountSec($h)

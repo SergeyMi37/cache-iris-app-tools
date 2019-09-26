@@ -329,6 +329,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 			<td>
 				#(##class(App.LogInfo).GetImg("tools"))#
 				 #(##class(App.LogInfoPane).GetSysinfo(color))#
+				 <a target='ccons' name='ccons' href='#("/csp/sys/op/UtilSysConsoleLog.csp#bottom")#' id='Param'>#($$$aText("Console log","КонсольныйПротокол"))#</a>
 				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix")#' title='#($$$aText("Sample Application Access Matrix","Пример приложения с матрицей доступа"))#' id='Param'>#($$$aText("Access Matrix","Матрица доступа"))#</a>
 			</td>
 		</tr>
@@ -1052,9 +1053,12 @@ ClassMethod DrawSQL(SQL As %String = "", MaxNode = {$$$MAXSHOW}, NSpace = "", ms
 		}
 	}
 	&html<</tbody></table>>
-	Write !,$$$aText("Number of records found","Количество записей найдено")_" :"_+$g(count)
-	if Execute'="" {
-		Write !,$$$aText("Contextual changes or allotments","Контекстных изменений или выделений")_" :"_+$g(countEx)
+	if msg=" " {}
+	else {
+		Write !,$$$aText("Number of records found","Количество записей найдено")_" :"_+$g(count)
+		if Execute'="" {
+			Write !,$$$aText("Contextual changes or allotments","Контекстных изменений или выделений")_" :"_+$g(countEx)
+		}
 	}
 	if $g(exportXLSfile)'="" { 
 		d ..CloseXLSfile(fileXLS, .exportXLSfileEmail, .exportXLSfile,.io, .count, .msg, .SQL)
@@ -1298,6 +1302,8 @@ ClassMethod GetHelp(help)
 	$$$sH(" "_$$$addAppLog("^log**","Список глобалов по маске с Allocated MB ","^log**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
 	$$$sH(" "_$$$addAppLog("^log***","Список глобалов по маске с Allocated MB и Used MB","^log***","")_" --- показать список глобалов с занимаемым размером Allocated MB и Used MB")
 	$$$sH(" "_$$$addAppLog("^tmp**","Список глобалов по маске с Allocated MB ","^tmp**","")_" --- показать список глобалов с занимаемым размером Allocated MB")
+	$$$sH(" "_$$$addAppLog("^ISCSOAP"," Глобал протокола SOAP ","^ISCSOAP","")_" --- Глобал протокола SOAP (на проде должен быть удален)")
+	
 	$$$sH(" ")
 	if ##class(App.sys).ClassExist("WebTerminal.Engine") {
 		$$$sH(" "_$$$addAppLog("trm"," Перейти к терминалу","trm","")_" --- Открыть встроенный Web Terminal ")
