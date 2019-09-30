@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-09-30 21:29:10">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-09-30 21:38:45">
 <Class name="App.Action">
 <Description>
 Выводить необходимые действия</Description>
@@ -9448,219 +9448,201 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 <Class name="App.security">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65212,72236</TimeChanged>
+<TimeChanged>65286,77900</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 
 <Method name="LockDown">
 <Description>
-Повышение безопасности системы до уровня LockDown, кроме параметра InactiveLimit=90
-Метод отключает сервисы и приложения как в LockDown. Удаляет области "DOCBOOK","ENSDEMO","SAMPLES"
-Метод включает аудит и настраивает регистрацию в портале всех событий, кроме переключения журнала
- и модификацию системных свойств
-Всем предустановленным пользователям сменим пароль и поменяем свойства как в LockDown
-	newPassword - новый единый пароль вместо SYS. Для уровня безопасности LockDown он имеет шаблон 8.32ANP
-	sBindings =1 Сервис %service_bindings включить
-	sCachedirect =1 Сервис %service_cachedirect включить
-	sECP =1 Сервис %service_ecp включить
-	sBindingsIP - список ip адресов через точку с запятой для которых разрешить подключение CacheStudio.
-		Для ECP конфигураций нужно добавить адреса всех серверов и клиентов для разрешения подключения по %Net.RemoteConnection для снятия "брошенных" заданий
-	sCachedirectIP - список ip адресов через точку с запятой для которых разрешить подключение CIMModeler.
-	sECPIP - список ip адресов через точку с запятой для которых разрешить подключение к серверу ECP.
-    AuthLDAP=1 Включить дополнительно к парольному еще и LDAP аутотентификацию
- Пример применения: 
+Increase system security to LockDown, except for InactiveLimit = 90
+The method disables services and applications as in LockDown. Deletes the areas "DOCBOOK", "ENSDEMO", "SAMPLES"
+The method enables auditing and configures registration of all events in the portal, except for switching the log
+and modification of system properties
+For all predefined users, change the password and change the properties as in LockDown
+	newPassword - new single password instead of SYS. For LockDown security level, it has an 8.32ANP pattern
+	sBindings = 1 Service% service_bindings enable
+	sCachedirect = 1 Service% service_cachedirect enable
+	sECP = 1 Service% service_ecp enable
+	sBindingsIP - list of ip addresses with a semicolon for which to allow CacheStudio connection.
+For ECP configurations, you need to add the addresses of all servers and clients to allow connection on% Net.RemoteConnection to remove "abandoned" tasks
+	sCachedirectIP - list of ip addresses with a semicolon for which to allow CIMModeler connection.
+	sECPIP - list of ip addresses with a semicolon for which to allow connection to the ECP server.
+	AuthLDAP = 1 In addition to the password, also enable LDAP authentication
+	Application example:
 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1")
 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1",,1)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>newPassword="",Warn,sBindings="",sCachedirect="",sECP="",sBindingsIP="",sCachedirectIP="",sECPIP="",AuthLDAP=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	I newPassword'?8.32ANP s text="Пароль не удовлетворяет шаблону 8.32ANP" w !,text QUIT $$$ERROR(text)
-	s ons = $zu(5) ;текущая область
-	w !,"Для приложений и служб будет установлена аутентификация по "_$s('AuthLDAP:"паролю",1:"паролю и LDAP")
-	s AutheEnabled=$s(AuthLDAP:2080,1:32) ;с паролем = 32, паролем и LDAP =2080
+	if newPassword'?8.32ANP s text="Password does not match the pattern 8.32ANP" write !,text QUIT $$$ERROR(text)
+	set ons = $zu(5)
+	write !,"Applications and services will be authenticated by "_$s('AuthLDAP:"password",1:"password and LDAP")
+	set AutheEnabled=$s(AuthLDAP:2080,1:32)
 	zn "%sys"
-	w !,"Происходит смена пароля предустановленным пользователям"
-	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
-	s tSC=result.Prepare("select NameLowerCase FROM Security.Users") ;!!! prefered !!!
-	s:tSC tSC=result.Execute()
-	i '$$$ISOK(tSC) {
-		s text="Ошибка настройки пользователей :"_$SYSTEM.Status.GetErrorText(tSC) w !,text
+	write !,"Password is reset to predefined users"
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare("select NameLowerCase FROM Security.Users")
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+		set text="User configuration error :"_$SYSTEM.Status.GetErrorText(tSC) write !,text
 		QUIT $$$ERROR(text)
 	}
 	else {
 		while result.Next() {
-			s name=result.Data("NameLowerCase")
-			k prop
-			s prop("Password")=newPassword
-			i name="_system" s prop("Enabled")=0 ; отключим
-			i name="unknownuser" s prop("Roles")="" ; удалим все роли
-			s tSC=##class(Security.Users).Modify(name,.prop)
-			i '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
+			set name=result.Data("NameLowerCase")
+			kill prop
+			set prop("Password")=newPassword
+			if name="_system" s prop("Enabled")=0
+			if name="unknownuser" s prop("Roles")="" ; delete all roles
+			set tSC=##class(Security.Users).Modify(name,.prop)
+			if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
 		}
 	}
-	w !,"Происходит модификация свойств сервисов:"
-	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
-	s tSC=result.Prepare("select NameLowerCase,ClientSystems FROM Security.Services")
-	s:tSC tSC=result.Execute()
-	i '$$$ISOK(tSC) {
-		s text="Ошибка настройки сервисов :"_$SYSTEM.Status.GetErrorText(tSC) w !,text
+	write !,"Modification of service properties:"
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare("select NameLowerCase,ClientSystems FROM Security.Services")
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+		set text="Service configuration error :"_$SYSTEM.Status.GetErrorText(tSC) write !,text
 		QUIT $$$ERROR(text)
 	}
 	else {
 		while result.Next() {
-			s name=result.Data("NameLowerCase")
-			#;пропускаем сетевые сервисы
+			set name=result.Data("NameLowerCase")
+			#;skipping network services
 			continue:(name="%service_mirror")||(name="%service_shadow")||(name="%service_datacheck")
-			k prop
-			s prop("Enabled")=0 ;все остальные выключим
-			i name="%service_csp"||(name="%service_console")||(name="%service_login") {
-				s prop("Enabled")=1 ; включим
-				i name'="%service_csp" s prop("AutheEnabled")=AutheEnabled ##; MSW4951b ;вход парольный
-				e  s prop("AutheEnabled")=96 ;вход беспарольный и с паролем
+			kill prop
+			set prop("Enabled")=0
+			if name="%service_csp"||(name="%service_console")||(name="%service_login") {
+				set prop("Enabled")=1 ; включим
+				if name'="%service_csp" s prop("AutheEnabled")=AutheEnabled
+				else  s prop("AutheEnabled")=96
 			}
-			i $G(sBindings),name="%service_bindings" {
-				s prop("Enabled")=1 ; включим
-				s prop("AutheEnabled")=AutheEnabled ;вход парольный
-				s Warn($i(Warn))="Если на текущей системе не предполагается разработка или редактирование исходного кода в CacheStudio, то лучше выключить сервис "_name
-				s prop("ClientSystems")=sBindingsIP
+			if $G(sBindings),name="%service_bindings" {
+				set prop("Enabled")=1
+				set prop("AutheEnabled")=AutheEnabled
+				set Warn($i(Warn))="If the current system does not intend to develop or edit the source code in CacheStudio, then it is better to turn off the service "_name
+				set prop("ClientSystems")=sBindingsIP
 			}
-			i $G(sCachedirect),name="%service_cachedirect" {
-				s prop("Enabled")=1 ; включим
-				s prop("AutheEnabled")=96 ;вход беспарольный и с паролем
-				s Warn($i(Warn))="Если на текущей системе не предполагается редактирование шаблонов трансформации утилитой CIMModeler, то лучше выключить сервис "_name
-				s prop("ClientSystems")=sCachedirectIP
+			if $G(sCachedirect),name="%service_cachedirect" {
+				set prop("Enabled")=1 ; включим
+				set prop("AutheEnabled")=96
+				set Warn($i(Warn))="If the current system does not intend to edit the transformation templates using the CIMModeler utility, then it is better to turn off the service "_name
+				set prop("ClientSystems")=sCachedirectIP
 			}
-			i $G(sECP),name="%service_ecp" {
-				s prop("Enabled")=1 ; включим
-				s Warn($i(Warn))="Если на текущей системе не включена ECP конфигурация, то лучше выключить сервис "_name
-				s:$g(sECPIP)="" Warn($i(Warn))="Если ECP конфигурация включена, то лучше ограничить подключение ECP-клиетов к ECP-серверу"
-				s prop("ClientSystems")=sECPIP
+			if $G(sECP),name="%service_ecp" {
+				set prop("Enabled")=1
+				set Warn($i(Warn))="If the ECP configuration is not enabled on the current system, it is better to turn off the service "_name
+				set:$g(sECPIP)="" Warn($i(Warn))="If ECP configuration is enabled, it is best to limit the connection of ECP clients to the ECP server"
+				set prop("ClientSystems")=sECPIP
 			}
-			;k pro d ##class(Security.Services).Get("%service_console",.pro)	zw pro
-			s tSC=##class(Security.Services).Modify(name,.prop)
-			i '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
+			set tSC=##class(Security.Services).Modify(name,.prop)
+			if '$$$ISOK(tSC) write !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
 		}
 	}
-
-
-	
-	w !,"Проиcходит создание парольного входа всем CSP приложениям"
-	s result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
-	s tSC=result.Prepare("select Name FROM Security.Applications")
-	s:tSC tSC=result.Execute()
-	i '$$$ISOK(tSC) {
-		s text="Ошибка настройки приложений :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
+	write !,"Passwords are created for all CSP applications."
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set tSC=result.Prepare("select Name FROM Security.Applications")
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+		set text="Application setup error :"_$SYSTEM.Status.GetErrorText(tSC)  write !,text QUIT $$$ERROR(text)
 	}
 	else {
-		#; Список отключаемых приложений
-		s appDisabled("/csp/ensdemo")=1
-		s appDisabled("/csp/samples")=1
-		s appDisabled("/csp/user")=1
-		s appDisabled("/isc/studio/usertemplates")=1
-		;s appDisabled("/csp/docbook")=1  
-		s appDisabled("/csp/documatic")=1
-		s appDisabled("/isc/studio/rules")=1
-		s appDisabled("/isc/studio/templates")=1
+		#; List of disconnected applications
+		set appDisabled("/csp/ensdemo")=1
+		set appDisabled("/csp/samples")=1
+		set appDisabled("/csp/user")=1
+		set appDisabled("/isc/studio/usertemplates")=1
+		set appDisabled("/csp/docbook")=1  
+		set appDisabled("/csp/documatic")=1
+		set appDisabled("/isc/studio/rules")=1
+		set appDisabled("/isc/studio/templates")=1
 		while result.Next() {
-			s CSP=result.Data("Name")
-			s csp=$zconvert(CSP,"L")
-			k prop
-			;w !,csp,"-----" d ##class(Security.Applications).Get(csp,.prop)	zw prop
+			set CSP=result.Data("Name")
+			set csp=$zconvert(CSP,"L")
+			kill prop
 			if $g(appDisabled(csp)) {
-				s prop("Enabled")=0
+				set prop("Enabled")=0
 			} else {
-				  s prop("Enabled")=1
+				  set prop("Enabled")=1
 			}
-		 s prop("AutheEnabled")=AutheEnabled 
-		
-			s tSC=##class(Security.Applications).Modify(CSP,.prop) ; MSW4343d
-			i '$$$ISOK(tSC) w !,csp_" : Error="_$SYSTEM.Status.GetErrorText(tSC)
+		 set prop("AutheEnabled")=AutheEnabled 
+		 set tSC=##class(Security.Applications).Modify(CSP,.prop)
+		 if '$$$ISOK(tSC) write !,csp_" : Error="_$SYSTEM.Status.GetErrorText(tSC)
 		}
 	}
-	WRITE !,"Происходит удаление демо областей"
+	write !,"Demo namespaces are being deleted."
 	for name="ENSDEMO","SAMPLES" {
-		#; Удаление Ensemble-области
-		d:##class(%Dictionary.CompiledClass).%ExistsId("%Library.EnsembleMgr")
-		
-		#; Удаление области
-		s tSC = ##class(Config.Namespaces).Delete(name)
-		if $$$ISERR(tSC) s text="Ошибка удаления "_name_" :"_$system.Status.GetErrorText(tSC) w !,text
-		if $$$ISOK(tSC) w !,"Удалили "_name
+		do:##class(%Dictionary.CompiledClass).%ExistsId("%Library.EnsembleMgr")
+		set tSC = ##class(Config.Namespaces).Delete(name)
+		if $$$ISERR(tSC) set text="Delete Error "_name_" :"_$system.Status.GetErrorText(tSC) w !,text
+		if $$$ISOK(tSC) write !,"Deleted "_name
 	}
-	WRITE !,"Происходит модификация основных настроек системы"
+	write !,"There is a modification of the basic system settings"
 	#dim ss As Security.System  = ##class(Security.System).%OpenId("SYSTEM")
-	#;Изменение шаблона пароля
-	s ss.PasswordPattern="8.32ANP"
-	#;Включение аудита
-	s ss.AuditEnabled=1
-	#;количество дней простоя после которой система выключит основных пользователей и их нужно будет включать в аварийном режиме
-	s ss.InactiveLimit=0
-	#;Сохраним настройки
-	s tSC=ss.%Save()
-	i '$$$ISOK(tSC) s text="Ошибка настройки основых параметров безопасности :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
-	w !,"Настройка событий AUDITa :"
+	set ss.PasswordPattern="8.32ANP"
+	set ss.AuditEnabled=1
+	set ss.InactiveLimit=0
+	set tSC=ss.%Save()
+	if '$$$ISOK(tSC) s text="Error setting basic security settings :"_$SYSTEM.Status.GetErrorText(tSC)  write !,text QUIT $$$ERROR(text)
+	write !,"Event Setup AUDIT :"
 	Set rs = ##class(%ResultSet).%New("Security.Events:ListActivate")
 	Set tSC = rs.Execute()
-	If $$$ISERR(tSC) s text="Ошибка настройки событий AUDIT:"_$system.Status.GetErrorText(tSC) w !,text QUIT $$$ERROR(text)
-	#; Список событий ктр должны быть переключены
-	s On("%Ensemble/%Message/ViewContents")=1
-	s On("%System/%DirectMode/DirectMode")=1
-	s On("%System/%Login/Login")=1
-	s On("%System/%Login/LoginFailure")=1
-	s On("%System/%Login/Logout")=1
-	s On("%System/%Login/Terminate")=1
-	s On("%System/%Security/ApplicationChange")=1
-	s On("%System/%Security/AuditChange")=1
-	s On("%System/%Security/AuditReport")=1
-	s On("%System/%Security/DBEncChange")=1
-	s On("%System/%Security/DomainChange")=1
-	s On("%System/%Security/LoginRuleChange")=1
-	s On("%System/%Security/Protect")=1
-	s On("%System/%Security/ResourceChange")=1
-	s On("%System/%Security/RoleChange")=1
-	s On("%System/%Security/ServiceChange")=1
-	s On("%System/%Security/SSLConfigChange")=1
-	s On("%System/%Security/SystemChange")=1
-	s On("%System/%Security/UserChange")=1
-	s On("%System/%System/AuditRecordLost")=1
-	s On("%System/%System/ConfigurationChange")=1
-	s On("%System/%System/JournalChange")=0 ;выключим аудит переключения журнала
-	s On("%System/%System/RoutineChange")=1
-	s On("%System/%System/Start")=1
-	s On("%System/%System/Stop")=1
-	s On("%System/%System/SuspendResume")=1
-	s On("%System/%System/UserEventOverflow")=1
+	if $$$ISERR(tSC) set text="Event setting error AUDIT:"_$system.Status.GetErrorText(tSC) write !,text QUIT $$$ERROR(text)
+	set On("%Ensemble/%Message/ViewContents")=1
+	set On("%System/%DirectMode/DirectMode")=1
+	set On("%System/%Login/Login")=1
+	set On("%System/%Login/LoginFailure")=1
+	set On("%System/%Login/Logout")=1
+	set On("%System/%Login/Terminate")=1
+	set On("%System/%Security/ApplicationChange")=1
+	set On("%System/%Security/AuditChange")=1
+	set On("%System/%Security/AuditReport")=1
+	set On("%System/%Security/DBEncChange")=1
+	set On("%System/%Security/DomainChange")=1
+	set On("%System/%Security/LoginRuleChange")=1
+	set On("%System/%Security/Protect")=1
+	set On("%System/%Security/ResourceChange")=1
+	set On("%System/%Security/RoleChange")=1
+	set On("%System/%Security/ServiceChange")=1
+	set On("%System/%Security/SSLConfigChange")=1
+	set On("%System/%Security/SystemChange")=1
+	set On("%System/%Security/UserChange")=1
+	set On("%System/%System/AuditRecordLost")=1
+	set On("%System/%System/ConfigurationChange")=1
+	set On("%System/%System/JournalChange")=0
+	set On("%System/%System/RoutineChange")=1
+	set On("%System/%System/Start")=1
+	set On("%System/%System/Stop")=1
+	set On("%System/%System/SuspendResume")=1
+	set On("%System/%System/UserEventOverflow")=1
 	While rs.Next() {
-		Set name = $G(rs.Data("Source"))_"/"_$G(rs.Data("Type"))_"/"_$G(rs.Data("Name"))
-		;w !,name d ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro) w " = ",pro("Description"),!!
-		If $DATA(On(name)) {
-			k pro
-			d ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
-			i $d(pro) {
+		set name = $G(rs.Data("Source"))_"/"_$G(rs.Data("Type"))_"/"_$G(rs.Data("Name"))
+		if $DATA(On(name)) {
+			kill pro
+			do ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
+			if $d(pro) {
 				if pro("Enabled")'=(+$G(On(name))) {
-					;s Status=##class(Security.Events).Set($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),+$G(On(name)))
-					;s Status=##class(Security.Events).Modify($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
-					i ##Class(Security.Events).Exists(name,,,.Event,.Status) {
-						s Event.Enabled=+$G(On(name))
-						s tSC=Event.%Save()
-						i '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
-						e  w !,name_" изменили"
+					if ##Class(Security.Events).Exists(name,,,.Event,.Status) {
+						set Event.Enabled=+$G(On(name))
+						set tSC=Event.%Save()
+						if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
+						else  write !,name_" changed"
 					}
 				}
 			}
-
 		}
 	}
-	d rs.Close()
-	zn ons ; вернемся в исходную область
-	q $$$OK
+	do rs.Close()
+	zn ons
+	quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="UiSavePermiss">
 <Description>
- Сохранить права доступа
- d ##class(App.security).UiSavePermiss(.Par)</Description>
+Save Access Rights
+d ##class(App.security).UiSavePermiss(.Par)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Par=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
@@ -9674,39 +9656,39 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 		if i[(divId_"Matr0"),$o(%request.Data(i,""),-1)'="" {
 			set val=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
 			if val'["unchecked" {
-				s chk(i)=val
-				s us=$p(i,"0",2)
-				s ro=$p(i,"0",3)
-				i $e(ro,1)="p" s ro="%"_$e(ro,2,*)
-				s users(us,ro)=val
+				set chk(i)=val
+				set us=$p(i,"0",2)
+				set ro=$p(i,"0",3)
+				if $e(ro,1)="p" s ro="%"_$e(ro,2,*)
+				set users(us,ro)=val
 			}
 		}
 	}
-	NEW $NAMESPACE
-  	SET $NAMESPACE = "%SYS"
-	s us=""
+	new $NAMESPACE
+  	set $NAMESPACE = "%SYS"
+	set us=""
 	for { set us=$o(users(us)) quit:us=""
-			s tSC=##class(Security.Users).Get(us,.prop)
-			i '$$$ISOK(tSC)  write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) q
-			s roles=","_prop("Roles")_","
+			set tSC=##class(Security.Users).Get(us,.prop)
+			if '$$$ISOK(tSC)  write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
+			set roles=","_prop("Roles")_","
 			kill prop
-			s ro=""
+			set ro=""
 			for { set ro=$o(users(us,ro)) quit:ro=""
 				if $g(users(us,ro)) {
-					if roles'[(","_ro_",") s roles=roles_ro_","
+					if roles'[(","_ro_",") set roles=roles_ro_","
 				}else {
-					if roles[(","_ro_",") s roles=$replace(roles,ro_",","") s:$e(roles,*)'="," roles=roles_","
+					if roles[(","_ro_",") set roles=$replace(roles,ro_",","") set:$e(roles,*)'="," roles=roles_","
 				}
 			}
-			s:$e(roles,1)="," roles=$e(roles,2,*)
-			s:$e(roles,*)="," roles=$e(roles,1,*-1)
-			s prop("Roles")=roles
+			set:$e(roles,1)="," roles=$e(roles,2,*)
+			set:$e(roles,*)="," roles=$e(roles,1,*-1)
+			set prop("Roles")=roles
 			;zw prop
-			s tSC=##class(Security.Users).Modify(us,.prop)
-			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) q
+			set tSC=##class(Security.Users).Modify(us,.prop)
+			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
 			;Проверка
-			s tSC=##class(Security.Users).Get(us,.pro)
-			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) q
+			set tSC=##class(Security.Users).Get(us,.pro)
+			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
 			write $$$appMsg(us_": "_pro("Roles"))
 	}
 	Quit $$$OK
@@ -9715,29 +9697,27 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 
 <Method name="UiMatrixPermission">
 <Description>
-Получить HTML контент формы матрицы доступа
+Get HTML content of access matrix form
 d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security","Ui"_"SavePermiss")</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>name="",rolesmask="",divId="",key="",class="",Method="",blockui=1</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-		if name="" w $$$appError("Выберите фильтр по пользователям параметр Логин пустой (Имена через запятую или по контексту)") q 1
-		if rolesmask="" w $$$appError("Выберите фильтр по ролям, параметр Роли пустой (Роли через запятую или по контексту)") q 1
+		if name="" write $$$appError("Выберите фильтр по пользователям параметр Логин пустой (Имена через запятую или по контексту)") q 1
+		if rolesmask="" write $$$appError("Выберите фильтр по ролям, параметр Роли пустой (Роли через запятую или по контексту)") q 1
 		set msg="Матрица прав доступа"
-		
 		set:blockui onclick=$$$blockui("Ждите...")
 		set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
 		set butt=$$$appButton(divId_"appButtonSavePermiss","onclick="""_onclick_"""","Сохранить права доступа")
 		write butt_"<br><br>"
-		
-		write "<form id='"_divId_"FormContentSave'>"
-		d ##class(App.sys).GetRoles(rolesmask,.roles)
-		if '$d(roles) w $$$appError("По этому фильтру роли не найдены") q 1
+		write "<form id='"_divId_"FormContentSave' >"
+		do ##class(App.sys).GetRoles(rolesmask,.roles)
+		if '$d(roles) write $$$appError("По этому фильтру роли не найдены") quit 1
 		;set roles("%all")=$lb("%All","The Super-User Role")
-		d ##class(App.sys).GetUsers(name,.users)
-		if '$d(users) w $$$appError("По этому фильтру пользователи не найдены") q 1
-		s r="UserName"
-  		s gn="matrix"
+		do ##class(App.sys).GetUsers(name,.users)
+		if '$d(users) write $$$appError("По этому фильтру пользователи не найдены") quit 1
+		set r="UserName"
+  		set gn="matrix"
  	    set @gn@(0,1)=$lb(r)
  		set @gn@(-1,r)=1
   		set col(1)=r
@@ -9752,19 +9732,19 @@ d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security
 		set u=""		
 		for row=1:1 { set u=$o(users(u)) quit:u=""
 			set usroles=$lg(users(u),3)
-			;zw usroles
+			;zwrite usroles
 			set @gn@(row)=$g(@gn@(row))_$lb(u)
 			for c=2:1:col {
 				set yes="unchecked"
-				if $LISTFIND(usroles,col(c)) s yes="1unchecked"
+				if $LISTFIND(usroles,col(c)) set yes="1unchecked"
 				set ret=##class(App.Form).WebCompShowCheckbox(,,,divId_"Matr0"_u_"0"_$tr(col(c),"%","p")_"0",yes)
 				set @gn@(row)=$g(@gn@(row))_$lb(ret)
 			}
 		}
-		;w "$('#"_pref_"MainContent').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
-		;w "<div id='TabViewCont' style='overflow: scroll;   max-width: 1200px;  max-height: 500px;'>"
+		;write "$('#"_pref_"MainContent').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
+		;write "<div id='TabViewCont' style='overflow: scroll;   max-width: 1200px;  max-height: 500px;'>"
 		set st=##class(App.LogInfoPane).DrawSQL("result "_gn,100000,$zu(5),$g(msg),$g(exec),,1)
-		;w "</div>"
+		;write "</div>"
 		;TODO do ##class(App.Form).DrawTable(.matrix) 
 		write "</form><div id='"_divId_"ContentSave'></div>"
 		quit $$$OK
