@@ -343,12 +343,12 @@ ClassMethod RunPage(Url As %String = "http://intersystems.ru")
 /// s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_repo_"/zip/master",repo,"d:\!\csptest")
 ClassMethod ImportCSPFromGitHub(url, repo, target)
 {
-	s tempdir=##class(%File).TempFilename("zip")
+	s tempdir=$zu(12)_"Temp"_$$$slash_$p(##class(%File).TempFilename("zip"),$$$slash,*)
 	s st=##class(%File).CreateDirectory(tempdir)
 	i 'st q st
  	s st=##class(App.net).GetHttp(url,.out,tempdir)
  	w !,tempdir
-	s unzip=##class(%File).TempFilename("unzip")
+	s unzip=$zu(12)_"Temp"_$$$slash_$p(##class(%File).TempFilename("unzip"),$$$slash,*)
 	s st=##class(%File).CreateDirectory(unzip)
 	i 'st q st
 	s cmd="7z x "_tempdir_$$$slash_repo_"-master.zip -y -o"_unzip ;_" >d:\!\log.log"

@@ -59,7 +59,7 @@ ClassMethod GetClientAddress()
 /// Add new log event
 /// Use via $$$LogEventTYPE().
 /// Return ID log
-/// Example do ##class(App.Log).AddRecord("Хочу", "протоколировать", "все", "INFO", "действия","пользователей")
+/// Example do ##class(App.Log).AddRecord("I want", "log", "everything", "INFO", "actions", "users")
 ClassMethod AddRecord(ClassName As %String = "", MethodName As %String = "", Source As %String = "", EventType As %String = "", Arguments As %String = "", Message As %String = "")
 {
 	try {

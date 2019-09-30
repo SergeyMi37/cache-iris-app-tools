@@ -328,5 +328,15 @@ ClassMethod tempGN(GN, NoKill = 0) As %String
 	q gn
 }
 
+/// Привести число к номальному виду
+/// w ##class(App.type).GetValidNumeric("14,650.00")
+ClassMethod GetValidNumeric(price) As %String
+{
+	;Значение типа данных 14,650.00 
+	i price[","&&(price[".") s price=$tr(price,",")
+	i price["," s price=$tr(price,",",".")
+	q price
+}
+
 }
 

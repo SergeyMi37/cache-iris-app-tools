@@ -14,6 +14,7 @@ ClassMethod IsPermiss(role) As %Status
 }
 
 /// Главный метод формирования содержимого страницы
+/// TODO #2c3136 #3e454c - заменить на синие тона
 ClassMethod OnPage() As %Status
 {
  s NSpace=$tr(%request.Get("ns"),"#")
@@ -22,6 +23,7 @@ ClassMethod OnPage() As %Status
  // Сохраним в параметрах сессии режим отладки (подразумевает расширенное информирование)
  s %session.Data("debug")=%request.Get("debug")
  set autoloadmenu=$p(%request.Get("autoload"),"#")
+ do ##class(App.Log).AddRecord(..%ClassName(1), "OnPage", "Login", "INFO", "","")
  &html<
  <!doctype html>
  <html>

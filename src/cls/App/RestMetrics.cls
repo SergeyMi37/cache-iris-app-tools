@@ -109,7 +109,7 @@ ClassMethod getDBsize(prefix = {..#ISCPREFIX_"_dbsize"}, dbname, int = 1, all = 
 ClassMethod getMgstat(delay As %Integer = 2) As %Status
 {
 	// By default, we use 2 second interval for averaging
-	quit ##class(App.Metrics).getSamples(delay)
+	quit ##class(App.MVK.Metrics).getSamples(delay)
 }
 
 /// Output should obey the Prometheus exposition formats. Docs:
