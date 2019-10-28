@@ -1,49 +1,49 @@
-/// Пример Параметров
+/// Example Parameters
 Class App.Parameter Extends %Persistent
 {
 
-/// Порядок свойств при выводе в форме
+/// The order of the properties in the output in the form
 Parameter AppORDERPROPERTY = "Name,Description,Value,Types,Namespace,DateStart,DateFinish,File,isEnabled,isEnabledCheck,OfficeFile";
 
-/// Namespace $zu(5) применения параметра
+/// Namespace $zu(5) use parameter
 Property Namespace As %String(MAXLEN = "") [ InitialExpression = {$zu(5)} ];
 
-/// Имя параметра
+/// The name of the parameter
 Property Name As %String(MAXLEN = "") [ Required ];
 
-/// Значение параметра по умолчанию
+/// Parameter value default
 Property Value As %String(MAXLEN = "");
 
-/// Описание параметра
-/// {"displayname":"Описание параметра","title":"Описание параметра","inputpattern":"textarea"}
+/// The description of the parameter
+/// {"displayname":"Description of option","title":"parameter Description","inputpattern":"textarea"}
 Property Description As %String(MAXLEN = "");
 
-/// ​​Дата выборки протокола с
-/// {"displayname":"Дата выборки протокола с","title":"введите дату","inputtype":"date"}
+/// Date of sampling Protocol
+/// {"displayname":"date of sampling Protocol","title":"enter date","inputtype":"date"}
 Property DateStart As %String(MAXLEN = "") [ InitialExpression = {##class(App.type).GetYear($h)_"-01-01"} ];
 
-/// ​​Дата выборки протокола по
-/// {"displayname":"Дата выборки протокола по","title":"введите дату и время","inputtype":"datetime-local"}
+/// Date of sampling Protocol on
+/// {"displayname":"date of sampling Protocol","title":"enter the date and time","inputtype":"datetime-local"}
 Property DateFinish As %String(MAXLEN = "") [ InitialExpression = {##class(App.type).GetYear($h)_"-12-31"} ];
 
-/// ​Тип Boolean в виде checkbox
-/// {"displayname":"Включен","inputtype":"checkbox"}
+/// Type Boolean in a checkbox
+/// {"displayname":"Enabled","inputtype":"checkbox"}
 Property isEnabledCheck As %Boolean [ InitialExpression = 1 ];
 
-/// ​Тип Boolean в виде списка
-/// {"displayname":"Включен","title":"введите (1 или 0)"}
+/// Type Boolean in a list
+/// {"displayname":"Included","title":"enter (1 or 0)"}
 Property isEnabled As %Boolean [ InitialExpression = 0 ];
 
-/// ​Выбор файла для загрузки на диск TempDir = ##class(%File).GetDirectory(##class(%File).TempFilename())
-/// {"displayname":"​Выбор шаблонного файла","title":"​Выбор шаблона","inputpattern":"files","filesMethod":"##class(App.type).UploadFilesJS(%id)","attr":"accept='.xls,.xlsx'","filesStore":"TempDir"}
+/// Select the file to upload to drive TempDir = ##class(%File).GetDirectory(##class(%File).TempFilename())
+/// {"displayname":"Select template file","title":"the Choice sablona","inputpattern":"files","filesMethod":"##class(App.type).UploadFilesJS(%id)","attr":"accept='.xls,.xlsx'","filesStore":"TempDir"}
 Property File As %String(MAXLEN = "");
 
-/// Список типов параметра
-/// {"displayname":"Типы параметра","title":"Выберите Тип"}
-Property Types As %String(DISPLAYLIST = ",Проект,Параметр приложения,Системный параметр", MAXLEN = 1, VALUELIST = ",Projecr,AppOption,SysOption") [ InitialExpression = "AppOption", Required ];
+/// The list of parameter types
+/// {"displayname":"parameter Types","title":"Select a Type"}
+Property Types As %String(DISPLAYLIST = ",Project,Application Parameter,System Parameter", MAXLEN = 1, VALUELIST = ",Projecr,AppOption,SysOption") [ InitialExpression = "AppOption", Required ];
 
-/// ​Выбор файла для загрузки на диск TempDir
-/// {"displayname":"​Выбор файла","title":"​Выбор файла","inputpattern":"files"}
+/// Select the file to download to disk TempDir
+/// {"displayname":"Select file","title":"Select file","inputpattern":"files"}
 Property OfficeFile As %String(MAXLEN = "");
 
 Storage Default

@@ -1,17 +1,30 @@
 Include App.LogMacro
 
-/// Утилиты работы с типами
+/// Utility types
 Class App.type [ Abstract ]
 {
 
-/// Вернуть дату в формате 3 
+/// To return the date in the format 3 
 /// App.type_Date3(DateFrom)
 ClassMethod Date3(h As %String) As %String [ SqlProc ]
 {
 	return $zd(h,3)
 }
 
-/// Посчитать количество секунд в ГГГГ-ММ-ДД ЧЧ:ММ:СС или в $HOROLOG
+/// To count the number of seconds to YYYY-MM-DD HH:MM:SS or the $HOROLOG
+/// w ##class(App.type).GetYYYYMM("2018-07-06 08:14:47",-1)
+/// w ##class(App.type).GetYYYYMM($h,-1)
+ClassMethod GetYYYYMM(h, plusMM = 0) As %String
+{
+	i h["-" s h=..GetHorYYYYMMDD(h)
+	s MM=$p($zd(+h,3),"-",2)+plusMM,YYYY=$p($zd(+h,3),"-",1)
+	i MM<1 s MM=12+MM,YYYY=YYYY-1 ;running for less than 12 plusMM
+	i MM>12 s MM=MM-12,YYYY=YYYY+1
+	i $l(MM)=1 s MM="0"_MM
+	q YYYY_"-"_MM
+}
+
+/// To count the number of seconds to YYYY-MM-DD HH:MM:SS or the $HOROLOG
 /// w ##class(App.type).GetCountSec("2018-07-06 08:14:47")
 /// w ##class(App.type).GetCountSec($h)
 ClassMethod GetCountSec(h) As %String
@@ -24,17 +37,17 @@ ClassMethod GetCountSec(h) As %String
 /// w ##class(App.type).GetTextMonth("05")
 ClassMethod GetTextMonth(mm) As %String
 {
-	q $s(+mm="1":"январь",+mm="2":"февраль",+mm="3":"март",+mm="4":"апрель",+mm="5":"май",+mm="6":"июнь",+mm="7":"июль",+mm="8":"август",+mm="9":"сентябрь",+mm="10":"октябрь",+mm="11":"ноябрь",1:"декабрь")
+	q $s(+mm="1":$$$aText("January",""),+mm="2":$$$aText("February",""),+mm="3":$$$aText("March",""),+mm="4":$$$aText("April",""),+mm="5":$$$aText("may",""),+mm="6":$$$aText("June",""),+mm="7":$$$aText("July",""),+mm="8":$$$aText("August",""),+mm="9":$$$aText("September",""),+mm="10":$$$aText("October",""),+mm="11":$$$aText("November",""),1:$$$aText("December",""))
 }
 
-/// Получить месяц
+/// To month
 /// w ##class(App.type).GetMonth($h)
 ClassMethod GetMonth(h) As %String
 {
 	q $p($zd(h,3),"-",2)
 }
 
-/// Перевести ГГГГ-ММ-ДД ЧЧ:ММ:СС в $HOROLOG
+/// Translate YYYY-MM-DD HH:MM:SS in $HOROLOG
 /// w ##class(App.type).GetHorYYYYMMDD("2018-07-06 08:14:47")
 ClassMethod GetHorYYYYMMDD(dt) As %String
 {
@@ -47,41 +60,39 @@ ClassMethod GetHorYYYYMMDD(dt) As %String
 	q $g(res)
 }
 
-/// Проверить на валидность и вывести дату
+/// To check the validity and display the date
 /// w ##class(App.type).GetValidZD(+$h)
 ClassMethod GetValidZD(hr) As %String
 {
 	try{ s res=$tr($zd(hr,4),"/",".") }
 	catch e { s res="" }
-	;$$$LogError("Дополнительное сообщение1")
 	q res
 }
 
-/// Получить год в формате 2018
+/// To year format 2018
 /// w ##class(App.type).GetYear($h)
 ClassMethod GetYear(h) As %String
 {
 	q $p($zd(h,3),"-",1)
 }
 
-/// Получить дату в формате 2018-04-03T16:40:30
+/// To get a date in the format 2018-04-03T16:40:30
 /// w ##class(App.type).GetDateTime($h)
 ClassMethod GetDateTime(h) As %String
 {
 	q $zd(h,3)_"T"_##class(App.type).GetValidZT(h)
 }
 
-/// Проверить на валидность и вывести время
+/// To check the validity and display the time
 /// w ##class(App.type).GetValidZT($h)
 ClassMethod GetValidZT(hr) As %String
 {
 	try{ s res=$zt(+$p(hr,",",2),1) }
 	catch e { s res="" }
-	;$$$LogError("Дополнительное сообщение "_hr)
 	q res
 }
 
-/// Переведем дату к формату DD.MM.YY
+/// Translate the date to the format DD.MM.YY
 /// w ##class(App.type).getDDMMYY("2016-05-05")
 ClassMethod getDDMMYY(pStringDate As %String) As %String
 {
@@ -94,7 +105,7 @@ ClassMethod getDDMMYY(pStringDate As %String) As %String
 	q $g(date)
 }
 
-/// Переведем дату к формату DD.MM.YYYY
+/// Translate the date to the format DD.MM.YYYY
 /// w ##class(App.type).getDDMMYYYY("2016-05-05")
 ClassMethod getDDMMYYYY(pStringDate As %String) As %String
 {
@@ -107,7 +118,7 @@ ClassMethod getDDMMYYYY(pStringDate As %String) As %String
 	q $g(date)
 }
 
-/// Переведем дату к формату YYYY-MM-DD  FORMAT=3 передав формулу типа "CurrentDay+1"
+/// Translate the date to the format YYYY-MM-DD FORMAT=3 passing a formula of the type "CurrentDay+1"
 /// w ##class(App.type).GetInpretDate("CurrentDay+1","12:00")
 ClassMethod GetInpretDate(pStringDate As %String, time = "") As %String
 {
@@ -126,7 +137,7 @@ ClassMethod GetInpretDate(pStringDate As %String, time = "") As %String
 	q $g(date)_$s($g(date)'=""&&(time'=""):" "_time,1:"")
 }
 
-/// Переведем дату к формату YYYY-MM-DD  FORMAT=3
+/// Translate the date to the format YYYY-MM-DD FORMAT=3
 /// w ##class(App.type).getYYYYMMDD(+$h)
 ClassMethod getYYYYMMDD(pStringDate As %String) As %String
 {
@@ -139,9 +150,9 @@ ClassMethod getYYYYMMDD(pStringDate As %String) As %String
 	q $g(date)
 }
 
-/// Интерпретирует строку с текущей датой типа
+/// Interpreterpath string with the current date type
 /// Str= DateFrom=(CurrentDay-2)&DateTo=(CurrentDay-1)
-/// Результат вычисленное значение выражения  "added?DateFrom=06.06.2018&DateTo=07.06.2018"
+/// The result of the computed expression value "added?DateFrom=06.06.2018&DateTo=07.06.2018"
 /// w ##class(App.type).InterpretCurrentDay("added?DateFrom=(CurrentDay-2)&DateTo=(CurrentDay-1)",.res)
 ClassMethod InterpretCurrentDay(Str As %String, Result As %String) As %Status
 {
@@ -163,14 +174,8 @@ ClassMethod InterpretCurrentDay(Str As %String, Result As %String) As %Status
 	q tSC
 }
 
-/// w ##class(App.type).Transliteration("sfdsdsdfываыавапв")
-ClassMethod Transliteration(Str As %String) As %Status
-{
-	q $tr(Str,"ёйцукенгшщзхъфывапролджэячсмитьбюЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ","eicukengsszxyfyvaproldzezccmitybyEICUKEHGSSZXYFYBAPROLDZEYCCMITYBY")
-}
-
-/// Разобрать строку по CGI переменным 
-/// w ##class(App.type).ParseURL("aaa=sfdsds&bbb=dfываыавапв")
+/// Parse a string of CGI variable 
+/// w ##class(App.type).ParseURL("aaa=111&bbb=222")
 ClassMethod ParseURL(str As %String, ByRef out, del = "&") As %Status
 {
 	f i=1:1:$l(str,del) {
@@ -180,146 +185,26 @@ ClassMethod ParseURL(str As %String, ByRef out, del = "&") As %Status
 	}
 }
 
-/// Вывести js код для выбора файла в новом окне и загрузки его на сервер
+/// Output the js code to select a file in a new window and download it to the server
 /// ##class(App.type).UploadFilesJS(%id)
 ClassMethod UploadFilesJS(id, %id) As %Status
 {
 	s onclick="win=window.open('App.UploadCSP.cls?idreturn="_id_"&ServerDirPath="_$zconvert($g(%id("filesStore")),"O","URL")_"', 'winupload', 'location=no,left=200,top=300,width=800,height=300,scrollbars=no,status=no,toolbar=no,menubar=no');"
-	q $$$appButton("appButtonUpload"_id,"onclick="""_$g(onclick)_"""","Загрузить файл")
+	q $$$appButton("appButtonUpload"_id,"onclick="""_$g(onclick)_"""",$$$aText("Download file",""))
 }
 
-/// Получить имя таблицы из Класса
+/// To obtain the table name from the Class
 /// w ##class(App.type).GetTableName("App.sss.user")
 ClassMethod GetTableName(SelectClass) As %String
 {
 	set (tab,table)=$p(SelectClass,".",*)
-	//Если имя таблицы - ключевое слов, обрамим в кавычки
+	//If the table name is the key words, frame it in quotation marks
 	set:$SYSTEM.SQL.IsReservedWord(table) table = """"_table_""""
 	set tab=$tr($p(SelectClass,"."_tab,1),".","_")_"."_table
 	q tab
 }
 
-/// Вывести сумму прописью
-/// w ##class(App.type).SummaProp(1111111.11)
-ClassMethod SummaProp(n) As %String
-{
- q $$sump(n)
-sump(n) ;$$;преобразование
- s n=+$j($tr(n,","),"",2)
- ;w !,$fn(num,",",2),!
- s n=$$tran(n)_"k"
- ;составляем разряды
- s n=$$repl(n,",,,,,,,","eT")
- s n=$$repl(n,",,,,,,","eM")
- s n=$$repl(n,",,,,,","em")
- s n=$$repl(n,",,,,","et")
- s n=$$repl(n,",,,","e")
- s n=$$repl(n,",,","d")
- s n=$$repl(n,",","c")
- ;убрать пустые значения
- s n=$$repl(n,"0c0d0eT","")
- s n=$$repl(n,"0c0d0et","")
- s n=$$repl(n,"0c0d0em","")
- s n=$$repl(n,"0c0d0eM","")
- ;заменяем соответвующие значения на пропись
- s n=$$repl(n,"0c","")
- s n=$$repl(n,"1c","сто ")
- s n=$$repl(n,"2c","двести ")
- s n=$$repl(n,"3c","триста ")
- s n=$$repl(n,"4c","четыреста ")
- s n=$$repl(n,"5c","пятьсот ")
- s n=$$repl(n,"6c","шестьсот ")
- s n=$$repl(n,"7c","семьсот ")
- s n=$$repl(n,"8c","восемьсот ")
- s n=$$repl(n,"9c","девятьсот ")
- ;
- s n=$$repl(n,"1d0e","десять ")
- s n=$$repl(n,"1d1e","одиннадцать ")
- s n=$$repl(n,"1d2e","двенадцать ")
- s n=$$repl(n,"1d3e","тринадцать ")
- s n=$$repl(n,"1d4e","четырнадцать ")
- s n=$$repl(n,"1d5e","пятнадцать ")
- s n=$$repl(n,"1d6e","шестнадцать ")
- s n=$$repl(n,"1d7e","семьнадцать ")
- s n=$$repl(n,"1d8e","восемнадцать ")
- s n=$$repl(n,"1d9e","девятнадцать ")
- ;
- s n=$$repl(n,"0d","")
- s n=$$repl(n,"2d","двадцать ")
- s n=$$repl(n,"3d","тридцать ")
- s n=$$repl(n,"4d","сорок ")
- s n=$$repl(n,"5d","пятьдесят ")
- s n=$$repl(n,"6d","шестьдесят ")
- s n=$$repl(n,"7d","семьдесят ")
- s n=$$repl(n,"8d","восемьдесят ")
- s n=$$repl(n,"9d","девяносто ")
- ;
- s n=$$repl(n,"0e","")
- s n=$$repl(n,"5e","пять ")
- s n=$$repl(n,"6e","шесть ")
- s n=$$repl(n,"7e","семь ")
- s n=$$repl(n,"8e","восемь ")
- s n=$$repl(n,"9e","девять ")
- ;
- s n=$$repl(n,"1e.","один рубль ")
- s n=$$repl(n,"2e.","два рубля ")
- s n=$$repl(n,"3e.","три рубля ")
- s n=$$repl(n,"4e.","четыре рубля ")
- s n=$$repl(n,"1et","одна тысяча ")
- s n=$$repl(n,"2et","две тысячи ")
- s n=$$repl(n,"3et","три тысячи ")
- s n=$$repl(n,"4et","четыре тысячи ")
- s n=$$repl(n,"1em","один миллион ")
- s n=$$repl(n,"2em","два миллиона ")
- s n=$$repl(n,"3em","три миллиона ")
- s n=$$repl(n,"4em","четыре миллиона ")
- s n=$$repl(n,"1eM","один милиард ")
- s n=$$repl(n,"2eM","два милиарда ")
- s n=$$repl(n,"3eM","три милиарда ")
- s n=$$repl(n,"4eM","четыре милиарда ")
- s n=$$repl(n,"1eT","один триллион ")
- s n=$$repl(n,"2eT","два триллиона ")
- s n=$$repl(n,"3eT","три триллиона ")
- s n=$$repl(n,"4eT","четыре триллиона ")
- ;копейки
- s n=$$repl(n,"11k","11 копеек")
- s n=$$repl(n,"12k","12 копеек")
- s n=$$repl(n,"13k","13 копеек")
- s n=$$repl(n,"14k","14 копеек")
- s n=$$repl(n,"1k","1 копейка")
- s n=$$repl(n,"2k","2 копейки")
- s n=$$repl(n,"3k","3 копейки")
- s n=$$repl(n,"4k","4 копейки")
- ;пустые позиции
- s n=$$repl(n,"et","")
- s n=$$repl(n,"em","")
- s n=$$repl(n,"eM","")
- s n=$$repl(n,"eT","")
- ;если число <1
- s:$p(n,".")="" n="ноль "_n
- ;
- s n=$$repl(n,".","рублей ")
- s n=$$repl(n,"t","тысяч ")
- s n=$$repl(n,"m","миллионов ")
- s n=$$repl(n,"M","милиардов ")
- s n=$$repl(n,"T","триллионов ")
- s n=$$repl(n,"k"," копеек")
- ;НЕРАСПОЗНАННЫЕ ОСТАТКИ ОТ ПРЕОБРАЗОВАНИЯ
- s n=$tr(n,".ecdtmMkT")
- ;w !,n
- q n
- ;
-tran(n) ;$$;приводим в форму пригодную для замены
- s n=$tr($j(n,18,2)," ","0")
- s n=$tr("q,w,,e,,,,,,,r,t,,y,,,,,,u,i,,o,,,,,p,a,,s,,,,d,f,,g,,,.hj","qwertyuiopasdfg.hj",n)
- ;w !,n
- q n
- 
-repl(s,s0,sn)
- q $replace(s,s0,sn)
-}
-
-/// Получить временную глобальну ссылку
+/// To obtain a temporary globalno link
 /// w ##class(App.type).tempGN("GN")
 ClassMethod tempGN(GN, NoKill = 0) As %String
 {
@@ -328,14 +213,13 @@ ClassMethod tempGN(GN, NoKill = 0) As %String
 	q gn
 }
 
-/// Привести число к номальному виду
+/// The number to the normal mind
 /// w ##class(App.type).GetValidNumeric("14,650.00")
 ClassMethod GetValidNumeric(price) As %String
 {
-	;Значение типа данных 14,650.00 
 	i price[","&&(price[".") s price=$tr(price,",")
 	i price["," s price=$tr(price,",",".")
-	q price
+	q $tr(price," "_$c(160)) ;remove the spaces
 }
 
 }

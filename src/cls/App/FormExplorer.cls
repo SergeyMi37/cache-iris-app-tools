@@ -4,7 +4,7 @@ Include App.LogMacro
 Class App.FormExplorer Extends App.LogInfoPane
 {
 
-/// Отрисовка формы для ввода информации
+/// Draw a shape for input information
 Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what, field, value, type, typeclass, caption) ]
 {
  	write ##class(App.LogInfoPane).AddJsScripts("grid")
@@ -13,7 +13,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	if nsp'="" try {zn nsp set NSpace=nsp } catch e {}
 	set NSpace=$zu(5)
 	set SelClass=$tr(%request.Get("SelClass"),"_",".")
-	// Навигатор по системе
+	// Navigator system
 	if %request.Get("panel")="AccordionExp" {
 	&html<
 	 <div id="accordion" style='width: 100%; height: 100%'>
@@ -31,7 +31,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	 </div>
 	>
 	d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
-	$$$jsstart	// Загрузить список областей
+	$$$jsstart	// To load a list of fields
 		w "$( '#accordion' ).accordion({"
 	 	w " collapsible: true, icons: { header: ""ui-icon-zoomin"",  headerSelected: ""ui-icon-zoomout"" }"
 		w "});"
@@ -59,7 +59,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
             $("#aNSPhead").html(args.item.Namespace);
             $("#aCLS").empty();
             $("#aCLShead").html("");
-			$.blockUI( { message: 'Идет загрузка' , css: { border: 'none', padding: '15px', backgroundColor: '#000', '-webkit-border-radius': '10px','-moz-border-radius': '10px', opacity: .5, color: '#fff' }} );
+			$.blockUI( { message: '...Loading' , css: { border: 'none', padding: '15px', backgroundColor: '#000', '-webkit-border-radius': '10px','-moz-border-radius': '10px', opacity: .5, color: '#fff' }} );
             $("#aCLS").load("App.Action.cls","appClass=App.FormExplorer&appMethod=Class2Grid&appNsp="+args.item.Namespace+"&appPar="+args.item.Namespace);
         },
         data: Namespace,
@@ -70,7 +70,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
     });
 	</script>>
 	}
-	/// Навигатор из selectors
+	/// Navigator of selectors
 	else {
 	&html<
 		<!-- ui-dialog -->
@@ -95,8 +95,8 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		</table>
 		>
 		 d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
-		 $$$jsstart	// Загрузить список областей
-		   	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+		 $$$jsstart	// To load a list of fields
+		   	; to calculate the height of the container as a result of wijetunge victory container-Taba height of the container header
 		 	w "$('#MainObjects').height(window.innerHeight-200);"
 
 		 	write "$('#MainNamespaces').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectNsp&appNsp="_$zu(5)_"');"
@@ -111,12 +111,12 @@ errors
  	quit $$$OK
 }
 
-/// Cписок классов в виде таблицы
+/// The list of classes in a table
 ClassMethod Class2Grid(Par)
 {
 	set ListClasses=""
 	do ..SelectClasses("",.ListClasses)
-	$$$jsstart	// Загрузить список классов
+	$$$jsstart	// Download a list of classes
     write " var classes = ["
     	set i=""
     	for { s i=$o(ListClasses(i)) quit:i=""
@@ -139,7 +139,7 @@ ClassMethod Class2Grid(Par)
             $("#aCLShead").html(args.item.ClassNames);
             $("#aOBJ").empty();
             $("#aOBJhead").html("");
-			$.blockUI( { message: 'Идет загрузка' , css: { border: 'none', padding: '15px', backgroundColor: '#000', '-webkit-border-radius': '10px','-moz-border-radius': '10px', opacity: .5, color: '#fff' }} );
+			$.blockUI( { message: '...Loading' , css: { border: 'none', padding: '15px', backgroundColor: '#000', '-webkit-border-radius': '10px','-moz-border-radius': '10px', opacity: .5, color: '#fff' }} );
             $("#aOBJ").load("App.Action.cls","appClass=App.FormExplorer&appMethod=Obj2Grid&appNsp="+$("#aNSPhead").html()+"&appPar="+args.item.ClassNames);
         },
         data: classes,
@@ -155,7 +155,7 @@ ClassMethod Class2Grid(Par)
 	>
 }
 
-/// Cписок экземпляров классов в виде таблицы
+/// A list of instances of classes in a table
 ClassMethod Obj2Grid(Par)
 {
 	#define tra(%s) $zconvert(%s,"O","JS")
@@ -165,7 +165,7 @@ ClassMethod Obj2Grid(Par)
 	do ##class(App.sys).SaveSQL(sql,gn)
 	set nl=$c(13,10)
 	$$$jsstart
-   // Загрузить список полей запроса
+   // To load the list of query fields
       set field = "["
     	for f=1:1:$ll(@gn@(0)) { 
     		set field=field_"{ name: """_$$$tra($lg(@gn@(0),f))_""", type: ""text"", validate: ""required"" }"_$s($ll(@gn@(0))'=f:",",1:"")
@@ -173,11 +173,11 @@ ClassMethod Obj2Grid(Par)
    		 set field=field_"]"
    	write !,nl,"var field = "_field_";",!,nl
    	;w "var field2=JSON.parse(field);",!,nl
-    // Загрузить список классов
+    // Download a list of classes
     set max=$$$MAXSHOW
     write " var objects = [",!
     	set i="0"
-    	for { s i=$o(@gn@(i)) q:i=""  q:i>max  ;ограничим
+    	for { s i=$o(@gn@(i)) q:i=""  q:i>max  ;limit
     		write "{ "
     		for f=1:1:$ll(@gn@(0)) {
 	    		set val=$lg(@gn@(i),f)
@@ -215,13 +215,13 @@ ClassMethod Obj2Grid(Par)
     });
  	$("#aOBJh").click();
   	$.unblockUI();
-	$("#aPROhead").html("Создать новый");
+	$("#aPROhead").html("Create new");
 	$("#aPRO").load("App.Action.cls","appClass=App.FormExplorer&appMethod=PRO2Grid&appNsp="+$("#aNSPhead").html()+"&appPar=,"+$("#aCLShead").html());
 	</script>
 	>
 }
 
-/// Открыть экземпляр класса
+/// To open an instance of the class
 ClassMethod PRO2Grid(Par)
 {
 	write "<form id='MainForm'><div id='MainContent'>"
@@ -229,7 +229,7 @@ ClassMethod PRO2Grid(Par)
 	set id=$p(Par,",",1)
 	set obj=##class(App.Form).GetObj(Par)
 	if '$isobject(obj) { 
-		write $$$appError("Не удалось открыть объект")
+		write $$$appError($$$aText("Failed to open object",""))
 	}
 	else {
 		set mode=($roles["%All")_",WithoutCancel,WithCreate"
@@ -243,14 +243,14 @@ ClassMethod PRO2Grid(Par)
 	quit $$$OK
 }
 
-/// Получить список областей в виде селекта
+/// To get a list of fields in the select
 ClassMethod SelectNsp(Par)
 {
 	set NSpace=$zu(5)
-	// Получить список областей
+	// To get a list of fields
 	set listNs=##class(App.sys).ListNS(.info)
 	set onc="$('#MainClasses').empty();$('#MainObjects').empty();$('#MainClasses').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectClasses&appNsp='+this.options[this.selectedIndex].value+'&appPar='+this.options[this.selectedIndex].value);"
-	set selectNS="<SELECT title=""Область"" name=""NSP"" id=""NSP""  > "
+	set selectNS="<SELECT title="""_$$$aText("NameSpace","")_""" name=""NSP"" id=""NSP""  > "
 	for ns=1:1:$l(listNs,",") { continue:$p(listNs,",",ns)=""
 		continue:$p(listNs,",",ns)["%ALL"
   		set selected=$select(NSpace=$p(listNs,",",ns):"selected",1:"")
@@ -265,13 +265,13 @@ ClassMethod SelectNsp(Par)
 	quit $$$OK
 }
 
-/// Получить список классов в виде селекта
+/// To obtain a list of classes in the form of select
 ClassMethod SelectClasses(SelectClass = "", ListClasses)
 {
 	set query=##class(%Library.ResultSet).%New("%Dictionary.ClassDefinition:Summary")
  	set st=query.Execute() ;"%Persistent")
 	set onc="$('#MainObjects').load('App.Action.cls','appClass=App.FormExplorer&appMethod=SelectObjects&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
- 	set selectNS="<SELECT title=""Классы"" name=""SelClass"" id=""SelClass"" > "
+ 	set selectNS="<SELECT title="""_$$$aText("Classes","")_""" name=""SelClass"" id=""SelClass"" > "
  	while query.Next() { 
  		if 'query.Get("Persistent") continue
 		set class=query.Get("Name"),f1=""
@@ -279,7 +279,7 @@ ClassMethod SelectClasses(SelectClass = "", ListClasses)
 		if $e($zu(5),1,3)'="ENS" continue:$e(class,1,3)="Ens"
 		set selected=""
 		if class=SelectClass s selected="selected",forceONC=1
-		if query.Get("Super")["App.Form" s f1="style='color:red;' title='Наследник App.Form'"
+		if query.Get("Super")["App.Form" s f1="style='color:red;' title='Inheritor App.Form'"
 		set selectNS=selectNS_" <OPTION "_$g(selected)_" "_f1_" VALUE="""_class_""">"_class_"</OPTION>"
 		if $D(ListClasses) s ListClasses(class)=$lb($g(selected),f1,query.Get("Super"),query.Get("System"),query.Get("TimeChanged"),,query.Get("SqlTableName"))
 	}
@@ -299,7 +299,7 @@ ClassMethod SelectClasses(SelectClass = "", ListClasses)
 	quit $$$OK
 }
 
-/// Получить Количество записей таблицы
+/// To obtain the Number of records in the table
 ClassMethod GetCountTab(SelectClass, ByRef tab)
 {
 	set tab=##class(App.type).GetTableName(SelectClass)
@@ -310,25 +310,22 @@ ClassMethod GetCountTab(SelectClass, ByRef tab)
 	quit count
 }
 
-/// Получить список экземпляров класса в виде таблицы
+/// To obtain a list of instances of a class in a table
 ClassMethod SelectObjects(SelectClass, sql = "", exec = "")
 {
 	set count=..GetCountTab(SelectClass,.tab)
 	set:sql="" sql="select * from "_tab
-	;set add=" <span style='"_$$$styleurl_"' onclick=""$('#MainObjEdit').load('App.Action.cls','appClass=App.FormExplorer&appMethod=PRO2Grid&appNsp="_$zu(5)_"&appPar=,"_SelectClass_"');"" title='Создать объект' >Создать</span><DIV id=MainObjEdit></div>"
-	set add=" <span style='"_$$$styleurl_"' onclick=""WinOpen('"_$zu(5)_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_SelectClass_"&ID=');"" title='Создать объект' >Создать</span>"
+	set add=" <span style='"_$$$styleurl_"' onclick=""WinOpen('"_$zu(5)_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_SelectClass_"&ID=');"" title='"_$$$aText("To create an object","")_"' >"_$$$aText("To create","")_"</span>"
 	$$$jsstart
 		write "$('#MainObjEdit').empty();"
 	$$$jsstop
 	set %SelectClass=SelectClass
-	;if exec="" set exec="##class(App.FormExplorer).EditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
 	if exec="" set exec="##class(App.FormExplorer).WinEditObj(.%AppLogInfoVal, %AppLogInfoCol, %AppLogInfoHead, .%AppLogInfoTemp,"""_$zu(5)_""")"
-	;set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),sql_" <a target=SelectQ href='App.LogInfo.cls?NSP="_$zu(5)_"&WHAT="_sql_"' title='Перейти на панель запросов'>Запрос</a> count(*)="_count_" "_add,exec)
-	set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),"Экземпляры класса "_SelectClass_" в области "_$zu(5)_" "_add,exec)
+	set st=##class(App.LogInfoPane).DrawSQL(sql,$$$MAXSHOW,$zu(5),$$$FormatText($$$aText("Instances of class %1 in namespace %2",""),SelectClass,$zu(5))_" "_add,exec)
 	quit st
 }
 
-/// Формировать активные ссылки для редактирования
+/// To form active links for editing
 ClassMethod EditObj(Val, Col, Head, Temp, nspace, DSN)
 {
 	set res=Val
@@ -343,7 +340,7 @@ ClassMethod EditObj(Val, Col, Head, Temp, nspace, DSN)
 	quit res
 }
 
-/// Формировать активные ссылки для редактирования в окне
+/// Forming an active link for editing in the window
 ClassMethod WinEditObj(Val, Col, Head, Temp, nspace, DSN)
 {
 	set res=Val
@@ -354,17 +351,16 @@ ClassMethod WinEditObj(Val, Col, Head, Temp, nspace, DSN)
 		if $D(Temp("ID",Col)) {
 			s %id=Val
 		}
-		set res=$replace(Val,Val,"<span title='Редактировать' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_%SelectClass_"&ID="_$zconvert(%id,"O","URL")_"');"" >"_Val_"</span>")
+		set res=$replace(Val,Val,"<span title='"_$$$aText("Edit","")_"' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_%SelectClass_"&ID="_$zconvert(%id,"O","URL")_"');"" >"_Val_"</span>")
 	}
 	quit res
 }
 
-/// Открыть окно для редактирования экземпляра объекта
+/// To open the window to edit the object instance
 ClassMethod WinOpenEditObj(Par)
 {
 	set id=$g(Par("ID"))
 	set ClassName=$tr($get(Par("SelectClass")),"_",".")
-	//
 	set obj=##class(App.Form).GetObj(id_","_ClassName)
 	set PrefixIdDIV="WinOpenEditObj"
 	write "<form id='"_PrefixIdDIV_"MainForm'>"

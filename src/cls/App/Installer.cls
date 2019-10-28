@@ -32,7 +32,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 		 QUIT $$$OK
 	}
 	if $g(@$$$GNEnsConf@("HomeNamespace"))="" {
-	;Заполнение глобала значениями по умолчанию
+	;Filling the global default values
 	 set @$$$GNEnsConf@("DBCACHESizeMon")="CACHESYS,CACHEAUDIT"
 	 set @$$$GNEnsConf@("EMAILAUTH")="user_from_send_mail@server.com"
 	 set @$$$GNEnsConf@("EMAILAUTHPASS")=12345
@@ -42,6 +42,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 	 set @$$$GNEnsConf@("EMAILXLSPATH")="c:\temp\"
 	 set @$$$GNEnsConf@("EXPORDPROJPATH")="c:\temp\source\"
 	 set @$$$GNEnsConf@("Language")="en"
+	 set @$$$GNEnsConf@("PATHCSP")="/"_..#AppCSP_"/"
 	}
     set @$$$GNEnsConf@("HomeNamespace") = ns
     write !, "Installing "_..#AppName_" application to " _ ns
@@ -62,7 +63,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 	s tSC=result.Prepare("select * FROM Security.Applications where Name=?")
 	s:tSC tSC=result.Execute("/csp/"_ns)
 	i '$$$ISOK(tSC) {
-		s text="Ошибка настройки приложений :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
+		s text="Error application :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$$ERROR(text)
 	}
 	else {
 		while result.Next() {
@@ -88,7 +89,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
     set cspProperties("DispatchClass") = ..#DispatchClass
     set st = ..RegisterWebApplication("/"_..#AppRest, .cspProperties)
     return:$$$ISERR(st) st
- 
+  	set @$$$GNEnsConf@("PATHCSP")="/"_..#AppCSP_"/"
     do ..CreateAllNamespace()
     
     write !, "Mapping "_..#AppName_" package into all namespaces:"

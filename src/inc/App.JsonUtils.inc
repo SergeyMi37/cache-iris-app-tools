@@ -65,6 +65,10 @@ ROUTINE App.JsonUtils [Type=INC]
 	#define jsonArrayClass %Library.Array
 
 	#define jsonInitialArrayIndex 0
+	
+	#define jsonGetTypeOf $getTypeOf
+    						//usage: obj.$$$jsonGgetTypeOf()
+	
 #else
     #define jsonClassIsLatestVersion %ClassIsLatestVersion 	
     						//usage: obj.$$$jsonClassIsLatestVersion()
@@ -99,6 +103,10 @@ ROUTINE App.JsonUtils [Type=INC]
 	#define jsonArrayClass %Library.DynamicArray
 	
 	#define jsonInitialArrayIndex 1
+	
+	#define jsonGetTypeOf %GetTypeOf
+    						//usage: obj.$$$jsonGgetTypeOf()
+
 #endif
 
 #def1arg jsonIsAbstract %IsA(##Quote($$$jsonAbstractClass))

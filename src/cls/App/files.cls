@@ -1,22 +1,21 @@
 Include App.LogMacro
 
-/// Утилиты работы с файлами
+/// Utilities working with files
 Class App.files [ Abstract ]
 {
 
-/// Поучить слэшь
 ClassMethod getSlash() As %String
 {
 	q $$$slash
 }
 
-/// Поток перевести в строку
+/// Stream convert to string
 /// w ##class(App.files).Stream2String(resp,.str)
 ClassMethod Stream2String(resp As %Stream, StringValue As %String) As %Status
 {
 	set st=$$$OK
 	set StringValue=""
-	i '$isobject(resp) q $$$ERROR($$$GeneralError,"Пустой поток")
+	i '$isobject(resp) q $$$ERROR($$$GeneralError,"An empty stream")
 	d resp.Rewind() 
 	set StringValue=resp.Read($$$MaxStringLength) 
 	while '(resp.AtEnd) { 
@@ -25,7 +24,7 @@ ClassMethod Stream2String(resp As %Stream, StringValue As %String) As %Status
 	q st
 }
 
-/// Распаковка архива в директорию
+/// Unpack the archive to a directory
 /// w ##class(App.files).UnzipToDirectory("/backup/eaist/imported/3a308a20ff8e271ae3e063231a8df1ad.zip","/backup/eaist/last")
 ClassMethod UnzipToDirectory(fileName As %String, Output dirName As %String, cmd) As %Status
 {
@@ -38,7 +37,7 @@ ClassMethod UnzipToDirectory(fileName As %String, Output dirName As %String, cmd
 		
 		;$$$TRACE(cmd)
 		set result = $zf(-1, cmd)
-		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, $$$aText("Return code error","Ошибка кода возврата")_":" _ result_" cmd="_cmd)) }
+		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, $$$aText("Return code error","")_":" _ result_" cmd="_cmd)) }
 	} catch ex {
 		set st = ex.AsStatus()
 		;$$$TRACE($system.Status.GetErrorText(st))
@@ -46,8 +45,8 @@ ClassMethod UnzipToDirectory(fileName As %String, Output dirName As %String, cmd
 	quit st
 }
 
-/// Упаковка файла в архив
-///  Каталогу tempdir нужно присвоить права на запись cacheusr >sudo chmod ugo+w .
+/// Packaging file in the archive
+/// Directory tempdir need to assign write cacheusr >sudo chmod ugo+w .
 ClassMethod zipFile(dir, fileName As %String, newfileName As %String, tempdir As %String = "") As %Status
 {
 	set st = $$$OK
@@ -61,7 +60,7 @@ ClassMethod zipFile(dir, fileName As %String, newfileName As %String, tempdir As
 			
 		}
 		set result = $zf(-1, cmd)
-		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, $$$aText("Return code error","Ошибка кода возврата")_":" _ result_" cmd="_cmd)) }
+		if (result '= 0) { $$$ThrowStatus($$$ERROR($$$GeneralError, $$$aText("Return code error","")_":" _ result_" cmd="_cmd)) }
 	} catch ex {
 		set st = ex.AsStatus()
 	}
@@ -89,7 +88,7 @@ ClassMethod GetList(directory As %String, ext As %String = "*.*", ByRef list) As
 
 ClassMethod RemoveFiles(pFile As %String, pDir As %String = "") As %Status
 {
-	// TODO: сделать обработку ошибок удаления
+	// TODO: make error handling removal of
 	i pDir'="" do ##class(%File).RemoveDirectoryTree(pDir)
 	do ##class(%File).Delete(pFile)
 	quit $$$OK
@@ -101,10 +100,10 @@ ClassMethod GetUzipCommand(file, dir) As %String
 	quit "7z x " _ file _ " -o" _ dir
 }
 
-/// Метод выгружает поток aStream в файл в папку aLogFolder. 
-/// aLogFolder - директория выгрузки /back/temp/
-/// aFileName - Имя выгруженного файла
-/// File - полный путь к файлу
+/// Method unloads the stream aStream into a file folder aLogFolder. 
+/// aLogFolder - directory of discharge /back/temp/
+/// aFileName - name of the unloaded file
+/// File - the full path to the file
 /// w ##class(App.files).Stream2Log(HttpResponse.Data, TempDir, fileName,.File) s aDATA("pathfileName")=$g(path)
 ClassMethod Stream2Log(aStream, aLogFolder, aFileName, ByRef filename) As %Status
 {
@@ -115,11 +114,11 @@ ClassMethod Stream2Log(aStream, aLogFolder, aFileName, ByRef filename) As %Statu
 	if '##class(%File).DirectoryExists(aLogFolder) {
 		quit:'##class(%File).CreateDirectoryChain(aLogFolder) $$$ERROR($$$GeneralError,"Cann't create directory chain: "_aLogFolder)
 	}
-	#; Определяем префикc для имени файла и имя файла
+	// Define a prefix for the file name and the file name
 	i (aFileName="") s filename = aLogFolder_"t"_$tr($zts,",.","")_".xml"
 	e  s filename = aLogFolder_aFileName
 	
-	#; Выполняем копирование файла в поток
+	// Execute copy file to stream
 	s ext=$p(filename,".",$l(filename,"."))
 	
 	i aStream.%ClassName(1)="%Stream.FileCharacterGzip" {
@@ -143,11 +142,11 @@ ClassMethod Stream2Log(aStream, aLogFolder, aFileName, ByRef filename) As %Statu
 	s File.Filename=filename
 	s sc=File.CopyFromAndSave(aStream)
 
-	#; Возвращаем результат
+	// Return result
 	d aStream.Rewind() quit sc
 }
 
-/// Открыть файл и записать в массив 
+/// To open a file and write to the array 
 /// w ##class(App.files).ReadFile2Arr("/backup/temp/snmp/ruRunCmd2018-10-03_14:31:00.txt","RSK",,"%tmp")
 ClassMethod ReadFile2Arr(file, mode = "RSK", code = "UTF8", gn = "tmp") As %Status
 {
@@ -164,7 +163,7 @@ endoffile u io close file
 	q $$$OK
 }
 
-/// Открыть файл для записи 
+/// To open a file for writing 
 /// set fn="/backup/temp/log.txt" if ##class(App.files).OpenFile(fn) use fn write "test",! close fn
 ClassMethod OpenFile(file, time = 1, mode = "WNSK", code = "UTF8") As %Status
 {
@@ -172,7 +171,7 @@ ClassMethod OpenFile(file, time = 1, mode = "WNSK", code = "UTF8") As %Status
 	quit $test
 }
 
-/// Прочитать файл и записать в глобал 
+/// To read a file and write to global 
 /// w ##class(App.files).File2Arr("/backup/eaist/work/SPGZ.xml_2018-05-07_14.56.26.461","^tmpFile")
 ClassMethod File2Arr(file, Mas, Param = "RSU") As %Status
 {
@@ -187,7 +186,7 @@ ClassMethod File2Arr(file, Mas, Param = "RSU") As %Status
  Q len_" byte"
 }
 
-/// Загрузка XML в класс объектов  
+/// Loading XML into the feature class 
 /// d ##class(App.files).LoadXML("d:\!\InfoObject.xml","infoObject","Model.InfoObject") 
 ClassMethod LoadXML(fn, tag, class)
 {
@@ -205,7 +204,7 @@ ClassMethod LoadXML(fn, tag, class)
 	Quit
 }
 
-/// Получить путь к системному протоколу
+/// To the system path Protocol
 /// w ##class(App.files).getPathcconsole()
 ClassMethod getPathcconsole(ByRef dir, ByRef logname)
 {
@@ -216,7 +215,7 @@ ClassMethod getPathcconsole(ByRef dir, ByRef logname)
  quit dir_logname_".log"
 }
 
-/// Поиск момента расширения базы данных
+/// Search of time of the extension of the database
 ClassMethod getDate(Line, yyyy, mm, dd)
 {
 	Set mm=$p(Line,"/",1)
@@ -225,7 +224,7 @@ ClassMethod getDate(Line, yyyy, mm, dd)
 	q mm'=""&&(yyyy'="")
 }
 
-/// Поиск выжный событий
+/// Search important events
 ClassMethod Alert(Line, ByRef bd)
 {
 	q:'..getDate(Line,.yyyy,.mm) $$$OK
@@ -250,7 +249,7 @@ ClassMethod Alert(Line, ByRef bd)
 	q $$$OK
 }
 
-/// Поиск момента расширения базы данных
+/// Search of time of the extension of the database
 ClassMethod ExpansionDB(Line, ByRef bd)
 {
 	s context = "Expansion completed"
@@ -266,7 +265,7 @@ ClassMethod ExpansionDB(Line, ByRef bd)
 	q $$$OK
 }
 
-/// Получить диапазон дат по количеству дней от текущего
+/// To date range in number of days from the current
 /// w ##class(App.files).getPeriod(69,.FromDateTime,.ToDateTime,.df,.dt)
 ClassMethod getPeriod(days, FromDateTime, ToDateTime, df, dt) As %String
 {
@@ -279,9 +278,9 @@ ClassMethod getPeriod(days, FromDateTime, ToDateTime, df, dt) As %String
 	}
 	i $g(dt) q df_" "_dt
 	q ""
- /// Интерпретирует строку с текущей датой типа
+ /// Interpreterpath string with the current date type
  /// Str= DateFrom=(CurrentDay-2)&DateTo=(CurrentDay-1)
- /// Результат вычисленное значение выражения 
+ /// The result the computed value of the expression 
 InterpretCurrentDay(Str, Result,df,dt) 
 	#dim tSC As %Status = 1
 	#dim e As %Exception.AbstractException
@@ -303,7 +302,7 @@ InterpretCurrentDay(Str, Result,df,dt)
   quit tSC
 }
 
-/// Выполнить метод на каждой строкой прготокола
+/// To execute the method on each line of Protocol
 ClassMethod FindContextInLog(days, method, bd) [ PublicList = (tProductionName, inf) ]
 {
 	Set gn=$$$GNmessages
@@ -326,16 +325,16 @@ ClassMethod FindContextInLog(days, method, bd) [ PublicList = (tProductionName, 
 	s hdt=HFromDateTime
 	s class=$p($p(method,"(",2),")"),method=$p($p(method,")",2),".",2)
 	f { s hdt=$o(@gn@(hdt),1,Line) q:hdt=""  q:hdt>HToDateTime
-		// Контекст поиска		
+		// Search context 
 		d $classmethod(class,method,Line,.bd)
 	}
 	quit $$$OK
 
 
-/// Функция разбора протокольного файла на дату требуемой глубины
-/// Сканироровать cconsole.log и результат положить 
+/// Function parse Protocol of the file on the date required depth
+/// To skanirovat cconsole.log the result to put 
 ParseFile(gnTemp,InFile)
-	if $g(@gnTemp)[InFile,InFile'["cconsole.log" q 1 ;уже архив разбирали
+	if $g(@gnTemp)[InFile,InFile'["cconsole.log" q 1 ;already archive dismantled
 	;w !,InFile
 	Set File2 = ##class(%File).%New(InFile)
 	Do File2.Open("RSK\UTF8\")
@@ -345,7 +344,7 @@ ParseFile(gnTemp,InFile)
 		i H="",$g(zts)'="" {
 			i $l($g(@gnTemp@(zts)))>32000 continue
 			;i $i(@gnTemp@(0))
-			s @gnTemp@(zts)=$g(@gnTemp@(zts))_" "_Line ;склеим с предыдущей
+			s @gnTemp@(zts)=$g(@gnTemp@(zts))_" "_Line ;glue from the previous
 			continue
 		}
 		s zts=H_","_$p($p(Line,":",4)," ")
@@ -359,10 +358,10 @@ ParseFile(gnTemp,InFile)
 		s @gnTemp@(zts)=Line
 		} While 'File2.AtEnd
 	Do File2.Close()
-	s:$g(@gnTemp)'[InFile @gnTemp=$g(@gnTemp)_"*"_InFile ;добавим имя в заколовок для исключений в следующий разбор
+	s:$g(@gnTemp)'[InFile @gnTemp=$g(@gnTemp)_"*"_InFile ;add the name of zagolovok for exceptions in the following analysis
  quit $g(@gnTemp)
 
-/// Трансформировать дату 09/01/17-10:31:15 в $Horolog.
+/// Transform the date 09/01/17-10:31:15 in $Horolog.
 DataTimeCConsole2H(DT) 
 		s dc=""
 		Set Date1=$p(DT,"-")
@@ -375,7 +374,7 @@ DataTimeCConsole2H(DT)
  quit $g(dc)
 
 
-/// Проверка вхождения Date1=MM/DD/YY, Time1=HH:MM:SS в диапазон df,dt
+/// Check entry Date1=MM/DD/YY, Time1=HH:MM:SS in the range df,dt
 IncludDataTime(DateTime1,df,dt,stop)
 	Set z="0"
 	try {
@@ -387,13 +386,13 @@ IncludDataTime(DateTime1,df,dt,stop)
  quit z
 }
 
-/// Посчитать в одном журнале какие глобалы как модифицируются
+/// Count one journal as what globals modifierade
 /// k ^tmpJRN d ##class(App.files).OneJournalCount("/sdb/journals/20181225.003","^tmpJRN")
 ClassMethod OneJournalCount(journal = "", tempGlob = {##class(App.LogInfoPane).#TEMPJRNL})
 {
 	s TmpGN="^||log" k @TmpGN
 	i '$isobject(journal) s journal=##class(%SYS.Journal.File).%OpenId(journal)	q:'$isobject(journal)
-	w !," Обрабатываем "_journal.Name_" "_$zdt($h,4)_" записываем в "_tempGlob,! 
+	w !,$$$FormatText($$$aText("Processed %1% 2 written in %3",""),journal.Name,$zdt($h,4),tempGlob),! 
 	d JournalCount(journal)
 	m @tempGlob@($P($zu(86),"*",2))=@TmpGN
     q
@@ -401,22 +400,22 @@ JournalCount(journal)
 	  #dim record As %SYS.Journal.Record
 	  set quit=0
 	  i $isobject(journal) {
-	    #; первый и последний адрес, для расчета прогресса обработки в процентах
+	    #; the first and last address, to calculate the progress in percent
 	    set firstPos=journal.FirstRecord.Address
 	    set lastPos=journal.LastRecord.Address
 	    set opr=""
-	    #; начнем с конца файла
+	    #; start with the end of the file
 	    set record=journal.LastRecord
 	    for {
 	      if '(record.Address#500000) {
-	      	#; отображение прогресса обработки
+	      	#; the progress display processing
 	      	set proc=$j((lastPos-record.Address)/(lastPos-firstPos)*100,5,1)
 	      	if proc'=opr set opr=proc write $c(13),?10,proc,"%  "
 	      }
 	      s TimeStamp=$tr(record.TimeStampGet(),"-")
 	      s date=$p(TimeStamp," ")
 	      s hour=$p($p(TimeStamp," ",2),":",1)
-	      #; Запись об изменении данных
+	      #; Change record data
 	      if record.%IsA("%SYS.Journal.SetKillRecord") {
 	        ;set gref=record.GlobalReference
 	    	s (OV,NV)=""
@@ -429,7 +428,7 @@ JournalCount(journal)
 	    	}
 	        d Count(record.TypeName,$l(OV),$l(NV),record.DatabaseName,record.GlobalNode)
 	      }
-	      #; перейдем к предыдущей записи в файле журнала
+	      #; move to the previous record in the log file
 	      set record=record.Prev
 	      quit:'$isobject(record)
 	    }
@@ -442,38 +441,38 @@ Count(TypeOp,OV,NV,base,gref)
 	if $qs(gref,0)["SYS",$ql(gref)>0 {
 		s gref=$na(@$qs(gref,0)@($qs(gref,1))) ;$qs(gref,2)))
 	}
-	elseif $e($qs(gref,0),*)="D"||($e($qs(gref,0),*)="I")||($e($qs(gref,0),*)="S") { //записи объектов
+	elseif $e($qs(gref,0),*)="D"||($e($qs(gref,0),*)="I")||($e($qs(gref,0),*)="S") { //record objects
 		s gref=$na(@$qs(gref,0))
 	}
-	elseif $qs(gref,0)["log"||($qs(gref,0)["tmp") { //протоколы
+	elseif $qs(gref,0)["log"||($qs(gref,0)["tmp") { //protocols
 		s gref=$na(@$qs(gref,0))
 	}
 	else {
-		s gref=$na(@$qs(gref,0)) ;имя массива
+		s gref=$na(@$qs(gref,0)) ;the name of the array
 	}
 	;s Log($lb(base,gref))=$g(Log($lb(base,gref)))+1
 	i $i(@TmpGN@(date,hour,base,TypeOp,gref,"Counts"))
-	;будем считать количество новых бы
+	;we assume the number of new would
 	s @TmpGN@(date,hour,base,TypeOp,gref,"OldValue")=$g(@TmpGN@(date,hour,base,TypeOp,gref,"OldValue"))+OV
 	s @TmpGN@(date,hour,base,TypeOp,gref,"NewValue")=$g(@TmpGN@(date,hour,base,TypeOp,gref,"NewValue"))+NV
  q
 }
 
-/// Посчитать в журналах какие глобалы как модифицируются за конкретную дату
+/// To count in magazines which globals as modifierade for a specific date
 ///  d ##class(App.files).OneDayJournalCount("/opt/isc/ensemble/mgr/journal/20181225","^tmpJRN")
 ///  d ##class(App.files).OneDayJournalCount("/sdb/journals/20181225","^tmpJRN")
 ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {##class(App.LogInfoPane).#TEMPJRNL})
 {
- i $g(@tempGlob)'="" w !,"Насчет уже идет "_$g(@tempGlob) q
- s @tempGlob=$zts ;начало формирования
+ i $g(@tempGlob)'="" w !,$$$aText("About is already underway","")_" "_$g(@tempGlob) q
+ s @tempGlob=$zts ;the beginning of the formation
 
  s slash=$$$slash
  if fileYYYYMMDD="" { 
-	w !,"Будем считать за предыдущий день"
+	w !,$$$aText("We assume for the previous day","")
 	s file=##class(%SYS.Journal.System).GetCurrentFile()
 	s fileYYYYMMDD=$p(file.Name,slash,1,*-1)_slash_$tr($zd($h-1,3),"-")
  }
- ;дата за которую считаем
+ ;date for which we believe
  s date=$p($p(fileYYYYMMDD,slash,$l(fileYYYYMMDD,slash)),".")
  for j=1:1:999 {
 	  s suf=$s($l(j)=1:"00",$l(j)=2:"0",1:"")_j
@@ -486,11 +485,11 @@ ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {##class(App.LogInf
 	  else { QUIT
 	  }
  }
- s @tempGlob="" ;флаг окончания насчета
+ s @tempGlob="" ;flag the end of nascet
  q
 }
 
-/// Экспорт в файл формата CSV
+/// Export to CSV file
 /// d ##class(App.files).Export2CSV("/backup/temp/JrnCount*.csv","^tmpJRN2")
 ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {##class(App.LogInfoPane).#TEMPJRNL}, aCharset = "CP1251")
 {
@@ -522,7 +521,7 @@ ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {#
 		}
 	
 	s sc=FileStream.SaveStream()
-	WRITE !,"Записано в файл "_aFileName,!
+	WRITE !,$$$aText("Written to the file","")_" "_aFileName,!
 	KILL FileStream quit sc
 	q
 }
@@ -542,54 +541,54 @@ ClassMethod GetAllDir(dir, ext = "", ByRef out)
 	q $$$OK
 }
 
-/// Конвертировать XSL файл в формат CSV и загрузить в глобал
+/// Can I convert XSL file to CSV format and upload to GD
 /// d ##class(App.files).TransXLS2CSV
 /// 
 ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef error, tempDir = {##class(%File).GetDirectory(##class(%File).TempFilename())})
 {
 		;s path=;"/opt/isc/ensemble/csp/spgz/files/"
 		s path=$p(fileXSL,"/",1,*-1)
-		if path="" s error="Пустой путь "_path q $$$ERROR($$$GeneralError,error)
+		if path="" s error="Empty "_path q $$$ERROR($$$GeneralError,error)
 		;	s fileXSL=path_NameFileXLS
 		;w "<br> "_fileXSL 
 		s gn2=..tempGN("Xls2") k @gn2
 
-		;Конвертировать xls в csv в формат UTF8 с разделителем по запятой, а значения полей в двойных кавычках
+		;Convert xls to csv in UTF8 format delimited by commas and field values enclosed in double quotes
 		s cmd="cd "_path_"; export HOME=$(eval echo ~$(id -u -n)) && unset LD_LIBRARY_PATH && soffice --convert-to csv --infilter=CSV:44,34,76,1 --headless "_fileXSL
 
 		d ##class(App.sys).RunCmd(cmd,gn2,0,tempDir) h 1
 		k @gn2
 
 		s fileCSV=$p(fileXSL,".",1,*-1)_".csv"
-		;Загружаем и разбираем полученный CSV
+		;Load and parse the received CSV
 
 		s gn3=..tempGN("Xls3") k @gn3
 		s st=##class(App.files).ReadFile2Arr(fileCSV,"RSK","UTF8",gn3)
 		i 'st s error=$System.Status.GetErrorText(st) q st
-		i '$d(@gn3) s error="Нет файла "_fileCSV q $$$ERROR($$$GeneralError,error)
+		i '$d(@gn3) s error="Not file "_fileCSV q $$$ERROR($$$GeneralError,error)
 		;zw @gn3
 		if FieldNameHead="" m out=@gn3 k @gn3 q $$$OK
 		s gn=..tempGN("CsvTable") kill @gn
 		s i=""
 		f { s i=$o(@gn3@(i),1,s) q:i=""
 			s ss=""
-			;Сначало пройдем по двойным кавычкам и на каждой четной запятые транслируем в Чар=1
+			;First go through by double quotes and each even-numbered commas in Char broadcast=1
 			f ii=1:1 { q:$p(s,$c(34),ii,ii+1)=""
 				s ss=ss_$s('(ii#2):$tr($p(s,$c(34),ii),",",$c(1)),1:$p(s,$c(34),ii))
 			}
-			i s[FieldNameHead { ;делаем шапку один раз
+			i s[FieldNameHead { ;make a hat once
 				f ii=1:1 { q:$p(ss,",",ii,ii+1)=""
-					s name=$tr($ZStrip($p(ss,",",ii),"<>WP"),$c(1),",") ;обратная трансляция
+					s name=$tr($ZStrip($p(ss,",",ii),"<>WP"),$c(1),",") ;reverse stream
 					continue:name=""
 					s @gn@(0,ii)=$lb(name)
 					s @gn@(-1,name)=ii
 				}
-			} elseif 1 { ;проход по всем остальным строкам
+			} elseif 1 { ;pass on all other rows
 				;w "<br>"_ss
 				s listval=""
-				;Пройдем по запятым и Чар=1 вернем обратно в запятие
+				;We'll use the comma Char=1 return back to commas
 				f ii=1:1 { q:$p(ss,",",ii,ii+1)=""
-					s val=$tr($ZStrip($p(ss,",",ii),"<>W"),$c(1),",") ;обратная трансляция
+					s val=$tr($ZStrip($p(ss,",",ii),"<>W"),$c(1),",") ;reverse stream
 					s listval=listval_$lb(val)
 				}
 				s row=$g(row)+1
@@ -599,32 +598,32 @@ ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef e
 		m out=@gn k @gn q $$$OK
 }
 
-/// Получить глобальну ссылку на временный глобал
+/// To globalnu a reference to a temporary global
 /// w ##class(App.files).tempGN("GN")
 ClassMethod tempGN(GN, NoKill = 0) As %String
 {
-	;не делать ^|| и ^mtemp
+	;not to do ^|| and ^mtemp
 	s gn=$na(^tmpAppFile(GN,$j)) 
 	if 'NoKill KILL @gn	s @gn=$$$AppDT($h)
 	q gn
 }
 
-/// Получить временную директорию
+/// To a temporary directory
 /// w ##class(App.files).tempDir()
 ClassMethod tempDir() As %String
 {
  q ##class(%File).GetDirectory(##class(%File).TempFilename())
 }
 
-/// Сформировать документ XLSX по шаблону трансформировав поля
-/// f - массив полей на замену
-/// ParamData - Значение имени парамера
-/// node - подузел временного глобала
+/// Generate the XLSX document template transforming field
+/// f - the array of fields to replace
+/// ParamData - the name Value of the parameter
+/// node - the subnode of a temporary global
 /// ParamClass - "Spgz.model.Param"
-/// ParamField - имя поля ;"OfficeFile"
+/// ParamField - field name ;"OfficeFile"
 ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField, debug = 0, newfile = "", msg = "")
 {
-	///Формирование Заявки РГ
+	///Forming Applications WG
 	s st=##class(App.Form).GetValueByName(ParamClass,ParamData,ParamField,.Val,1)
 	i 'st {
 		w $System.Status.GetErrorText(st) q $$$OK
@@ -632,24 +631,24 @@ ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField,
 		s desc=Val("obj").Description
 		s file=$p($g(Val("fileName")),"*",1)
 	}
-	if $g(file)="" w $$$appError("Пустой файл "_file) q 1
+	if $g(file)="" w $$$appError("Empty file "_file) q 1
 	
 	s gn=..tempGN(node) k @gn
 	;d ##class(App.files).File2Arr(file,gn)
 	i debug s msg=msg_"<br>"_gn_" "_file
-	;Разархивировать
+	;Unzip
 	s tempDir=..tempDir()_$j
 	d ##class(App.files).UnzipToDirectory(file,tempDir)
 	
-	;Прочитаем в глобал исходник шаблона
+	;Read the global source template
 	s fileSource=tempDir_"/xl/sharedStrings.xml"
-	s st=##class(App.files).ReadFile2Arr(fileSource,"RSK",,gn) ;читаем файл в массив
+	s st=##class(App.files).ReadFile2Arr(fileSource,"RSK",,gn) ;read the file into an array
 
 	i 'st s msg=msg_$$$appError($System.Status.GetErrorText(st)) w msg q 1
-	i '$d(@gn) w $$$appError("Нет файла") q 1
+	i '$d(@gn) w $$$appError($$$aText("No file","")) q 1
 
 	set fn=fileSource ;    $replace(file,"-doc","-order-"_$username_"-") ;_$tr($zts,",.")) 
-	if '##class(App.files).OpenFile(fn) s msg=msg_$$$appError("Нет прав доступа записать файл "_fn) w msg q 1
+	if '##class(App.files).OpenFile(fn) s msg=msg_$$$appError($$$aText("No access rights to write the file","")_" "_fn) w msg q 1
 	s curIo=$i
 	s i=""
 	f { s i=$o(@gn@(i),1,str) q:i=""
@@ -663,7 +662,7 @@ ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField,
 	close fn
 	
 	i debug s msg=msg_"<br>fn="_fn_"<br>tempDir="_tempDir
-	;Архивируем снова под новым именем
+	;Archived again under a new name
 	;i ##class(App.files).zipFile(tempDir,tempDir,newfilename,"/backup/temp/spgz-zip")
 	s newfile=..tempDir()_node_"-"_$username_"-"_$zd($h,3)_"-"_$tr($zt($p($h,",",2),1),":")_".xlsx"
 	set cmd="cd "_tempDir_"; zip -r "_newfile_" * ; rm -R "_tempDir
@@ -671,9 +670,9 @@ ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField,
 	i debug s msg=msg_"<br>"_cmd
 	d ##class(App.sys).RunCmd(cmd,gn) h 3
 	i debug zw @gn
-	;Ссылка временная
+	;The link is temporary
 	if ##class(App.DownloadCSP).GetFileId(newfile,.url) { 
-		s msg=msg_"<li><a title=""Сохранить этот файл у себя на диске"" href='"_url_"'>Получить сформированный документ по файлу "_$g(desc)_"</a>"
+		s msg=msg_"<li><a title="""_$$$aText("Save this file on your disk","")_""" href='"_url_"'>"_$$$aText("To the formed document file","")_" "_$g(desc)_"</a>"
 		w msg
 	}
 }

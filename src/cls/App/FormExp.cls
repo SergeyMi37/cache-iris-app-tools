@@ -1,9 +1,11 @@
+Include App.LogMacro
+
 Class App.FormExp Extends App.AutoPage
 {
 
 Parameter CSPURL = "App.FormExp.cls";
 
-Parameter PAGENAME = {$s($mvv(58)="ru":"Навигатор",1:"Explorer")};
+Parameter PAGENAME = {"Objects Explorer"};
 
 Parameter PARENTPAGE = "App.AutoPage.cls";
 

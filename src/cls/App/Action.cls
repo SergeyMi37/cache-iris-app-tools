@@ -1,10 +1,10 @@
 Include App.LogMacro
 
-/// Выводить необходимые действия
+/// Withdraw the necessary actions
 Class App.Action Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
 {
 
-/// Главный метод формирования содержимого страницы
+/// Main method generate the content of page
 ClassMethod OnPage() As %Status
 {
 	set $zt="Err"
@@ -40,7 +40,7 @@ ClassMethod OnPage() As %Status
 		;if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
 		;set NSpace=$zu(5)
 
-	 	if $isobject(%request.Content) { //POST
+	 	if $isobject(%request.Content) { 
 		 	set stream=%request.Content
 			set sc=##class(App.files).Stream2String(%request.Content,.str)
 			if 'sc quit sc
@@ -52,7 +52,7 @@ ClassMethod OnPage() As %Status
  	
 	if appMethod="" {
 		$$$jsstart
- 		write "alert('Параметр appMethod пустой');"
+ 		write "alert('"_$$$aText("The appMethod parameter is empty","")_"');"
  		$$$jsstop
 		quit $$$OK
 	}
@@ -74,7 +74,7 @@ Err
 	quit $$$OK
 }
 
-/// Выполнить метод
+/// To execute the method
 ClassMethod RunMethod(appNsp, appClass, appMethod, appPar) As %Status
 {
 	if appNsp'="" try {zn appNsp set NSpace=appNsp } catch e {}
@@ -92,7 +92,7 @@ ClassMethod RunMethod(appNsp, appClass, appMethod, appPar) As %Status
 		Do $CLASSMETHOD(appClass,appMethod,.appPar)
 }
 
-/// Показать форматированный json 
+/// Show a formatted json 
 ClassMethod ShowJson(appPar) As %Status
 {
 	set gn=$zconvert(appPar,"I","URL")
@@ -104,7 +104,7 @@ ClassMethod ShowJson(appPar) As %Status
 	quit $$$OK
 }
 
-/// Показать форматированный XNL
+/// Show formatted XNL
 ClassMethod ShowXML(appPar) As %Status
 {
 	set gn=$zconvert(appPar,"I","URL")
@@ -116,7 +116,7 @@ ClassMethod ShowXML(appPar) As %Status
 	quit $$$OK
 }
 
-/// Разобрать стоку в Json
+/// To disassemble the drain to Json
 ClassMethod Test(appPar) As %Status
 {
 	write "ClassMethod Test."
@@ -124,7 +124,7 @@ ClassMethod Test(appPar) As %Status
 	quit $$$OK
 }
 
-/// Разобрать стоку в Json
+/// To disassemble the drain to Json
 ClassMethod ParseJson(jsonStr, appClass, appMethod, appPar) As %Status
 {
  try {

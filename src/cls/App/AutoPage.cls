@@ -18,7 +18,7 @@ Parameter STYLESHEET = "intersystems.css";
 ClassMethod OnCompile() [ CodeMode = generator, Internal, ServerOnly = 1 ]
 {
 	s tSC=$$$OK
-	// Пропускаем проверку, если компилируется класс-шаблон
+	// Skip the test if the compiled template class
 	s isTemplate=%class="App.AutoPage"
 	q:isTemplate $$$OK
 	

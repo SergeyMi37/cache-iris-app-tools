@@ -1,27 +1,29 @@
 Include App.LogMacro
 
-/// Шаблон GUI приложения с селектором и вкладками на основе jQueryUi / Simple GUI Application Template based jQueryUi
+/// The template GUI of the application selector and tabs on the basis jQueryUi / Simple GUI based Application Template jQueryUi
 Class App.TabsPanelUikitAdmin Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
 {
 
-/// Заголовок приложения / Application title
+/// The application title / Application title
 Parameter HeaderText = "AdminTabsApplication";
 
-/// есть ли право на работу с этой формой
+/// is there a right to work with this form
 ClassMethod IsPermiss(role) As %Status
 {
 	q $roles[role||($roles["%All")
 }
 
-/// Главный метод формирования содержимого страницы
-/// TODO #2c3136 #3e454c - заменить на синие тона
+/// Main method generate the content of page
+/// TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
+/// #3e454c - 2185D0 , 1c1f22 - 0FC0FC , 656a70 - 
 ClassMethod OnPage() As %Status
 {
  s NSpace=$tr(%request.Get("ns"),"#")
  s:NSpace="" NSpace=$zu(5)
  zn NSpace
- // Сохраним в параметрах сессии режим отладки (подразумевает расширенное информирование)
+ // Save the session parameters debugging mode (implies extended disclosure)
  s %session.Data("debug")=%request.Get("debug")
+ // http://cip.mvk.ru/csp/spgz/App.MVK.gisui.cls?ns=MVK&autoload=Find# - Find the first startup
  set autoloadmenu=$p(%request.Get("autoload"),"#")
  do ##class(App.Log).AddRecord(..%ClassName(1), "OnPage", "Login", "INFO", "","")
  &html<
@@ -35,8 +37,8 @@ ClassMethod OnPage() As %Status
  	write ##class(App.LogInfoPane).AddJsScripts() 
    	   do ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
    	   do ##class(App.LogInfoPane).AddStyle()
- 	set menu=..DrawMenu() ;боковое меню
-	set menuTop=..DrawMenuTop() ;верхнее мню
+ 	set menu=..DrawMenu() ;sidebar
+	set menuTop=..DrawMenuTop() ;top think
 	s path=$$$PATHCSP
  &html<
 	
@@ -50,7 +52,7 @@ ClassMethod OnPage() As %Status
 		</a>
 		
 		<div class="cd-search is-hidden">
-			<input type="search" placeholder="Искать..." id="searchstr" name="searchstr">
+			<input type="search" placeholder="search.." id="searchstr" name="searchstr">
 		</div> <!-- cd-search -->
 
 		<a href="#" class="cd-nav-trigger"><span></span></a>
@@ -79,12 +81,12 @@ ClassMethod OnPage() As %Status
 <div class="uk-grid">
     <div class="uk-width-1-1 uk-margin-left uk-margin-right " style='overflow: auto;' id="mainApp" >
 		<ul id='tabMenu' class="uk-tab uk-tab-grid uk-tab-top" data-uk-tab="{connect:'#tabList', animation: 'fade'}">
-			<li id='t1' class="uk-active"><a href="#">О программе</a></li>
+			<li id='t1' class="uk-active"><a href="#">About</a></li>
 		</ul>
 		<ul id="tabList" class="uk-switcher uk-margin uk-tab-content">
 			<li id='ta1' >
 			 <div class="uk-alert-success" uk-alert>
-				<p title='#($username)#'> Если вам не доступен ни один пункт меню, то обратитесь к администратору</p>
+				<p title='#($username)#'> #($$$aText("If you are not available to any single menu item",""))#</p>
 			 </div>
 			</li>
 		</ul>
@@ -142,7 +144,7 @@ ClassMethod OnPage() As %Status
  quit $$$OK
 }
 
-/// отрисовка вернего меню 
+/// the rendering top menu 
 ClassMethod DrawMenuTop(Par) As %String
 {
 	do ..GetAllApps(.opt) 
@@ -150,7 +152,7 @@ ClassMethod DrawMenuTop(Par) As %String
 	set m="",ret=""
 	for { set m=$o(menu(m)) quit:m=""
 		s i=""
-		if m=99 { ;account - с подменю
+		if m=99 { ;account - with submenu
 			s ret=ret_"<li class='has-children account'><a href='#'><span id='account_status'>"_$lg(menu(m),2)_"</span></a><ul>"
 			for { set i=$o(menu(m,i)) quit:i=""
 		   		set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
@@ -168,7 +170,7 @@ ClassMethod DrawMenuTop(Par) As %String
   quit ret
 }
 
-/// отрисовка бокового меню 
+/// render side menu 
 ClassMethod DrawMenu(Par) As %String
 {
 	do ..GetAllApps(.opt) 
@@ -187,14 +189,14 @@ ClassMethod DrawMenu(Par) As %String
   quit ret
 }
 
-/// Получить информацию по техподдержке
+/// To obtain information on the support
 ClassMethod GetSupportInfo() As %String
 {
-	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
+	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","")
 	q msg_"Support info mailto: sergey.mikhaylenko@gmail.com"
 }
 
-/// Добавить на форму  js код если режим разработки
+/// To add to the form js code if development mode
 ClassMethod IsDebugMode(mode = 0) As %Status
 {
  i mode,'%request.Get("debug") { 
@@ -206,20 +208,20 @@ ClassMethod IsDebugMode(mode = 0) As %Status
 	q 0
 }
 
-/// отрисовка статуса пользователя
+/// rendering status of the user
 ClassMethod DrawStatus(Par) As %Status
 {
 	;do ##class(App.Form).BlockUI(0)
 	s fio=##class(App.sys).GetFullName($username)
-	s:fio="" fio="Пользователь"
-	w $s(%request.Get("debug"):"<font color=red><b>Режим админа</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"-"_$zu(5)_"'>"_fio_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
+	s:fio="" fio=$$$aText("The user","")
+	w $s(%request.Get("debug"):"<font color=red><b>"_$$$aText("Administrator mode","")_"</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"-"_$zu(5)_"'>"_$$$aText("User","")_": "_fio_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
  	$$$jsstart
 	w "$('.tip').tooltip();"
 	$$$jsstop
  q $$$OK
 }
 
-/// Получить меню
+/// To menu
 ClassMethod GetAllMenu(opt, menu, top = 0) As %Status
 {
  s i="" for { s i=$o(opt(i)) q:i=""
@@ -239,122 +241,123 @@ ClassMethod GetAllMenu(opt, menu, top = 0) As %Status
   }
 }
 
-/// какие доступны режимы
+/// what are the available modes
 ClassMethod GetAllApps(opt) As %Status
 {
-	;сделать их зависымыми от области
-	;------------ боковое меню
+	;make them zavisimye from the area
+	;------------ sidebar
 	s key="menu-first"
-	s opt(key)="Поиск" ;Имя меню
+	s opt(key)="Find" ;The name of the menu
 	s opt(key,"id")="Find"
-	s opt(key,"TabName")="Вкладка поиска" ;имя вкладки
+	s opt(key,"TabName")="Tab finding" ;the name of the tab
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
-	s opt(key,"Disable")=0 ;разрабатывается
+	s opt(key,"Disable")=0 ;developed
 	s opt(key,"TabMenu","Close")=1
-	s opt(key,"Menu")=$lb(1,"Режимы",1) ;$lg(,3)=1 - раскрытое меню 1 уровня
-	s opt(key,"Active")=1 ;активный пункт меню
+	s opt(key,"Menu")=$lb(1,"Mode",1) ;$lg(,3)=1 - open menu level 1
+	s opt(key,"Active")=1 ;active menu item
 
 	s key="menu-second"
-	s opt(key)="Помощь"
+	s opt(key)="Help"
 	s opt(key,"id")="Help"
-	s opt(key,"TabName")="Помощь"
+	s opt(key,"TabName")="Help"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"MethodUrl")="http://ShowTabAbout.cls"
-	s opt(key,"Disable")=1 ;разрабатывается
-	s opt(key,"Menu")=$lb(2,"О Программе",0)
+	s opt(key,"Disable")=1 ;developed
+	s opt(key,"Menu")=$lb(2,"About the program",0)
 
 	s key="menu-second2"
-	s opt(key)="Автор"
+	s opt(key)="Menu 3"
 	s opt(key,"id")="About"
-	s opt(key,"TabName")="Об авторе"
+	s opt(key,"TabName")="Menu 3"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabAbout"
-	s opt(key,"Disable")=1 ;разрабатывается
-	s opt(key,"Menu")=$lb(2,"О Программе")
+	s opt(key,"Disable")=1 ;developed
+	s opt(key,"Menu")=$lb(2,"About the program")
 
 	s key="menu-second3"
-	s opt(key)="Поддержка"
+	s opt(key)="Support"
 	s opt(key,"id")="Support"
-	s opt(key,"TabName")="ТехПоддержка"
+	s opt(key,"TabName")="Support"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"MethodUrlNewWin")="http://ShowTabAbout.cls"
-	s opt(key,"Disable")=1 ;разрабатывается
-	s opt(key,"Menu")=$lb(2,"О Программе")
+	s opt(key,"Disable")=1 ;developed
+	s opt(key,"Menu")=$lb(2,"About the program")
 	
-	;------------ верхнее одноуровневое меню 
+	;------------ one-level upper menu 
 	s key="menu-topLern"
-	s opt(key)="Обучение Курс 2"
-	s opt(key,"id")="Lernen"
-	s opt(key,"TabName")="Обучение технологиям 2"
+	s opt(key)="Menu 2"
+	s opt(key,"id")="Menu2"
+	s opt(key,"TabName")="Menu 2"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabAbout"
-	s opt(key,"MenuTop")=$lb(1,"Обучение") ;не имеет вложенные пункты
+	s opt(key,"MenuTop")=$lb(1,"Menu 2") ;has no sub-items
 
 	s key="menu-topOpt"
-	s opt(key)="Опции админики"
+	s opt(key)="Option"
 	s opt(key,"id")="Option"
-	s opt(key,"TabName")="Опции сайта" 
+	s opt(key,"TabName")="Option"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabAbout"
-	s opt(key,"MenuTop")=$lb(2,"Опции") ;не имеет вложенные пункты
+	s opt(key,"MenuTop")=$lb(2,"Option") ;has no sub-items
 
-	;------------ верхнее меню top-accoun
+	;------------ top menu the top-accoun
 	s key="menu-top-accoun"
-	s opt(key)="Профиль"
+	s opt(key)=$$$aText("Profile","")
 	s opt(key,"id")="AccountProf"
-	s opt(key,"TabName")="Профиль" 
+	s opt(key,"TabName")=$$$aText("Profile","")
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabAbout"
-	s opt(key,"MenuTop")=$lb(99,"Учетка") ;только 99-account имеет вложенные пункты
+	s opt(key,"MenuTop")=$lb(99,"Account") ;only 99-account has sub-items
 
 	s key="menu-top-account3"
-	s opt(key)="Выход"
+	s opt(key)=$$$aText("Exit","")
 	s opt(key,"id")="AccountExit"
-	s opt(key,"TabName")="Выход" 
+	s opt(key,"TabName")=$$$aText("Exit","")
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="Logout"
-	s opt(key,"MenuTop")=$lb(99,"Учетка") ;только 99-account имеет вложенные пункты
+	s opt(key,"MenuTop")=$lb(99,"Account") ;only 99-account has sub-items
 	
-	;----- Настройка поиска в топ меню
+	;----- Setup the search in the top menu
 	s key="Search"
-	s opt(key)="Искать"
+	s opt(key)=$$$aText("Search","")
 	s opt(key,"id")="Search-"
-	s opt(key,"TabName")="Поиск-"
+	s opt(key,"TabName")=$$$aText("Search","")_"-"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSearch"
 	s opt(key,"TabMenu","Close")=1
-	s opt(key,"TabMenu","Mode")=0 ;1- для каждой новой поисковой строки делать новый таб, 0-таб всегда один
+	s opt(key,"TabMenu","Mode")=0 ;1 - for each new search bar to make new tab, 0-tab is always the same
 	
 	q $$$OK
 }
 
-/// отрисовка Вкладки поиска
-/// Par - код пункта меню из ..GetAllApps
+/// drawing Tabs search
+/// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTabSearch(key = "") As %Status
 {
  ;do ..GetAllApps(.opt) 
  ;if $g(opt(key,"Disable")) write ..GetSupportInfo() quit $$$OK
  ;set NSpace=$zu(5)
- w "Поиск по контексту :"_$g(key)
+ w $$$aText("Context","")_" :"_$g(key)
  ;set pref=$g(opt(key,"id"))
 }
 
-/// отрисовка Вкладки по пункту меню
-/// Par - код пункта меню из ..GetAllApps
+/// the render Tab on the menu
+/// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTab(Par) As %Status
 {
 	do ..GetAllApps(.opt) 
 	if Par="Search" {
 		s Searchstr=$g(Par("%request.Data","Searchstr"))
 		if Searchstr="" q $$$OK
-		s tr=$tr(##class(App.type).Transliteration(Searchstr)," №`()\/*;'"":%","_N---")
+		;s tr=$tr(##class(App.MSW.type).Transliteration(Searchstr)," №`()\/*;'"":%","_N---")
+		s tr=$tr(Searchstr," №`()\/*;'"":%","_N---")
 		s key=Searchstr
 		MERGE opt(key)=opt(Par)
 		s opt(key)=opt(key)_Searchstr
-		i $g(opt(Par,"TabMenu","Mode"))=1 { ;режим добавления нового таба 
+		i $g(opt(Par,"TabMenu","Mode"))=1 { ;mode add a new tab 
 			s opt(key,"id")=opt(key,"id")_tr 
-		} else { ;режим добавления нового замены старого 
+		} else { ;mode add a new replace the old 
 			set tabId="tab-"_opt(Par,"id")
 			set tabIdMenu="tabMenu-"_opt(Par,"id")
 			$$$jsstart
@@ -368,12 +371,12 @@ ClassMethod ShowTab(Par) As %Status
 	set tabId="tab-"_opt(Par,"id")
 	set tabIdMenu="tabMenu-"_opt(Par,"id")
 	if $g(opt(Par,"TabMenu","Close"))'="" s IconMenu="<span class=""uk-margin-small-left uk-icon uk-close"" uk-icon=""close"" onclick=""$(\'#"_tabIdMenu_",#"_tabId_"\').remove();""></span>"
- 	if $DATA(opt(Par,"TabMenu","Close"))>9 { //есть еще пункты
+ 	if $DATA(opt(Par,"TabMenu","Close"))>9 { //there are more points
  		;TODO
  	}
  	$$$jsstart
  	 if $g(opt(Par,"MethodUrlNewWin"))'="" {
-	 	 if $g(opt(Par,"Disable")) { w "alert('Режим на отладке');"}
+	 	 if $g(opt(Par,"Disable")) { w "alert('"_$$$aText("Mode debugging","")_"');"}
 	 	 else {write "window.open('"_$g(opt(Par,"MethodUrlNewWin"))_"','_blank');"
 	 	 }
  	}
@@ -397,7 +400,7 @@ ClassMethod ShowTab(Par) As %Status
 	$$$jsstop
 }
 
-/// Возврат в одной строке
+/// Return in a single string
 ClassMethod Logout(Par) As %Status
 {
  do ##class(App.sys).logout()
@@ -406,26 +409,26 @@ ClassMethod Logout(Par) As %Status
  <br>
  <div class="uk-align-center uk-width-1-1 uk-margin-left uk-margin-right " style='overflow: auto;'>
 	<div class="uk-alert-warning" uk-alert>
-		<p>Выход из сестему произведен</p>
+		<p>#($$$aText("The output of Sistema produced",""))#</p>
 	</div>
-	<center><button class="uk-button uk-button-default uk-margin-small-right" type="button" onclick="#(onclick)#" ><span class="uk-margin-small-left uk-icon" uk-icon="sign-in"></span> Войти</button>
+	<center><button class="uk-button uk-button-default uk-margin-small-right" type="button" onclick="#(onclick)#" ><span class="uk-margin-small-left uk-icon" uk-icon="sign-in"></span>#($$$aText("Log in",""))#</button>
 	</center>
 </div><br><br>
 >
  	quit $$$OK
 }
 
-/// Вывод кнопки Сначала
+/// The output of the First button
 ClassMethod ButtonAgain(divId = "", key = "") As %Status
 {
 	set mhead=divId_"MainHeader"
 	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""","Сначала")
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
 }
 
-/// отрисовка Вкладки О программе"
-/// Par - код пункта меню из ..GetAllApps
+/// the render Tab On the program"
+/// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTabAbout(Par = "") As %Status
 {
 	do ..GetAllApps(.opt) 
@@ -435,8 +438,8 @@ ClassMethod ShowTabAbout(Par = "") As %Status
 	write ..ButtonAgain(divId,Par)
 }
 
-/// отрисовка Вкладки ранее переданных
-/// Par - код пункта меню из ..GetAllApps
+/// rendering the Tab previously submitted
+/// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTabSample(key = "") As %Status
 {
  do ..GetAllApps(.opt) 
@@ -455,29 +458,29 @@ ClassMethod ShowTabSample(key = "") As %Status
 >
  ;d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
  $$$jsstart
-  	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+  	; to calculate the height of the container as a result of wijetunge victory container-Taba height of the container header
   	w "ActionJs('"_pref_"MainForm','"_mhead_"','','"_pref_"FirstHead','divId="_pref_"~key="_key_"');"
 	w "$('#"_mcont_"').height($(window).height()-($('#"_mhead_"').height()+$('#t1').height()+$('#MainNavbar').height()+300));"
-  	w $$$blockui("Загрузка...")
+  	w $$$blockui($$$aText("Loading...",""))
  $$$jsstop
  quit $$$OK
 }
 
-/// загрузить шаблон формы поиска
+/// download template forms search
 ClassMethod FindFirstHead(Par = "") As %Status
 {
 	do ##class(App.Form).BlockUI(0)
 	set key=Par("key")
 	set divId=Par("divId")
-	set onclick=$$$blockui("Ждите...")_";ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+	set onclick=$$$blockui("Load...")_";ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
 		&html<
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
-			Контекст названия фильма
+		Context film name
 			</td>
 			<td>
-			#($$$appText(divId_"Name","","N"))#
+			#($$$appText(divId_"Name","","New"))#
 			</td>
 			<td>
 
@@ -497,7 +500,7 @@ ClassMethod FindFirstHead(Par = "") As %Status
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Поиск фильма в SAMPLES"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find film in namespase SAMPLES"))#
 			</td>
 			<td>
 
@@ -516,7 +519,7 @@ ClassMethod FindFirstHead(Par = "") As %Status
 	quit $$$OK
 }
 
-/// Результат поиска
+/// Search result
 ClassMethod FindResult(Par = "") As %Status
 {
 	do ##class(App.Form).BlockUI(0)
@@ -529,12 +532,12 @@ ClassMethod FindResult(Par = "") As %Status
 	set st=$$$OK
 	write ..ButtonAgain(divId,key)
 	if mode=1 {
-		if Name="" w $$$appError("Контекст пустой") quit $$$OK
+		if Name="" w $$$appError($$$aText("Context is empty","")) quit $$$OK
 		zn "samples"
 		set sql="select * from Cinema.Film where title is not null "
 		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
 		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
-		set msg="Запрос : "_sql
+		set msg="Query: "_sql
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
 		if 'st  w $$$appError($System.Status.GetErrorText(st))

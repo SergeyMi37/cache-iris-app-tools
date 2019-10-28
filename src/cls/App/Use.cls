@@ -15,8 +15,6 @@ ClassMethod TestWithObjects(a As %Integer = 1, b As %ZEN.proxyObject)
 	$$$LogWarn("User message")
 }
 
-/// Пример сохранения в глобале объекта в формате JSON
-/// zn "%SYS" 
 /// do ##class(App.Use).TestLogObjects(4)
 ClassMethod TestLogObjects(id)
 {

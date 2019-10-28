@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-/// шаблон сервиса jsonrpc
+/// sample servise JSON-RPC 2.0 https://www.jsonrpc.org/specification
 Class App.rest Extends %CSP.REST
 {
 
@@ -19,13 +19,9 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 }
 
 /*
-/// JSON-RPC 2.0 https://www.jsonrpc.org/specification
-
 {"jsonrpc": "2.0", "result": {"likes": 123}, "id": 1}
-Если возникает ошибка — ответ об ошибке:
+If error:
 {"jsonrpc": "2.0", "error": {"code": 666, "message": "Post not found"}, "id": "1"}
-И это всё!
-Бонусом поддерживаются batch-операции:
 Request:
 [
   {"jsonrpc":"2.0","method":"server.shutdown","params":{"server":"42"},"id":1},
@@ -62,7 +58,7 @@ ClassMethod jsonrpc(ns = "", class = "", meth = "") As %Status
 				}
 				if ns'="" zn ns
 				do $classmethod(class,meth,.json) quit
-				;w "{""text"":""Привет"",""inn"":"""_params.inn_"""}" q
+				;w "{""text"":""Hello world"",""inn"":"""_params.inn_"""}" q
 				;w $ZCVT(str,"O","UTF8") 
 				;w resjson
 	 			
@@ -98,11 +94,11 @@ ClassMethod Test() As %Status
 	quit $$$OK
 }
 
-/// Поиск пользователей по контексту 
+/// Search users by context
 /// http://localhost:57772/apptoolsrest/finduser/super
 ClassMethod FindUser(text = "") As %Status
 {
- i $l(text)<3 d ..jsonrpcError(5,"Строка поиска должна быть не меньше 3 символов") q $$$OK
+ i $l(text)<3 d ..jsonrpcError(5,$$$aText("Search string must be at least 3 characters","")) q $$$OK
  zn "%SYS"
  s sql="select Name,FullName,Comment,EmailAddress,Enabled,CreateDateTime,LastModifiedDateTime from Security.Users where UPPER(FullName) [ '"_$zconvert(text,"U")_"'"
 	#if $$$comClassDefined("%ZEN.Auxiliary.jsonSQLProvider")

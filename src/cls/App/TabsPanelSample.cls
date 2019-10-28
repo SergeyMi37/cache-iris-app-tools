@@ -1,47 +1,47 @@
 Include App.LogMacro
 
-/// Шаблон GUI приложения с селектором и вкладками / Simple GUI Application Template
+/// The template GUI of the application selector and tabs / Simple GUI Application Template
 Class App.TabsPanelSample Extends App.TabsPanel
 {
 
-/// Заголовок приложения / Application title
+/// The application title / Application title
 Parameter HeaderText = "Tabs Application Sample";
 
-/// какие доступны приложения
+/// what are the available applications
 ClassMethod GetAllApps(opt) As %Status
 {
 	s key="menu-first"
-	s opt(key)="Поиск" ;Имя меню
+	s opt(key)="Find" ;The name of the menu
 	s opt(key,"id")="Find"
-	s opt(key,"TabName")="Вкладка поиска" ;имя вкладки
+	s opt(key,"TabName")="Tab Find" ;the name of the tab
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
-	s opt(key,"Disable")=0 ;разрабатывается
+	s opt(key,"Disable")=0 ;developed
 
 	s key="menu-second"
-	s opt(key)="О программе"
+	s opt(key)="About the program"
 	s opt(key,"id")="About"
-	s opt(key,"TabName")="О программе"
+	s opt(key,"TabName")="About the program"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabAbout"
-	s opt(key,"Disable")=1 ;разрабатывается
+	s opt(key,"Disable")=1 ;developed
 	
 	s key="menu-param"
-	s opt(key)="Параметры"
+	s opt(key)="Parameter"
 	s opt(key,"id")="Param"
-	s opt(key,"TabName")="Редактировать параметры"
+	s opt(key,"TabName")="Edit parameters"
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=0
 	q $$$OK
 }
 
-/// отрисовка Вкладки О программе"
-/// Par - код пункта меню из ..GetAllApps
+/// the render Tab On the program"
+/// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTabAbout(Par = "") As %Status
 {
 	d ..GetAllApps(.opt) 
-	$$$AppLogTab("INFO","Загрузка файла","d:\!\wwww.txt")
+	$$$AppLogTab("INFO","Loading file","d:\!\wwww.txt")
 	w "<pre>" w  w "</pre>"
 	i $g(opt(Par,"Disable")) w ..GetSupportInfo() q $$$OK
 	s divId=$g(opt(Par,"id"))
@@ -49,8 +49,8 @@ ClassMethod ShowTabAbout(Par = "") As %Status
 	w ..ButtonAgain(divId,,Par)
 }
 
-/// отрисовка Вкладки
-/// Par - код пункта меню из ..GetAllApps
+/// rendering Tabs
+/// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTabSample(key = "") As %Status
 {
  d ..GetAllApps(.opt) 
@@ -69,17 +69,17 @@ ClassMethod ShowTabSample(key = "") As %Status
 
 >
  $$$jsstart
- 	;Для вкладки Param изменим высоту контейнера
+ 	;For the tab Param to change the height of the container
  	;if pref="Param" w "$('#"_pref_"MainHeader').height($('#tabs-"_pref_"').height());"
- 	; вычислить высоту контейнера-результата как вычетание из выстоты контейнера-таба высоту контейнера-заголовка
+ 	; to calculate the height of the container as a result of wijetunge victory container-Taba height of the container header
  	w "$('#"_pref_"MainContent').height($('#tabs-"_pref_"').height()-$('#"_pref_"MainHeader').height()-150);"
   	;w "console.log($('#"_pref_"MainHeader').height());"
-  	;Затемнение экрана с надписью Загрузка
-  	w $$$blockui("Загрузка...")
+  	;Dimming of the screen that says Download
+  	w $$$blockui($$$aText("Loading...",""))
 	
-	;Для организации выполнения по клику на кнопке применяем js функцию AppAct(From,To,Act), где
-	;From - ид контейнера откуда возьмем элементы с формы методом serialize
-	;To - ид контнейнера куда будем выводить резльтат выполнения
+	;For the organization of execution by clicking on the apply button AppAct js function(From,To,Act), where
+	;From - the ID of the container where will we get the items from the form method serialize
+	;To - ID container where we deduce resultat run
 	;AppAct=NameSpace:Packet.ClassName:Method:&Par1=Val1&Par2=Val2...
 	w "AppAct('"_pref_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_pref_"FirstHead:&divId="_pref_"&key="_key_"');"
 	
@@ -87,7 +87,7 @@ ClassMethod ShowTabSample(key = "") As %Status
  quit $$$OK
 }
 
-/// загрузить форму редактирования
+/// to download a form for editing
 ClassMethod ParamFirstHead(Par = "") As %Status
 {
 	do ##class(App.Form).BlockUI(0)
@@ -96,27 +96,26 @@ ClassMethod ParamFirstHead(Par = "") As %Status
 	set class="App.Parameter"
 	
 	set sql="select * from "_class_" where Name is not null order by id desc"
-	;Список полей выводимых в атрибуте Value тага Option, 
-	;Первое поле из запроса - должно быть идентификатором
+	;The list of fields displayed in the Value attribute of the Option tag, 
+	;The first field of the query must be an identifier
 	set listFields="ID,ID,Name,Description"
-	write "Выберите параметров:"
+	write "Choice parameters:"
 	s ONCHANGE=";$('#"_divId_"SelectId').attr('value',data.item.value);"
 	do ##class(App.Form).SelectObj(sql,ONCHANGE,listFields,.gn,divId_"Select")
 	
 	write "<br>"_$$$appInputHidden(divId_"SelectId","","")_"<br>"
 	
-	set onclick=$$$blockui("Ждите...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&class="_class_"&mode=*');"
+	set onclick=$$$blockui("Loading...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&class="_class_"&mode=*');"
 	write $$$appTable1(class)
-	set butt1=$$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Режим просмотра в две колонки")
-	set butt2=$$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",2)_"""","Режим редактирования в одну колонку")
-	set butt3=$$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",3)_"""","Режим просмотра из таблицы, редактирования из окна")
+	set butt1=$$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""",$$$aText("Preview mode in two columns",""))
+	set butt2=$$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",2)_"""",$$$aText("Edit mode in one column",""))
+	set butt3=$$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",3)_"""",$$$aText("The view mode from table",""))
 	write $$$appTableTrTd1(butt1_butt2_butt3)
 	write $$$appTableEnd1
 	quit $$$OK
 }
 
-// Результат выбора режима редактирования параметров
-
+/// The result of selecting the edit mode settings
 ClassMethod ParamResult(Par = "") As %Status
 {
 	do ##class(App.Form).BlockUI(0)
@@ -127,13 +126,13 @@ ClassMethod ParamResult(Par = "") As %Status
 	set SelectId=$g(Par("%request.Data",divId_"SelectId"))
 	write ..ButtonAgain(divId,,key)
 	if mode=1 {
-		;порядок вывода полей в две колонки по разделителю :
+		;the order of the fields in two columns by the delimiter :
 		set order="Name,Description:Value,Types:DateStart,DateFinish:isEnabled,isEnabledCheck:File,OfficeFile:ImageFile,ImageGlobal::,"
 		do Show(0,order)
 		quit $$$OK
 	} 
 	elseif mode=2 {
-		;порядок вывода полей по умолчанию
+		;the order of fields by default
 		set order=""
 		do Show("1,ShowFieldName",order)
 		quit $$$OK
@@ -148,21 +147,21 @@ ClassMethod ParamResult(Par = "") As %Status
 Show(modeShow,order)
 	set obj=##class(App.Form).GetObj(SelectId_","_class)
 	if '$isobject(obj) { 
-		set msg="Не удалось открыть объект "_SelectId_","_class
+		set msg=$$$aText("Failed to open object","")_" "_SelectId_","_class
 		write $$$appError(msg) q $$$ERROR($$$GeneralError,msg)
 	}
 	do ##class(App.Form).Show(obj,modeShow,divId,order)
  q
 }
 
-/// загрузить шаблон формы поиска
+/// download template forms search
 ClassMethod FindFirstHead(Par = "") As %Status
 {
 	do ##class(App.Form).BlockUI(0)
 	s key=Par("key")
 	s divId=Par("divId")
 
-	set onclick=$$$blockui("Ждите...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&mode=*');"
+	set onclick=$$$blockui("Loading...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&mode=*');"
 	
 	s fullPath="/opt/isc/ensemble/csp/spgz/template/samples-order-MSW-.docx"
 	if ##class(App.DownloadCSP).GetFileId(fullPath,.url) {
@@ -172,19 +171,19 @@ ClassMethod FindFirstHead(Par = "") As %Status
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
-			Логин
+			Login
 			</td>
 			<td>
 			#($$$appText(divId_"Name","","su"))#
 			</td>
 			<td>
-			Полное имя
+			fullname
 			</td>
 			<td>
 			#($$$appTextarea(divId_"fullName","rows=5",""))#
 			</td>
 			<td>
-			Дата
+			Date
 			</td>
 			<td>
 			#($$$appDate(divId_"Date","",""))#
@@ -195,16 +194,16 @@ ClassMethod FindFirstHead(Par = "") As %Status
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Поиск пользователя"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find user"))#
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",2)_"""","Получить элементы с формы"))#
+			#($$$appButton(divId_"appButtonResult2","onclick="""_$tr(onclick,"*",2)_"""","Get items from the form"))#
 			</td>
 			<td>
 			#($g(fileDownload))#
 			</td>
 			<td>
-			дата и время
+			date time
 			</td>
 			<td>
 			#($$$appDateTime(divId_"DateTime","",""))#
@@ -215,7 +214,7 @@ ClassMethod FindFirstHead(Par = "") As %Status
 	q $$$OK
 }
 
-/// Результат поиска
+/// Search result
 ClassMethod FindResult(Par = "") As %Status
 {
 	do ##class(App.Form).BlockUI(0)
@@ -228,12 +227,12 @@ ClassMethod FindResult(Par = "") As %Status
 	set DateTime=$g(Par("%request.Data",divId_"DateTime"))
 	write ..ButtonAgain(divId,,key)
 	if mode=1 {
-		if Name="" w $$$appError("Контекст пустой") q $$$OK
+		if Name="" w $$$appError($$$aText("Context is empty","")) q $$$OK
 		zn "%SYS"
 		set sql="select ID,name,EmailAddress,fullName from Security.Users where Enabled [ '1' "
 		if Name'="" s sql=sql_" and (name like '%"_Name_"%') "
 		if fullName'="" s sql=sql_" and (fullName like '%"_fullName_"%') "
-		set msg="Запрос : "_sql
+		set msg="Query: "_sql
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_fullName_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
 		if 'st  w $$$appError($System.Status.GetErrorText(st)) 
@@ -245,16 +244,16 @@ ClassMethod FindResult(Par = "") As %Status
 	q $$$OK
 }
 
-/// Добавить на форму  js код
+/// To add to the form js code
 ClassMethod AddToForm() As %Status
 {
 	q $$$OK
 }
 
-/// Получить информацию по техподдержке
+/// To obtain information on the support
 ClassMethod GetSupportInfo() As %String
 {
-	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","Программный комплекс на отладке. Попробуйте войти попозже, или обратитесь тех.поддержку: ")
+	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","")
 	q msg_"Support info mailto: sample@server.com"
 }
 

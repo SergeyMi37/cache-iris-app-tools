@@ -3,6 +3,27 @@ Include App.LogMacro
 Class App.sys [ Abstract ]
 {
 
+/// Add two languages to global translation
+/// Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))
+ClassMethod AddLangMsg(en, other) As %String
+{
+	s otherLang="ru"
+	;s @$$$GNLang@($$$GNLangDOMAIN) = otherLang
+	s @$$$GNLang@($$$GNLangDOMAIN,"en",$zcrc(en,7)) = en
+	s:other'="" @$$$GNLang@($$$GNLangDOMAIN,otherLang,$zcrc(en,7)) = other
+	q "$s("_$zcrc(en,7)_":$g("_$$$GNLang_"("""_$$$GNLangDOMAIN_""",$get("_$$$GNEnsConf_"(""Language""),$mvv(58)),"_$zcrc(en,7)_"),"""_en_"""),1:"""_other_""")"
+}
+
+/// Sign Out
+/// d ##Expression(##class(App.sys).logout()
+ClassMethod logout() As %Status
+{
+    #dim %session As %CSP.Session
+    set st = %session.Logout(1)
+    set %session.EndSession = 1
+    return st
+}
+
 /// Create a task to clean the messages of the ensemble
 /// for ns="AISGSASUMS","M112","SPGZ","RDID","RDIDPROD" try {zn ns w !,ns," ",##class(App.sys).CreateTaskPurge("Ensemble message cleaning",ns,90)}catch{}
 ClassMethod CreateTaskPurge(Name = "", ns, days = 90) As %Status
@@ -169,7 +190,7 @@ ClassMethod getSQLConnection(ByRef List As %String = "")
 	Set:tSC tSC=result.Execute()
 	
 	if '(tSC) {
-		s text=$$$aText("Application Setup Error","Ошибка настройки приложений")_" :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$Error^%apiOBJ(text)
+		s text=$$$aText("Application Setup Error","")_" :"_$SYSTEM.Status.GetErrorText(tSC)  w !,text QUIT $$Error^%apiOBJ(text)
 	}
 	else {
 		while result.Next() {
@@ -184,7 +205,7 @@ ClassMethod getSQLConnection(ByRef List As %String = "")
 }
 
 /// Get the value of a field by its name from GN or a list of values
-/// В формате $listbuild
+/// Format $listbuild
 /// w a=##class(App.sys).GetValueGN(gn,2,"QUANTITY,PRIMARY_UNIT_OF_MEASURE")
 ClassMethod GetValueGN(gn, row, NameFields) As %Status
 {
@@ -266,26 +287,6 @@ ClassMethod ClassExist(class) As %String
 		s st=$d($$$comClassRaw(class))
 	} catch e { s st=$ze }
   q $g(st)
-}
-
-/// Add two languages to global translation
-/// Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))
-ClassMethod AddLangMsg(en, ru) As %String
-{
-	s @$$$GNLang@($$$GNLangDOMAIN) = "ru"
-	s @$$$GNLang@($$$GNLangDOMAIN,"en",$zcrc(en,7)) = en
-	s @$$$GNLang@($$$GNLangDOMAIN,"ru",$zcrc(en,7)) = ru
-	q "$g("_$$$GNLang_"("""_$$$GNLangDOMAIN_""",$get("_$$$GNEnsConf_"(""Language""),$mvv(58)),"_$zcrc(en,7)_"),"""_en_""")"
-}
-
-/// Sign Out
-/// d ##Expression(##class(App.sys).logout()
-ClassMethod logout() As %Status
-{
-    #dim %session As %CSP.Session
-    set st = %session.Logout(1)
-    set %session.EndSession = 1
-    return st
 }
 
 /// Global list
@@ -538,6 +539,107 @@ ClassMethod GetUsers(mask = "", ByRef list) As %String
 		}
 	}
 	quit $$$OK
+}
+
+/// Delete and Export the table in oeBS when the match is in Description
+/// Sample d ##class(App.sys).Export("OEBS",.msg,"Mvk.model.Characteristic")
+/// s class="Spgz.model.PP.Files" d ##class(App.sys).Export("OEBS",.msg,class,1,"select * from "_##class(App.type).GetTableName(class)_" where FileID='127'")
+ClassMethod Export(jdbc = "OEBS", msg, class, NoDel = 0, sql = "", write = 0)
+{
+	#define addQuote(%s) $replace(%s,"'","''")
+	d ##class(App.LogInfoPane).GetClassDef(class,"",.out,0)
+	;zw out
+	q:'$d(out) 1
+	s gn="^||tmpExp"_$p(class,".",*)  ;^||
+	kill @gn	
+	s:sql="" sql="select * from "_##class(App.type).GetTableName(class)
+	s st=##class(App.sys).SaveSQL(sql,gn)
+	i 'st q st
+	s rowcount=$o(@gn@(""),-1) 
+	w:write !,$$$FormatText($$$aText("On request %1 found %2 records",""),sql,rowcount)_" "_gn_" "_$System.Status.GetErrorText(st)
+	i 'rowcount w:write !,$$$aText("there is nothing to export","") q 1
+
+	s tab=$g(out("Parameters","OEBSTAB","Default"))
+	w:write !,tab
+	if 'NoDel { ;do not delete the table
+		s del="delete "_tab
+		s gnDel="^||tmpExpDel"
+		s st=##class(App.sys).SqlToDSN(del,jdbc,gnDel)
+		;i 'st s err=$System.Status.GetErrorText(st) q st
+		kill @gnDel
+	}
+	i write { ;check the types in oeBS
+		s sqltest="select * from "_tab_" where 1=0"
+		s gnD="^||tmpExpD"
+		s st=##class(App.sys).SqlToDSN(sqltest,jdbc,gnD)
+		zw @gnD
+	}
+	s f="" ;Create an array of unequivocal conformity between oeBS and instrumentation fields
+	f ff=1:1 { s f=$o(out("Properties",f)) q:f=""
+		i $e(out("Properties",f,"Description"))="=" {
+			w:write !,ff_". "_$$$aText("field","")_" ",f
+			s desc=$p(out("Properties",f,"Description"),";",1)
+			w:write " "_$$$aText("review","")_" ",desc
+			s oefield=$p($p(desc,"=",2)," ")
+			s oetype=$ZStrip($p(desc," ",2,*),"<>WCP")
+			
+			if " "[oefield {	s oefield=f	}
+			if oetype="" {	s oetype="NUMBER"	}
+			if $zconvert(oefield,"L")["date" {	s oetype="DATE"	}
+			
+			i write {w " -> "_oefield_" "_oetype_" "
+			 s num=$g(@gnD@(-1,$zconvert(oefield,"U")))
+			 if 'num {w $$$aText("not found","")_" "_$zconvert(oefield,"U")}
+			 else { s typ=$lg(@gnD@(0,num),4) w typ
+			 	i oetype'[typ w $$$aText("not the same","")
+			 }
+			}
+			s array(f)=oefield
+			s array(f,"type")=oetype
+		}
+	}
+	i '$d(array) w !,$$$aText("Not configured-to-one correspondence","") q 1
+	s f="" ;A new pass through the array, sorting may differ
+	s pattIns="insert into "_tab_"("
+	f { s f=$o(array(f)) q:f=""
+		s pattIns=pattIns_array(f)_$s($o(array(f))="":"",1:",")_" "
+	}	
+	s pattIns=pattIns_") values "
+	;w !,pattIns 
+	s ins="",coun=0,gnIns="^||tmpExpIns"
+	s chank=2000 ;1000 batch of transmission records
+	m fields=@gn@(-1)
+	for row=1:1:rowcount { 
+		s coun=coun+1
+		
+		s f="" ;Get the values to be written
+		s values="("
+		f { s f=$o(array(f)) q:f=""
+			 s val=$$$addQuote($lg(@gn@(row),fields(f))) 
+			 if array(f,"type")["DATE" {
+				 s val="TO_DATE('"_val_"','YYYY-MM-DD HH24:MI:SS')"
+			 } else {
+				 s val="'"_val_"'"
+			 }
+			s values=values_val_$s($o(array(f))="":"",1:",")_" "
+		}	
+		s ins=ins_pattIns_values_");"		
+		;w:row=1 !,ins ;q:row=1
+		i '(coun#chank) {
+			w:write !,ins
+			s st=##class(App.sys).SqlToDSN("BEGIN "_ins_" COMMIT; END;",jdbc,gnIns)
+			s ins=""
+		}
+	}
+	;q 1
+	i ins'="" w:write !,ins s st=##class(App.sys).SqlToDSN("BEGIN "_ins_" COMMIT; END;",jdbc,gnIns)
+	s st=##class(App.sys).SqlToDSN("select count(*) from "_tab,jdbc,gnIns)
+	i $d(%objlasterror) w:write !,$System.Status.GetErrorText(%objlasterror)
+	s inscount=$lg($g(@gnIns@(1)),1) ;from the first record to take the first field
+	s msg=$$$FormatText($$$aText("Unloaded %1 from %2",""),inscount,rowcount)
+	k @gnIns,@gn
+	w:write !,msg
+	q $$$OK
 }
 
 }

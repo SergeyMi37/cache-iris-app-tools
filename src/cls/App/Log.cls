@@ -1,4 +1,3 @@
-/// Updated at 12/08/2017 16:09:03
 Class App.Log Extends %Persistent
 {
 
@@ -121,10 +120,10 @@ ClassMethod GetArgumentValue(Name As %String, ClassName As %Dictionary.CacheClas
 	}
 }
 
-/// Сериализация объекта в json
-/// obj - объект
-/// gn - глобальная ссылка для сохранения потока
-/// mode - режима сохранения объекта см: /csp/log/App.LogInfo.cls?WHAT=?
+/// Serialize the object to json
+/// obj - the object
+/// gn - global link to save flow
+/// mode - the storage mode of the object see: /csp/log/App.LogInfo.cls?WHAT=?
 /// w ##class(App.Log).SerializeObject(obj,"^gn","sveta")
 ClassMethod SerializeObject(Object, gn = "", mode = "") As %String
 {
@@ -184,8 +183,8 @@ output(s)
     quit
 }
 
-/// Загрузить контекст из протокольного глобала
-/// Пример: d ##class(App.Log).Load("^logMSWstack(3)")
+/// Download the context of Protocol global
+/// Example: d ##class(App.Log).Load("^logMSWstack(3)")
 ClassMethod Load(gn) As %Status [ ProcedureBlock = 0 ]
 {
 	Return:gn'["^"||('$d(@gn)) $$$OK
@@ -211,7 +210,7 @@ ClassMethod Load(gn) As %Status [ ProcedureBlock = 0 ]
 	Return $$$OK
 LoadNode(GNkey,key)
 	try {
-		// Если в json есть _class
+		// If in the json there is a _class
 		if $Get(@GNkey)["_class"":" {
 			set @key = ..DeserializeObject($Get(@GNkey),$p($p($Get(@GNkey),"_class"":",2),$c(34),2))
 		}
@@ -222,7 +221,7 @@ LoadNode(GNkey,key)
 	q
 }
 
-/// Загрузить контекст из таблицы протокола
+/// To load the context from the table Protocol
 ClassMethod LoadContext(Id) As %Status [ ProcedureBlock = 0 ]
 {
 	Return:'..%ExistsId(Id) $$$OK

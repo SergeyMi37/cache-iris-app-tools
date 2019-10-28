@@ -1,38 +1,41 @@
 Include App.LogMacro
 
-/// Утилита работ с %Net.HttpRequest и %Net.SMTP
+/// Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP
 Class App.net [ Abstract ]
 {
 
 /// Zip files and Send to email
 /// w ##class(App.net).SendFilesToEmail()
-ClassMethod SendFilesToEmail(subj, text, files, zip = 1) As %Status
+ClassMethod SendFilesToEmail(subj, text, files, zip = 1, email = "") As %Status
 {
 	;send files to email
-	s slash=##class(App.files).getSlash()
-	zw files
-	;s path=$p(exportXLSfile,slash,1,*-1)
-	;s sc=##class(App.files).zipFile(path,$p(exportXLSfile,slash,*),$p(exportXLSfile,slash,*)_".zip",path)
-	;if sc s exportXLSfile=exportXLSfile_".zip"
-	;i 'sc s $$$AppL("APP","CloseXLSfile-zipFile")=$System.Status.GetErrorText(sc) 
-	//TODO prepare file to send e-mail
-	q 1
-	;i exportXLSfileEmail'="" {
-	;	s sc=##class(App.LogInfo).SendEmail(exportXLSfileEmail, $$$aText("Send file","Отправление файла")_" "_exportXLSfile, $g(msg)_"<br> "_$$$aText("Namespace","Область")_" :"_$zu(5)_"<br> "_$$$aText("Query","Запрос")_": "_SQL, exportXLSfile)
-	;	i 'sc s $$$AppL("APP","CloseXLSfile-SendEmail")=$System.Status.GetErrorText(sc) 
-	;	}
+	s f="" for { s f=$o(files(f)) q:f=""
+		s path=$p(f,$$$slash,1,*-1)
+		s file=$p(f,$$$slash,*)
+		if zip {
+			s sc=##class(App.files).zipFile(path,file,file_".zip",path)
+			if sc {s file=file_".zip" 
+			}
+			i 'sc s $$$AppL("APP","SendFilesToEmail")=$System.Status.GetErrorText(sc) 
+		}
+		s filez($i(fil),"path")=path_$$$slash
+		s filez(fil)=file
+	}	
+	s sc=##class(App.LogInfo).SendEmail(email, subj, text, .filez)
+	i 'sc s $$$AppL("APP","SendFilesToEmail2")=$System.Status.GetErrorText(sc) 
+	
 	q $$$OK
 }
 
-/// Послать электронное письмо
-/// subscrible - список через запятую, кому направлять письмо
-/// subj - тема
-/// text - текст письма
-/// attach - массив файлов по ссылке
+/// To send email
+/// subscrible - a comma separated list whom to send the letter
+/// subj - subject
+/// text - the text of the letter
+/// attach - an array of files the link
 ClassMethod SendMail(server, port, ssl, UseSTARTTLS, timezone, username, psw, from, subscrible, subj, text, attach) As %Status
 {
  #dim smtp As %Net.SMTP
- #; Определяем SMTP-сервер для отправки
+ #; Define SMTP server for sending
  set smtp=##class(%Net.SMTP).%New()
  set smtp.smtpserver=server
  set:port smtp.port=port
@@ -54,20 +57,20 @@ ClassMethod SendMail(server, port, ssl, UseSTARTTLS, timezone, username, psw, fr
 	 set to=$p(subscrible,",",i) 
 	 if to'="" do mail.To.Insert(to)
  }
- set mail.Subject=$s($g(subj)="":$g(Subj),1:$g(subj))     ; Subject - тема
+ set mail.Subject=$s($g(subj)="":$g(Subj),1:$g(subj))     ; Subject - the subject
  set mail.Charset="windows-1251"
  set mail.IsHTML=$s(text["<html":1,1:0)
  set mail.IsMultiPart=1
  set mail.MultiPartType="related" 
  do mail.TextData.Write(text)
  set sc=$$$OK
- ; Если файл один и передается по тексту в формате $lb
+ ; If a single file is transmitted in text format $lb
  if $g(attach)'="" {
 	 set attach(1)=$lg(attach,2)
 	 set attach(1,"path")=$lg(attach,1)
 	 set:$lg(attach,3)'="" attach(1,"content-type")=$lg(attach,3) ;image/jpeg
  }
- ; Файлов много
+ ; A lot of files
  if $d(attach)>1 {
 	set rec="" 
 	for { s rec=$o(attach(rec),1,file) quit:rec=""
@@ -84,8 +87,7 @@ ClassMethod SendMail(server, port, ssl, UseSTARTTLS, timezone, username, psw, fr
  quit $$$OK
 }
 
-/// Загрузить файл и положить на сервер добавив к имени метку даты и времени
-/// w ##class(App.net).LoadFileHttp("http://localhost:8000/OA_HTML/XxkWebServ/download?fileId=5215954",.out,"/backup/temp/",1)
+/// Download the file and put on the server by adding the name of the mark date and time
 ClassMethod LoadFileHttp(aURL = "", aDATA, TempDir = "", fileName) As %Status
 {
 	s st=##class(App.net).GetHttp(aURL,.aDATA)
@@ -96,25 +98,19 @@ ClassMethod LoadFileHttp(aURL = "", aDATA, TempDir = "", fileName) As %Status
 	q sc
 }
 
-/// Получить от сервер  данные по URL
-/// Если TempDir определен, то файл запишется туда 
-/// w ##class(App.net).GetHttp("https://opendatabot.com/c/19358827",.out,"c:\!\","^temp")
-/// w ##class(App.net).GetHttp("http://www.cbr.ru/mcirabis/PluginInterface/GetBicCatalog.aspx",.out,"/backup/temp/")
-/// w ##class(App.net).GetHttp("http://www.cbr.ru/mcirabis/BIK/bik_db_13102017.zip",.out2,"/backup/temp/")
+/// To receive from the data server at the URL
+/// If TempDir is specified, then the file will be written there 
 /// w ##class(App.net).GetHttp("https://codeload.github.com/SergeyMi37/cache-iris-app-tools/zip/master",.out2,"D:\temp\")
 ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 {
 	set part1=$p(aURL,"/",3),part2=$p(aURL,"/",4,$l(aURL,"/")),params=$p(aURL,"?",2)
-	#; Сервер
-	set server=$p(part1,":",1) quit:(server="") $$$ERROR($$$GeneralError,"0: отсутствует сервер")
-	#; Порт
+	#; Server
+	set server=$p(part1,":",1) quit:(server="") $$$ERROR($$$GeneralError,"0:"_$$$aText("no server",""))
+	#; Port
 	set port=$p(part1,":",2)
-	#; Адрес
-	set location=$p(part2,"?",1) quit:(location="") $$$ERROR($$$GeneralError,"0: отсутствует адрес - "_location)
-	;!!!set location=$zcvt(location,"O","URL")
-	;i location="" s location="/"
-	;w !,location,!,server
-	#; Создание HTTP-запроса для загрузки файла
+	#; Address
+	set location=$p(part2,"?",1) quit:(location="") $$$ERROR($$$GeneralError,"0:"_$$$aText("missing address","")_" - "_location)
+	#; Create HTTP request to download the file
 	set HttpRequest=##class(%Net.HttpRequest).%New()
 	set HttpRequest.Server=server
 	if $f($zcvt(aURL,"L"),"https://") {
@@ -123,32 +119,32 @@ ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 		;set HttpRequest.FollowRedirect = 1
 		set HttpRequest.SSLConfiguration=..CheckSSLCertificate("DefaultSSL")
 	
-	#; Запрос по HTTP
+	#; Request HTTP
 	} else {
 		s:(port="") port=80
 	}
-	;w !,server,!,location
+	;w !,server,!,location,!,port,!,params
 	set HttpRequest.Port=port
 	
-	#; Заполняем параметры
+	#; Fill in the parameters
 	for i=1:1:$l(params,"&") { s pair=$p(params,"&",i),name=$p(pair,"=",1),value=$p(pair,"=",2)
 		continue:(name="")	
-		;Конвертация, чтобы предотвратить двойной конвертации
+		;Conversion, to prevent double conversion
 		s value=$zcvt(value,"I","URL") 
 		d HttpRequest.SetParam(name,value)
 	} ; /for i
 	
-	#; Выполняем запрос
+	#; Execute the query
 	Try { d HttpRequest.Get(location) } Catch Error { s err=Error.AsSystemError() }
 	quit:($g(err)'="") $$$ERROR($$$GeneralError,err)
-	#; Обрабатываем полученный ответ
+	#; The processed response is received
 	set HttpResponse=HttpRequest.HttpResponse 
-	quit:('$isobject(HttpResponse)) $$$ERROR($$$GeneralError,"сервер не вернул ответ")
+	quit:('$isobject(HttpResponse)) $$$ERROR($$$GeneralError,$$$aText("the server does not return a response",""))
 	quit:(HttpResponse.StatusCode'=200) $$$ERROR($$$GeneralError,HttpResponse.ReasonPhrase)
 	s aDATA("status")=HttpResponse.StatusCode
-	#; Разбираем ответ сервера, сохраняя в структуру aDATA
+	#; Parse the response from the server, keeping the structure of the aDATA
 	set aDATA("contentType")=HttpResponse.ContentType
-	#; Имя файла получаем через "content-disposition" в виде "attachment;filename="name.ext";"
+	#; The name of the file received via the "content-disposition" as "attachment;filename="name.ext";"
 	s fileName=HttpResponse.GetHeader("content-disposition")
 	s aDATA("content-disposition")=fileName
 	if ($l(fileName,"*=utf-8''")>1) {
@@ -157,7 +153,7 @@ ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 		s fileName=$zcvt(fileName,"I","UTF8")
 	} else { s fileName=$p(fileName,"filename=",2),fileName=$tr($p(fileName,";",1),"""'","") }
 	
-	#; Если имя файла не задано, то используем в качестве имени кусок адреса ссылки
+	#; If the file name is not specified, use as the name of the piece of the link
 	s:(fileName="") fileName=$p(location,"/",$l(location,"/"))
 	s aDATA("content")=HttpResponse.Data
 	s aDATA("fileName")=$zcvt(fileName,"I","URL")
@@ -167,9 +163,9 @@ ClassMethod GetHttp(aURL = "", aDATA, TempDir = "", tmpGN = "") As %Status
 	quit sc
 }
 
-/// Метод проверяет существование настроенной SSL конфигурации
-/// и создает пустую конфигурацию с таким именем если такого пока нет
-/// для подключения к https серверу, этого достаточно
+/// The method checks for the existence of the configured SSL configuration
+/// and creates an empty configuration with that name if this yet
+/// to connect to a https server, that's enough
 ClassMethod CheckSSLCertificate(name) As %String
 {
   NEW $NAMESPACE
@@ -181,108 +177,9 @@ ClassMethod CheckSSLCertificate(name) As %String
   QUIT name
 }
 
-/// fix by Eduard Lebedyuk 
-/// w ##class(App.net).CopyFileBinaryGzip()
-ClassMethod CopyFileBinaryGzip() As %String
-{
-	w !,$zv
-	set HttpRequest=##class(%Net.HttpRequest).%New()
-	set HttpRequest.Server="www.cbr.ru"
-	set HttpRequest.Port=80
-	Try { d HttpRequest.Get("mcirabis/PluginInterface/GetBicCatalog.aspx") } Catch Error { s err=Error.AsSystemError() }
-	if ($g(err)'="") w !,"ERROR1:",$system.Status.GetOneErrorText(err) Quit
-	
-	set HttpResponse=HttpRequest.HttpResponse 
-	if ('$isobject(HttpResponse)) w !,"ERROR2"
-	
-	s newFilename="/backup/GetBicCatalog4.xml"
-	d HttpResponse.Data.Rewind()
-	
-	w !,HttpResponse.Data.%ClassName(1)
-	w !,HttpResponse.Data.Filename
-		s gzipfileName=HttpResponse.Data.Filename
-		set f2 = ##class(%Stream.FileBinary).%New()
-		set f1 = ##class(%Stream.FileBinaryGzip).%New()
-		do f1.LinkToFile(gzipfileName)
-		do f2.LinkToFile(newFilename)
-		s sc=f2.CopyFromAndSave(f1)
-
-	if $$$ISERR(sc) w !,"ERROR3:",$system.Status.GetOneErrorText(sc) Quit
-	s sc=f2.%Save()
-	if $$$ISERR(sc) w !,"ERROR4:",$system.Status.GetOneErrorText(sc) Quit
-	q sc
-}
-
-/// Чтение файлов из фтп сервера
-/// w ##class(App.net).ListFtp()
-ClassMethod ListFtp() As %String
-{
-	;ftp://fz223free:fz223free@ftp.zakupki.gov.ru/out/
- #dim ftp As %Net.FtpSession
- Set ftp=##class(%Net.FtpSession).%New()
- //ftp.Connect("nameserver","name","pass","port")
- s st=ftp.Connect("ftp.zakupki.gov.ru","fz223free","fz223free",21) 
- i 'st Write "Not connected "_$System.Status.GetErrorText(st),! Quit
- Write "Ftp server messsage: ",ftp.ReturnMessage,!
- 
- If 'ftp.System() W "No answer System" G FTPSTOP
- Write "Ftp server messsage: ",ftp.ReturnMessage,!
- 
- If 'ftp.Binary() Write "Can not swap to binary mode",! G FTPSTOP
- Write "Mode now: ",ftp.Type,!
-
- // ПРОЧИТАТЬ ДИРЕКТОРИЮ
- Set stream=##class(%GlobalCharacterStream).%New()
- W ! 
- s st=ftp.List("/out/published/undefined/purchaseNoticeEP/daily",.stream) 
- i 'st W !,"Error List "_$System.Status.GetErrorText(st) G FTPSTOP
- IF stream.Size>0 {
- Write "-------- Length of file received: ",stream.Size," ------",!
- ;for  set len=32763,line=stream.Read(.len) write line  quit:stream.AtEnd
- for  {
-	 s line=stream.ReadLine() ;s ^logFTT(1,$i(^logFTT),"F")=$lb(line) 
-	 w !,line
-	 quit:stream.AtEnd
- }
- Write !," -------- End of stream -----",!
- }
- D stream.%Close() 
- 
- /*/ ПРОЧИТАТЬ ДИРЕКТОРИЮ
- Set stream=##class(%GlobalCharacterStream).%New()
- W ! IF 'ftp.List("CLIeNT\*.F*",.stream) W !,"Error List" G FTPSTOP
- IF stream.Size>0 D
- .Write "-------- Length of file received: ",stream.Size," ------",!
- . new len,line
- . for  set len=32763,line=stream.Read(.len) do  quit:stream.AtEnd
- .. write line
- .Write !," -------- End of stream -----",!
- D stream.%Close() ;*/
- 
- /*/ДОБАВИТЬ ФАЙЛ
- Set stream=##class(%GlobalCharacterStream).%New()
- for I=1:1:100 D stream.WriteLine(I_" ASASAS")
- If 'ftp.Append("CLIENT\AAA.TXT",stream) Write "Failed to PUT file",! G FTPSTOP
- D stream.%Close() ;*/
- 
- /*/ВОЗВРАТИТЬ ФАЙЛ
- Set stream=##class(%GlobalCharacterStream).%New()
- If 'ftp.Retrieve("CLIENT\mAIN.FRM",stream) Write "Failed to get file",! G FTPSTOP
- IF stream.Size>0 D
- .Write "-------- Length of file received: ",stream.Size," ------",!
- . new len,line
- . for  set len=32763,line=stream.Read(.len) do  quit:stream.AtEnd
- .. write line
- .Write !," -------- End of stream -----",!!!!
- D stream.%Close() ;*/
-FTPSTOP If 'ftp.Logout() S ER="Failed to logout"
- Do ftp.%Close()
- Q
-}
-
-/// Получить IP адрес сервера
+/// To obtain the server's IP address
 /// w ##class(App.net).GetIP()
-/// $G(%request.CgiEnvs("REMOTE_ADDR")) - адроес клиента
+/// $G(%request.CgiEnvs("REMOTE_ADDR")) - agrees client
 ClassMethod GetListIP() As %String
 {
  set lsIface=##class(%SYSTEM.INetInfo).GetListOfConfiguredInterfaces()
@@ -301,8 +198,7 @@ ClassMethod GetIP(host = "") As %String
 	q $P($ZU(54,13,host),",",1)
 }
 
-/// Получить ответ на Post Http запрос
-/// w ##class(App.net).PostHttp("localhost:57772", "/apptoolsrest/jsonrpc","msw" ,"S37@asu3" ,"{""jsonrpc"":""2.0"",""method"":""server.shutdown"",""params"":{""server"":""42""},""id"":1}",.out)
+/// To response to Http Post request
 ClassMethod PostHttp(ServerPort, method, user, pass, ByRef body, ByRef out) As %String
 {
     set ht = ##class(%Net.HttpRequest).%New()
@@ -314,6 +210,11 @@ ClassMethod PostHttp(ServerPort, method, user, pass, ByRef body, ByRef out) As %
 	s ht.ContentType="text/html;  charset=UTF-8"
 	;s ht.ContentType="application/json; charset=UTF-8"
 	i $p(ServerPort,":",2)'="" set ht.Port = $p(ServerPort,":",2)
+	
+	;set ht.Https=1
+	;set ht.Port = 443
+	;set ht.SSLConfiguration=..CheckSSLCertificate("DefaultSSL")
+	
 	Do ht.EntityBody.Write($g(body))
 	if $d(body)>1 s i="" f  s i=$o(body(i)) q:i=""  Do ht.EntityBody.Write(body(i))
 	
@@ -344,10 +245,10 @@ ClassMethod RunPage(Url As %String = "http://intersystems.ru")
 ClassMethod ImportCSPFromGitHub(url, repo, target)
 {
 	s tempdir=$zu(12)_"Temp"_$$$slash_$p(##class(%File).TempFilename("zip"),$$$slash,*)
+	w !,tempdir
 	s st=##class(%File).CreateDirectory(tempdir)
 	i 'st q st
  	s st=##class(App.net).GetHttp(url,.out,tempdir)
- 	w !,tempdir
 	s unzip=$zu(12)_"Temp"_$$$slash_$p(##class(%File).TempFilename("unzip"),$$$slash,*)
 	s st=##class(%File).CreateDirectory(unzip)
 	i 'st q st
@@ -361,6 +262,76 @@ ClassMethod ImportCSPFromGitHub(url, repo, target)
 	d ##class(%File).Delete(tempdir)
 	d ##class(%File).Delete(unzip)
 	q $$$OK
+}
+
+///  d ##class(App.net).GetMailPOP3()
+ClassMethod GetMailPOP3(MDEAM, BSmName, BSmPass, MASS, dir) As %String
+{
+ ;MDEAM - MAIL SERVER NAME OR ITS IP
+ ;,BSmName - USER NAME = "NAME_user@"_MDEAM
+ ;,BSmPass - USER PASSWORD
+ ;,MASS - THE ARRAY FROM WHICH TO CREATE THE PROGRAM, WHICH WILL BE BASED ON A LIST OF EMAILS
+ ;dir - the PATH TO the DIRECTORY WHERE you DOWNLOADED the attached FILES
+ ;new mailserver,status,from,to,date,subject,messagesize,m,hdrs,key,mailMsg,lined
+ ;N mssg
+ set mailserver=##class(%Net.POP3).%New()
+ I $D(dir) set mailserver.AttachDir=dir
+ set mailserver.Debug=0
+ set mailserver.port=25
+ set mailserver.StoreAttachToFile=1
+ set status=mailserver.Connect(MDEAM,BSmName,BSmPass)
+ if ('status) w !,$System.Status.GetErrorText(status) g clo
+ f mssg=1:1 d  if ('status) Q
+ .set status=mailserver.FetchMessage(mssg,.from,.to,.date,.subject,.messagesize,.hdrs,.mailMsg,0)
+ .if ('status) Q
+ .S MASS(mssg,"subject")=subject
+ .S MASS(mssg,"date")=date
+ .S MASS(mssg,"from")=from
+ .S MASS(mssg,"messagesize")=messagesize
+ .S MASS(mssg,"to")=to
+ .K MAS
+ .d Dump(mailMsg,.MAS)
+ .M MASS(mssg,"z")=MAS
+ .s status=mailMsg.%Close()
+clo s status=mailserver.%Close()
+	i 'status w !,$System.Status.GetErrorText(status)
+ q $G(mssg)-1
+ 
+Dump(msg,MASS) 
+ ;new i,index,value
+ if msg.IsMultiPart do  quit
+ . for i=1:1:msg.Parts.Count() do Dump(msg.Parts.GetAt(i),.MASS)
+ s index=""  f  s value=msg.Headers.GetNext(.index) q:index=""  S MASS(msg,"head",index)=value
+ if msg.IsBinary do
+ . S MASS(msg,"msg")="binary"
+ . S MASS(msg,"msgFN")=msg.FileName
+ . S MASS(msg,"msgGA")=msg.GetAttribute("content-disposition","filename")
+ else  do
+ . ;w !,"Dumping text msg Filename="_msg.FileName_" filename="_msg.GetAttribute("content-disposition","filename"),!
+ . S MASS(msg,"msg")="text"
+ . S MASS(msg,"msgFN")=msg.FileName
+ . S MASS(msg,"msgGA")=msg.GetAttribute("content-disposition","filename")
+ . set stream=msg.TextData
+ . do stream.Rewind()
+ . k len,line
+ . for l=1:1 set len=32763,line=stream.Read(.len) do  quit:stream.AtEnd
+ ..S MASS(msg,"msg",l)=line         ;write line
+ quit
+}
+
+ClassMethod KILLMAIL(MDEAM, BSmName, BSmPass, MSGK, Kill) As %String
+{
+ S OK=1,Kill=0
+ set mailserver=##class(%Net.POP3).%New()
+ set mailserver.port=$G(^%BScSMTP(MDEAM,"POP"),"110")
+ set mailserver.Debug=0
+ set mailserver.StoreAttachToFile=1
+ set status=mailserver.Connect(MDEAM,BSmName,BSmPass)
+ if ('status) S OK=status g Kclo
+ S I="" F  S I=$O(MSGK(I)) Q:I=""  set OK=mailserver.DeleteMessage(I) S:OK Kill=Kill+1 I 'OK Q
+ s status=mailserver.QuitAndCommit()
+Kclo s status=mailserver.%Close()
+ q $G(OK)
 }
 
 }

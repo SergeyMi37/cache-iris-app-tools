@@ -1,6 +1,5 @@
 Include App.LogMacro
 
-/// // Класс на основе %CSP Page для создания ссылок
 Class App.DownloadCSP Extends %CSP.Page
 {
 
@@ -24,7 +23,7 @@ ClassMethod OnPreHTTP() As %Boolean [ ServerOnly = 1 ]
 	elseif %request.Get("Id")'="" {
 		s file=..GetfileName(%request.Get("Id"),,.origname)
 	}
-	if file="" {set fileName=$$$aText("Link already invalid","Ссылка уже недействительна")}
+	if file="" {set fileName=$$$aText("Link already invalid","")}
 	else {set fileName = $p(file,$$$slash,*)}
 	s %response.ContentType="application/force-download"
 	;s %response.CharSet="windows-1251"
@@ -42,7 +41,7 @@ ClassMethod OnPreHTTP() As %Boolean [ ServerOnly = 1 ]
 
 /// Event handler for <b>PAGE</b> event: this is invoked in order to  
 /// generate the content of a csp page.
-/// w "<a title=""Сохранить этот файл у себя на диске"" href=""App.DownloadCSP.cls?fileId=221212"">"
+/// w "<a title=""Save this file to disk"" href=""App.DownloadCSP.cls?fileId=221212"">"
 ClassMethod OnPage() As %Status [ ServerOnly = 1 ]
 {
 	if %request.Get("fileName")'="" {
@@ -85,20 +84,20 @@ ClassMethod OnPage() As %Status [ ServerOnly = 1 ]
      Quit $$$OK
 }
 
-/// Получить глобальную ссылку
+/// To global link
 ClassMethod GetGN() As %String
 {
-	quit $na(^CacheTemp.App.tmpDownloadCSP(+$h)) ;глобал должен быть доступен из любой области
+	quit $na(^CacheTemp.App.tmpDownloadCSP(+$h)) ;global should be available from any region
 }
 
-/// Удалить идентификатор для скачивания
+/// Remove the ID for download
 ClassMethod DeleteFileId(FileId, gn = {..GetGN()}) As %Status
 {
 	KILL @gn@(FileId)
 	quit $$$OK
 }
 
-/// Получить полное имя файла по идентификатору для скачивания
+/// To obtain the full name of the file ID for download
 ClassMethod GetfileName(FileId, gn = {..GetGN()}, origname = "") As %String
 {
 	if '$d(@gn@(FileId)) quit ""
@@ -107,11 +106,11 @@ ClassMethod GetfileName(FileId, gn = {..GetGN()}, origname = "") As %String
 	quit ""
 }
 
-/// Получить идентификатор для скачивания файла
+/// To ID to download the file
 /// if ##class(App.DownloadCSP).GetFileId(fileName,.url) { set fn="<a href='"_url_"'>DownLoad</a>"	}
-/// cgivar="Id" отдавать файл в течении дня
-/// cgivar="fileId" отдавать файл только один раз
-/// cgivar="fileName" отдавать файл по полному пути (небезопасно)
+/// cgivar="Id" to send a file during the day
+/// cgivar="fileId" give the file only once
+/// cgivar="fileName" to send a file via the full path (insecure)
 ClassMethod GetFileId(FileName, ByRef URL, ByRef id, cgivar = "Id", gn = {..GetGN()}) As %Status
 {
 	set URL=""

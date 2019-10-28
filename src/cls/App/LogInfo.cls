@@ -15,23 +15,22 @@ ClassMethod GetDetailPane(pInstance As %CSP.Util.PageInstance) As %CSP.Util.Pane
 	quit ##class(App.LogInfoPane).%New()
 }
 
-/// Получить INPUT кнопку для очистки полей формы
-/// fields - имена полей через запятую
+/// To INPUT button to clear form fields
+/// fields - field names separated by commas
 /// w ##class(App.LogInfo).ClearFields("a,b")
 ClassMethod ClearFields(fields = "", onclick)
 {
-	;set res="<input type=button name='clearFields' id='clearFields' onclick=""#"" value=X title='Очистить поля'>"
-	set res="<span class='ui-icon ui-icon-trash' name='clearFields' id='clearFields' onclick=""#"" title='Очистить поля'></span>"
+	set res="<span class='ui-icon ui-icon-trash' name='clearFields' id='clearFields' onclick=""#"" title='clear form fields'></span>"
 	for f=1:1:$l(fields,",") {
 		continue:$p(fields,",",f)=""
 		s onclick=$g(onclick)_"try{document.getElementById('"_$p(fields,",",f)_"').value=''}catch(e){};"
 	}
-	quit $replace(res,"#",$g(onclick,"alert('Нет полей');"))
+	quit $replace(res,"#",$g(onclick,"alert('not fields');"))
 }
 
-/// Пометить красным контекст в исходной строки
-/// Source - Исходная строка
-/// Mark - контекст для пометки через запятую
+/// Mark in red the context in the original string
+/// Source - the Source string
+/// Mark - the context to mark a comma
 /// w ##class(App.LogInfo).MarkRed("ssssazzzzbssss","a,b")
 ClassMethod MarkRed(Source, Mark)
 {
@@ -43,10 +42,10 @@ ClassMethod MarkRed(Source, Mark)
 	quit res
 }
 
-/// Включить в строку обрамление тэга
-/// Source - Исходная строка
-/// Mark - контекст из фраз для вставки это список
-/// TagBeg, TagEnd - обрамление тэга для каждой фразы должен быть свой, список
+/// To include in the string frame tag
+/// Source - the Source string
+/// Mark - the context of the phrases to insert this list
+/// TagBeg, TagEnd - borders tag for each phrase needs to be your list
 /// w ##class(App.LogInfo).IncludTags("ssssazzzzbssss","a,b",")
 ClassMethod IncludTags(Source, Mark, TagBeg, TagEnd)
 {
@@ -58,20 +57,20 @@ ClassMethod IncludTags(Source, Mark, TagBeg, TagEnd)
 	quit res
 }
 
-/// Получить набор инпут элементов для выгрузки потока в ексель и посылки по почте
+/// To obtain a set of input elements to discharge flow in Excel and sending by mail
 /// w ##class(App.LogInfo).GetInputXLSTags()
-/// Выгрузить в XLS <input type="checkbox" name="exportXLS" id="exportXLS" #($s($g(exportXLS):"checked",1:""))#>
+/// To upload a XLS <input type="checkbox" name="exportXLS" id="exportXLS" #($s($g(exportXLS):"checked",1:""))#>
 ClassMethod GetInputXLSTags(exportXLS, exportXLSfile, exportXLSfileEmail)
 {
  &html<
- Выгрузить в XLS <input type="checkbox" name="exportXLS" id="exportXLS" >
- В файл <input type="text" size=30 name="exportXLSfile" id="exportXLSfile" value="#($g(exportXLSfile))#">
- и послать на <input placeholder="email@mail.com,email2@mail.com" type="text" size=30 name="exportXLSfileEmail" id="exportXLSfileEmail" value="#($g(exportXLSfileEmail))#">
+ #($$$aText("Unload in",""))# XLS <input type="checkbox" name="exportXLS" id="exportXLS" >
+ #($$$aText("file",""))# <input type="text" size=30 name="exportXLSfile" id="exportXLSfile" value="#($g(exportXLSfile))#">
+ #($$$aText("and send on",""))# <input placeholder="email@mail.com,email2@mail.com" type="text" size=30 name="exportXLSfileEmail" id="exportXLSfileEmail" value="#($g(exportXLSfileEmail))#">
  >
  quit ""
 }
 
-/// Получить значения инпут элементов для выгрузки потока в ексель и посылки по почте
+/// To obtain the values of input elements to discharge flow in Excel and sending by mail
 /// d ##class(App.LogInfo).GetInputXLSTagsVal(.exportXLS, .exportXLSfile, .exportXLSfileEmail)
 ClassMethod GetInputXLSTagsVal(exportXLS, exportXLSfile, exportXLSfileEmail, SDNum, suffix = "")
 {
@@ -84,56 +83,31 @@ ClassMethod GetInputXLSTagsVal(exportXLS, exportXLSfile, exportXLSfileEmail, SDN
 	quit ""
 }
 
-/// Сформировать XLS из Запроса и Послать пользователю файл с сообщением
-/// w ##class(App.LogInfo).SaveQueryXLS2jobSendEmail("mihaylenko_sv@mosvodokanal.ru", "select * from Mvk_model.SPGZ where (IdSPGZ='19902800' or entityIdSPGZ='19902800') and deletedDate is null", "qqqq",.msg)
-ClassMethod SaveQueryXLS2jobSendEmail(email = "", sql = "", name = "", msg = "") As %Status
-{
-	d ##class(App.LogInfo).GetInputXLSTagsVal(.exportXLS, .exportXLSfile, .exportXLSfileEmail,,##class(App.type).Transliteration(name))
-	i email="" {
-		i '##class(App.MVK.EISinfo).GetUserProp($username,"fullName,email",.prop) s msg="В КИП Нет пользователя "_$username q $$$ERROR($$$GeneralError,msg)
-		s email=$g(prop("email"))
-	}
-	i email="" {
-		s msg="У пользователя "_$username_" ("_$g(prop("fullName"))_") Нет адреса электронной почты"
-		q $$$ERROR($$$GeneralError,msg)
-	}
-	else {	
-		s exportXLS=$lb(1,exportXLSfile,email)
-		job ##class(App.LogInfoPane).DrawSQL(sql,1000000,$zu(5)," ","",exportXLS)::1
-		i $t {
-			s msg="Запущенный в фоновом режиме запрос '"_name_"' экспортируется в файла Excel: '"_$p(exportXLSfile,"/",*)_"' и результат заархивируется и отправится на почту: "_email
-			q $$$OK
-		} else {
-			s msg="ошибка запуска "_query_" "_sql_" и посылки на "_email
-			q $$$ERROR($$$GeneralError,msg)
-		}
-	}
-	q $$$OK
-}
-
-/// Послать пользователю файл с сообщением
-/// w ##class(App.LogInfo).SendEmail("mihaylenko_sv@mosvodokanal.ru", "Тест", "Тестовое сообщ", "c:\temp\2019-01-16_32309.xls")
+/// To send a file to the user with the message
+/// w ##class(App.LogInfo).SendEmail("mihaylenko_sv@mosvodokanal.ru", "Test", "Test message", "c:\temp\2019-01-16_32309.xls")
 ClassMethod SendEmail(supportemail = "", subj = "", msg = "", file = "") As %Status
 {
-		set subj="Сервер : "_$zu(110)_", "_subj
-		set text="<html><head></head><body color=greay><h4>Здравствуйте</h4><br><br>"_$g(msg)
+		set subj=$$$aText("Server","")_" : "_$zu(110)_", "_subj
+		set text="<html><head></head><body color=greay><h4>"_$$$aText("Hello","")_"</h4><br><br>"_$g(msg)
 		set text=text_"</body></html>"
 		// support
 		if supportemail="" set supportemail=$$$EMAILSUPPORT		
-		; Определение адреса
-		set email=supportemail //только 
+		set email=supportemail //only 
 		
-		; Учетка для авторизации todo - ВЗЯТЬ из параметров
 		set authFrom=$$$EMAILAUTH
 		set authFromPass=$$$EMAILAUTHPASS
 		if file'="" {
-			s slash=##class(App.files).getSlash()
-			s path=$p(file,slash,1,*-1)
-			s file=$lb($p(file,slash,1,*-1)_slash,$p(file,slash,*))
+			s path=$p(file,$$$slash,1,*-1)
+			s file=$lb($p(file,$$$slash,1,*-1)_$$$slash,$p(file,$$$slash,*))
 		}
-		set sc=##class(App.net).SendMail($$$EMAILSERVERIP,$$$EMAILSERVERPORT, 0, 0, "", authFrom, authFromPass, authFrom, email_","_supportemail, subj, text,file)
-		if 'sc w !,"Ошибка "_$System.Status.GetErrorText(sc) $$$AppLogTab("ERROR","()",$System.Status.GetErrorText(sc))
-		else  w !,"Направлено по адресу "_email $$$AppLogTab("INFO","()","Отправление на адрес "_email_" файла "_file)
+		set sc=##class(App.net).SendMail($$$EMAILSERVERIP,$$$EMAILSERVERPORT, 0, 0, "", authFrom, authFromPass, authFrom, email_","_supportemail, subj, text,.file)
+		if 'sc {
+			w !,"Error "_$System.Status.GetErrorText(sc) 
+			$$$AppLogTab("ERROR","()",$System.Status.GetErrorText(sc))
+		}
+		else { w !,$$$aText("Sent to","")_" "_email
+		 	$$$AppLogTab("INFO","()",$$$FormatText($$$aText("Sent to %1 file %2",""),email,$g(file)))
+		}
 		quit sc
 }
 
@@ -171,8 +145,6 @@ ClassMethod ExportProjects(Dir, files) As %Status
 /// d ##class(App.LogInfo).ExportProj("/backup/source/","app")
 ClassMethod ExportAppProj(Dir, proj = "", files) As %Status
 {
-	s pFileName=Dir_$zu(110)_"-"_$zu(5)_"-"_proj_"-"_$tr(##class(App.type).GetDateTime($h),":T","-_")_".xml"
-	w !,pFileName s files(pFileName)=""
 	/*
 The items to export.
 Each of the items must have a type determined by an extension selected from the following list of basic types, additional types are supported under the abstract routine interface so this list is not exhaustive.
@@ -190,14 +162,36 @@ OBJ - Compiled object code
 PKG - Package definitions
 If exporting multiple items, separate them with commas, pass the items("item")="" as an array. You can also use ? or * wild cards and if you wish to exclude items pass ' before the item name which also supports wild card, e.g. "User.*.cls,'User.T*.cls".
 	*/
+	new $namespace
+	try {
+	s pFileName=Dir_$zu(110)_"-"_$zu(5)_"-"_proj_"-"_$tr(##class(App.type).GetDateTime($h),":T","-_")_".xml"
 	s list("App*.CLS")=""
 	s list("App*.INC")=""
-	s list("App*.GBL")=""
-	Write $SYSTEM.OBJ.Export(.list, pFileName)
+	s list("App.ParameterD.GBL")=""
+	s st=$SYSTEM.OBJ.Export(.list, pFileName)
+	i st w !,pFileName s files(pFileName)=""
+
 	k list
 	s list("/apptools/*.*")=""
 	s pFileName=Dir_$zu(110)_"-"_$zu(5)_"-"_proj_"-CSP-"_$tr(##class(App.type).GetDateTime($h),":T","-_")_".xml"
-	w !,pFileName s files(pFileName)=""
+	s st=$SYSTEM.OBJ.Export(.list, pFileName)
+	i st w !,pFileName s files(pFileName)=""
+
+	k list
+	s list("%App.Setting.GBL")=""
+	s list("%AppCacheMsg.GBL")=""
+	s list("%App.Proj.GBL")=""
+	s list("%App.ParameterD.GBL")=""
+	
+	s pFileName=Dir_$zu(110)_"-"_$zu(5)_"-"_proj_"-AppSett-"_$tr(##class(App.type).GetDateTime($h),":T","-_")_".xml"
+	s $namespace="%SYS"
+	s st=$SYSTEM.OBJ.Export(.list, pFileName)
+	i st w !,pFileName s files(pFileName)=""
+
+	} catch e { w !,"Error: "_$ze}
+	w !,$System.Status.GetErrorText(st)
+	
+	q $$$OK
 }
 
 }

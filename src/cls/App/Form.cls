@@ -1,13 +1,13 @@
 Include App.LogMacro
 
-/// Представление хранимых классов для просмотра и редактирования
+/// The representation of the stored classes for viewing and editing
 Class App.Form [ Abstract ]
 {
 
-/// префикс у имени поля объекта
+/// prefix the field name of the object
 Parameter PREFIXFIELD = "appfield";
 
-/// Получить всех потомков для класса
+/// To get all descendants for a class
 ClassMethod GetSubclassOf(super = "App.Form")
 {
  set query=##class(%Library.ResultSet).%New("%Dictionary.ClassDefinition:SubclassOf")
@@ -15,7 +15,7 @@ ClassMethod GetSubclassOf(super = "App.Form")
  Q query
 }
 
-/// Получить расширенные свойства поля объекта
+/// To obtain the extended properties of the field object
 ClassMethod GetJsonProp(obj, propName, gn, out)
 {
 	set out("description")=..GetPropVal(obj,propName,.gn,"Description")
@@ -46,19 +46,19 @@ ClassMethod GetJsonProp(obj, propName, gn, out)
 			set out("readOnly")={}.$$$jsonFromJSON(json).ReadOnly
 			if out("displayname")'="" set out("description")=out("displayname")
 			else  s out("description")=$p(out("description"),"{",1)
-			// включим обработчик события
+			// enable the event handler
 			if $g(out("onchange"))'="" {
 				s out("attr")=out("attr")_" onchange='"_out("onchange")_"'" ;alert(this.value)'"
 			}
 			
-		} catch e { w "Ошибка: "_$ze }
+		} catch e { w "Error: "_$ze }
 	}
 	elseif out("description")="" {
 		set out("description")=propName
 	}
 }
 
-/// Получить все значения свойств
+/// Get all property values
 ClassMethod GetPropVal(obj, propName, gn, nameAttr)
 {
 	q $g(gn("Properties",propName,nameAttr))
@@ -67,18 +67,18 @@ ClassMethod GetPropVal(obj, propName, gn, nameAttr)
 	;quit $lg($g(@gn@(row)),col)
 }
 
-/// Вывести строку свойств объекта
+/// Write the string object properties
 ClassMethod ShowProp(obj, propName, gn, PrefixIdDIV, Mode)
 {
 	set sysType=..GetPropVal(obj,propName,.gn,"Type")
-	if sysType["%Stream." q $$$OK ;TODO исключения
+	if sysType["%Stream." q $$$OK ;TODO exception
 	set Name=..GetPropVal(obj,propName,.gn,"Name")
 	if Name="" q $$$ERROR($$$GeneralError,"No Exsist Property "_propName) 
 	set Required=..GetPropVal(obj,propName,.gn,"Required")
 	set ReadOnly=..GetPropVal(obj,propName,.gn,"ReadOnly")
 	set Parameters=..GetPropVal(obj,propName,.gn,"Parameters")
 	set Value=$property(obj,Name)
-	set redstar="" if Required s redstar="<font color=red title='Обязательное поле'>*</font>"
+	set redstar="" if Required s redstar="<font color=red title='"_$$$aText("Required field","")_"'>*</font>"
 	
 	do ..GetJsonProp(obj, propName, .gn, .pr)
 	if 'ReadOnly set ReadOnly=$g(pr("readOnly"))
@@ -122,10 +122,10 @@ ClassMethod ShowProp(obj, propName, gn, PrefixIdDIV, Mode)
 			set met=$g(pr("selectMethod"))
 			if met'="" {
 				;;w met
-				if (met["{") { //список из json
+				if (met["{") { //a list of json
 					;TODO
 				}
-				else { //список из функции
+				else { //a list of functions
 					xecute "do "_met
 				}
 			}
@@ -165,7 +165,7 @@ ClassMethod ShowProp(obj, propName, gn, PrefixIdDIV, Mode)
 	Quit $$$OK
 }
 
-/// Вывести компоненту checkbox
+/// Display checkbox
 ClassMethod WebCompShowCheckbox(obj, ByRef pr, Mode, %id, %val, ByRef ext)
 {
 	set onclick="$('#"_%id_"').attr('value',$('#"_%id_"checkbox').prop('checked') ? 1 : 0 );"
@@ -175,7 +175,7 @@ ClassMethod WebCompShowCheckbox(obj, ByRef pr, Mode, %id, %val, ByRef ext)
 	quit ret
 }
 
-/// Вывести компоненту Files
+/// Display component Files
 ClassMethod WebCompShowFiles(obj, ByRef pr, Mode, %id, %val, ByRef ext)
 {
 	set ret=""
@@ -194,7 +194,7 @@ ClassMethod WebCompShowFiles(obj, ByRef pr, Mode, %id, %val, ByRef ext)
 		set fileName=$g(pr("filesStore"))_%val
 		;W fileName
 		if ##class(App.DownloadCSP).GetFileId(fileName,.url) { 
-			set ext("aurl")="<a href='"_url_"'>"_$$$aText("DownLoad","Выгрузить")_"</a>"
+			set ext("aurl")="<a href='"_url_"'>"_$$$aText("DownLoad","")_"</a>"
 			set ext("url")=url
 			set ext("fileName")=fileName
 			s ret=ret_" "_ext("aurl")
@@ -203,7 +203,7 @@ ClassMethod WebCompShowFiles(obj, ByRef pr, Mode, %id, %val, ByRef ext)
 	quit ret
 }
 
-/// Сохранить обхект по умолчанию
+/// Keep object default
 ClassMethod ObjectDelete(Param = "", Ref = 0)
 {
 	set id=$g(Param("objId")) ;$p(Param,",")
@@ -211,24 +211,24 @@ ClassMethod ObjectDelete(Param = "", Ref = 0)
 	set PrefixIdDIV=$g(Param("pref")) ;$p(Param,",",3)
 	#dim obj As %Persistent
 	;m $$$AppL("MSW","req")=%request.Data
-	if id="" w $$$appError("Неопределен идентификатор объекта")_"<br>" d:'Ref ..ButtonRef() q
+	if id="" w $$$appError($$$aText("Undefined object identifier",""))_"<br>" d:'Ref ..ButtonRef() q
 	set obj=$classmethod(Class,"%OpenId",id)
-	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:'Ref ..ButtonRef() q
+	if '$isobject(obj) w $$$appError($$$aText("Undefined object",""))_"<br>" d:'Ref ..ButtonRef() q
 	set st=obj.%DeleteId(obj.%Id())
 	if 'st w $$$appError($System.Status.GetErrorText(st)) w "<br>" d:'Ref ..ButtonRef() q
-	write $$$appMsg("Объект удален")
+	write $$$appMsg($$$aText("The object is removed",""))
 	write "<br>" d:'Ref ..ButtonRef() 
 	q
 }
 
-/// Создать объект как новый
+/// To create the object as new
 ClassMethod ObjectSaveAsNew(Param = "")
 {
 	s Param("objId")=""
  d ..ObjectSave(.Param)
 }
 
-/// Создать новый объект по умолчанию
+/// To create a new object by default
 ClassMethod ObjectNew(Param = "")
 {
  s obj=..GetObj(Param)
@@ -236,7 +236,7 @@ ClassMethod ObjectNew(Param = "")
  q $$$OK
 }
 
-/// Получить объект из параметра
+/// To get the object from the argument
 ClassMethod GetObj(Par) As %Status
 {
 	if $p(Par,",",1) = "" s obj=$classmethod($p(Par,",",2),"%New")
@@ -244,7 +244,7 @@ ClassMethod GetObj(Par) As %Status
 	q obj
 }
 
-/// Сохранить объект по умолчанию
+/// Save the default object
 ClassMethod ObjectSave(Param = "", Ref = 0)
 {
 	;AppAct('WinOpenEditObjMainForm','WinOpenEditObjMainContent','AppAct=APP:App.Form:ObjectSave:&objId=2&ClassName=App.Parameter&pref=WinOpenEditObj
@@ -255,7 +255,7 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 	if Mode["WithoutRef" s Ref=1
 	if id="" s obj=$classmethod(Class,"%New")
 	else  s obj=$classmethod(Class,"%OpenId",id)
-	if '$isobject(obj) w $$$appError("Неопределен объект")_"<br>" d:'Ref ..ButtonRef() q ""
+	if '$isobject(obj) w $$$appError($$$aText("Undefined object",""))_"<br>" d:'Ref ..ButtonRef() q ""
 	;set gn="%prop"
 	set st=..GetPropertyDefinition(obj,.gn)
 	if 'st w $$$appError($System.Status.GetErrorText(st))_"<br>" d:'Ref ..ButtonRef() q ""
@@ -269,14 +269,14 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 			s Value=$g(%request.Data(i,1))
 	
 			if ..GetPropVal(obj,nameProp,.gn,"Required"),Value="" {
-				;получить свойство - описание pr("description")
+				;to get property - description of pr("description")
 				d ..GetJsonProp(obj, nameProp, .gn, .pr)
-				s err=$g(err)_"<li>"_nameProp_" Обязательное поле пусто ("_$g(pr("description"))_")</li>" continue
+				s err=$g(err)_"<li>"_nameProp_" "_$$$aText("Mandatory field is empty","")_" ("_$g(pr("description"))_")</li>" continue
 			}
 			;write "<li>NameField: "_nameProp_" Value:("_$g(%request.Data(i,1))_")"
 			if $d(gn("Properties",nameProp)) {
 				;set sysType=..GetPropVal(obj,nameProp,.gn,"Type")
-				; если свойство - поток, то сохраняем из файла
+				; if the property is - the stream from the stored file
 				if 0,sysType["%Stream." {
 					set filename=##class(%File).GetDirectory(##class(%File).TempFilename())_Value
 					Set file = ##class(%File).%New(filename)
@@ -297,17 +297,17 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 				}
 			}
 	}
-	if $d(err) w "<br><br>"_$$$appError("Ошибки проверки свойств<hr>"_$g(err)) d:'Ref ..ButtonRef() q ""
+	if $d(err) w "<br><br>"_$$$appError($$$aText("Error checking properties","")_"<hr>"_$g(err)) d:'Ref ..ButtonRef() q ""
 	set st=obj.%Save()
 	if 'st w "<br><br>"_$$$appError($System.Status.GetErrorText(st))_" <br>" d:'Ref ..ButtonRef() q ""
-	write "<br><br>"_$$$appMsg("Сохранено")_"<br>" d:'Ref ..ButtonRef()
+	write "<br><br>"_$$$appMsg($$$aText("Saved",""))_"<br>" d:'Ref ..ButtonRef()
 	quit obj
 }
 
-/// Получить список свойств класса
+/// To list the properties of a class
 ClassMethod GetPropertyDefinition(obj, gn)
 {
-	; Получим все свойства объекта
+	; Get all object properties
 	;s sql="SELECT cls.Name, prop.Name, prop.Type, prop.Description FROM ""%Dictionary"".ClassDefinition cls  JOIN ""%Dictionary"".PropertyDefinition prop ON cls.Name = prop.parent WHERE cls.Name = '"_obj.%ClassName(1)_"'"
 	;set sql="SELECT * from ""%Dictionary"".PropertyDefinition where parent like '"_obj.%ClassName(1)_"'"
 	;set st=##class(App.sys).SaveSQL(sql,gn,1)
@@ -317,16 +317,16 @@ ClassMethod GetPropertyDefinition(obj, gn)
 	quit $$$OK
 }
 
-/// Вывод поля типа селект Да или нет
+/// The output type field select Yes or no
 /// do ##class(App.Form).SelectFieldYesNo("test","0")
 ClassMethod SelectFieldYesNo(idSelect = "selectmenu", dfltKey = "") As %Status
 {
-	do ..SelectField($lb(0,1),,$lb("Нет","Да"),.gn,,idSelect,dfltKey,100)
+	do ..SelectField($lb(0,1),,$lb($$$aText("No",""),$$$aText("Yes","")),.gn,,idSelect,dfltKey,100)
 	q $$$OK
 }
 
-/// Вывод поля типа селект
-/// do ##class(App.Form).SelectField($lb("",0,1),"alert(1);",$lb("","Нет","Да"),.gn,,"test","0",50) 
+/// The output fields of type select
+/// do ##class(App.Form).SelectField($lb("",0,1),"alert(1);",$lb("","No","Yes"),.gn,,"test","0",50) 
 ClassMethod SelectField(KeyList = "", ONCHANGE = "", ValueList = "", gnRet, order = 1, idSelect = "selectmenu", dfltKey = "", width = 500, NoWrite = 0) As %Status
 {
 	kill gnRet
@@ -350,12 +350,12 @@ ClassMethod SelectField(KeyList = "", ONCHANGE = "", ValueList = "", gnRet, orde
 	q $$$OK
 }
 
-/// Получить объектов в селекторе для небольших выборок 
-/// Возврат в одной строке или в глобале
-/// sql - запрос
-/// ONCHANGE = js функция на событие в селесторе ONCHANGE
-/// ValueList = список полей для выводе в Value
-/// gnRet - возвращаемый массив по ссылке
+/// To objects in the selector for small samples 
+/// Return in the same row or in the global
+/// sql query
+/// ONCHANGE = js function on the event in the ONCHANGE salestore
+/// ValueList = list of fields for the output Value
+/// gnRet - return the array by reference
 ClassMethod SelectObj(sql, ONCHANGE = "", ValueList = "", gnRet, idSelect = "selectmenu") As %Status
 {
 	kill gnRet
@@ -365,7 +365,7 @@ ClassMethod SelectObj(sql, ONCHANGE = "", ValueList = "", gnRet, idSelect = "sel
 	set gnRet($i(gnRet))=selectNS
 	set st=##class(App.sys).SaveSQL(sql,gn)
 	if 'st quit st
-	if ValueList="" set ValueList=$lg(@gn@(0),1)_","_$lg(@gn@(0),1) ///Первое поле из запроса - должно быть идентификаторм
+	if ValueList="" set ValueList=$lg(@gn@(0),1)_","_$lg(@gn@(0),1) ///The first field of the query should be identificator
 	set NameFieldVALUE=$p(ValueList,",",1)
 	s ns=""
 	for { s ns=$o(@gn@(ns)) Q:ns=""
@@ -384,9 +384,9 @@ ClassMethod SelectObj(sql, ONCHANGE = "", ValueList = "", gnRet, idSelect = "sel
 	quit $$$OK
 }
 
-/// Блокировать или деблокировать экран
-/// do ##class(App.Form).BlockUI(1,"Загрузка формы")
-ClassMethod BlockUI(mode = 1, msg = "Загрузка")
+/// To block or unblock the screen
+/// do ##class(App.Form).BlockUI(1,"Loading form")
+ClassMethod BlockUI(mode = 1, msg = "...Loading")
 {
  $$$jsstart 
   w:mode $$$blockui(msg)
@@ -395,22 +395,22 @@ ClassMethod BlockUI(mode = 1, msg = "Загрузка")
  q $$$OK
 }
 
-/// Показать объект 
-/// Obj - экземпляр класса
-/// Mode = 0 режим просмотра
-/// Mode = 1 режим редактирования со всеми кнопками
-/// Mode = "1,WithoutSave,WithoutDel,WithCreate,WithoutRef" режим редактирования без кнопок
-/// Mode = "1,ShowFieldName" - показывать имена полей
+/// Show object 
+/// Obj - the class instance
+/// Mode = 0 safe mode
+/// Mode = 1 edit mode with all buttons
+/// Mode = "1,WithoutSave,WithoutDel,WithCreate,WithoutRef" edit mode without buttons
+/// Mode = "1,ShowFieldName" - show the field names
 ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "", orderProp = "")
 {
-	if '$isobject(obj) w "Нет объекта" quit
+	if '$isobject(obj) w $$$aText("No object","") quit
 	set st=..GetPropertyDefinition(obj,.gn)
 	if 'st w $System.Status.GetErrorText(st) quit  ;##class(%Library.Global).Quote(
 	if orderProp=""	set orderProp=obj.#AppORDERPROPERTY
 	write "<table>"
-	// Упорядоченный вывод полей
+	// An ordered display of fields
 	if orderProp'="" {
-		if orderProp[":" { ;В несколько колонок
+		if orderProp[":" { ;In multiple columns
 			for ii=1:1:$l(orderProp,":") { s col=$ZStrip($p(orderProp,":",ii),"<>WCP")
 				continue:col=""
 				write "<tr>"
@@ -421,7 +421,7 @@ ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "", orderProp = "")
 				write "</tr>"
 			}
 		}
-		else { ;в одну колонку
+		else { ;in one column
 			for i=1:1:$l(orderProp,",") { s nameProp=$ZStrip($p(orderProp,",",i),"<>WCP")
 			 	continue:nameProp=""
 			 	write "<tr>"
@@ -429,7 +429,7 @@ ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "", orderProp = "")
 				write "</tr>"
 			}
 		}
-	} //вывод полей по умочанию
+	} //the output fields by default
 	else {
 		set p=""
 		for  { s p=$o(gn("Properties",p)) q:p=""  ;q:'$d(@gn@(p))  
@@ -441,25 +441,21 @@ ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "", orderProp = "")
 	write "<tr><td style='text-align: right;'>"
 		set onclick="AppAct('"_PrefixIdDIV_"MainForm','"_PrefixIdDIV_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":*:&objId="_obj.%Id()_"&ClassName="_obj.%ClassName(1)_"&pref="_PrefixIdDIV_"&mode="_Mode_"');"
 		if Mode {
-			;w $$$appInputHidden(""_PrefixIdDIV_"appNsp","",$zu(5))
-			;w $$$appInputHidden(""_PrefixIdDIV_"appClass","","App.Form")
-			;w $$$appInputHidden(""_PrefixIdDIV_"appMethod","","")
-			;w $$$appInputHidden(""_PrefixIdDIV_"appPar","",obj.%Id()_","_obj.%ClassName(1)_","_PrefixIdDIV_",~objId="_obj.%Id()_"~ClassName="_obj.%ClassName(1)_"~pref="_PrefixIdDIV_"~mode="_Mode)
 			
 			if Mode'["WithoutSave" {
-				set buttval=$s(obj.%Id()'="":"Сохранить",1:"Создать")
+				set buttval=$s(obj.%Id()'="":$$$aText("Save",""),1:$$$aText("Create",""))
 				do ..ButtonMake(buttval,$replace(onclick,"*","ObjectSave"),"appButtonSave") ;ObjectSaveAsNew
 			}
 			if Mode'["WithoutDel" {
-				if obj.%Id() w "&nbsp; " d ..ButtonMake("Удалить","if (confirm('Удалить, вы уверены ?')) { "_$replace(onclick,"*","ObjectDelete")_"}","appButtonDelete")
+				if obj.%Id() w "&nbsp; " d ..ButtonMake($$$aText("Delete",""),"if (confirm('"_$$$aText("Delete, are you sure?","")_"')) { "_$replace(onclick,"*","ObjectDelete")_"}","appButtonDelete")
 			}
 			if obj.%Id(),Mode["WithCreate" {
-			  w "&nbsp; " do ..ButtonMake("Сохранить как новый",$replace(onclick,"*","ObjectSaveAsNew"),"appButtonSaveAsNew")
+			  w "&nbsp; " do ..ButtonMake($$$aText("Save As New",""),$replace(onclick,"*","ObjectSaveAsNew"),"appButtonSaveAsNew")
 			}
 		}
 		if Mode'["WithoutCancel" {
 			write "</td><td style='text-align: left;'>"
-				do ..ButtonMake("Отмена","","appButtonCancel")
+				do ..ButtonMake($$$aText("Cancel",""),"","appButtonCancel")
 			write "</td><tr>"
 		}
 	write "</table>"
@@ -467,21 +463,21 @@ ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "", orderProp = "")
 	quit $$$OK
 }
 
-/// Вывеcти кнопку сначало
-ClassMethod ButtonRef(value = "Сначала", onclick = "top.document.location.reload();", id = "appButtonRef")
+/// Bring the first button
+ClassMethod ButtonRef(value = {$$$aText("Begin","")}, onclick = "top.document.location.reload();", id = "appButtonRef")
 {
 	do ..ButtonMake(value,onclick,id)
 	quit $$$OK
 }
 
-/// Вывеcти кнопку назад
-ClassMethod ButtonBack(value = "Назад", onclick = "window.history.back();", id = "appButtonBack")
+/// Display back button
+ClassMethod ButtonBack(value = {$$$aText("Back","")}, onclick = "window.history.back();", id = "appButtonBack")
 {
 	do ..ButtonMake(value,onclick,id)
 	quit $$$OK
 }
 
-/// Вывеcти кнопку
+/// Withdraw button
 ClassMethod ButtonMake(value = "", onclick = "", id, title = "")
 {
   	write $$$appButton(id,"onclick="""_$g(onclick)_""" "_$s(title="":"",1:"title="""_title_""""),value)
@@ -489,8 +485,8 @@ ClassMethod ButtonMake(value = "", onclick = "", id, title = "")
 	quit $$$OK
 }
 
-/// Получить значение свойства параметра по имени 
-/// ExtProp=1 получить расширенные свойства, напрмер для типа файл
+/// To obtain the value of the parameter named 
+/// ExtProp=1 to extended properties, for example for the type of file
 /// if ##class(App.Form).GetValueByName("App.Parameter","TestFiles","Value",.Val,1) zwrite Val
 ClassMethod GetValueByName(class, name, NameField = "Value", ByRef Val, ExtProp = 0) As %Status
 {
@@ -523,8 +519,8 @@ ClassMethod GetValueByName(class, name, NameField = "Value", ByRef Val, ExtProp 
 	q st
 }
 
-/// Получить значение свойства параметра по идентификатору 
-/// ExtProp=1 получить расширенные свойства, напрмер для типа файл
+/// To obtain the value of parameter ID 
+/// ExtProp=1 to extended properties, for example for the type of file
 /// if ##class(App.Form).GetValueByIdField("App.Parameter","15","ImageFile",.Val,1) zwrite Val
 ClassMethod GetValueByIdField(class, id, NameField, ByRef Val, ExtProp = 0) As %Status
 {
@@ -557,7 +553,7 @@ ClassMethod GetValueByIdField(class, id, NameField, ByRef Val, ExtProp = 0) As %
 	q st
 }
 
-/// Вывести таблицу из матрицы
+/// Display a table from a matrix
 /// do ##class(App.Form).DrawTable(.matrix) 
 ClassMethod DrawTable(matrix) As %Status
 {

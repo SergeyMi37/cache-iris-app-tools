@@ -62,7 +62,7 @@ ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", 
 			kill prop
 			set prop("Enabled")=0
 			if name="%service_csp"||(name="%service_console")||(name="%service_login") {
-				set prop("Enabled")=1 ; включим
+				set prop("Enabled")=1 ; turn on
 				if name'="%service_csp" s prop("AutheEnabled")=AutheEnabled
 				else  s prop("AutheEnabled")=96
 			}
@@ -73,7 +73,7 @@ ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", 
 				set prop("ClientSystems")=sBindingsIP
 			}
 			if $G(sCachedirect),name="%service_cachedirect" {
-				set prop("Enabled")=1 ; включим
+				set prop("Enabled")=1 ; turn on
 				set prop("AutheEnabled")=96
 				set Warn($i(Warn))="If the current system does not intend to edit the transformation templates using the CIMModeler utility, then it is better to turn off the service "_name
 				set prop("ClientSystems")=sCachedirectIP
@@ -229,7 +229,7 @@ ClassMethod UiSavePermiss(Par = "") As %Status
 			;zw prop
 			set tSC=##class(Security.Users).Modify(us,.prop)
 			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
-			;Проверка
+			;Check
 			set tSC=##class(Security.Users).Get(us,.pro)
 			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
 			write $$$appMsg(us_": "_pro("Roles"))
@@ -241,19 +241,19 @@ ClassMethod UiSavePermiss(Par = "") As %Status
 /// d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security","Ui"_"SavePermiss")
 ClassMethod UiMatrixPermission(name = "", rolesmask = "", divId = "", key = "", class = "", Method = "", blockui = 1) As %Status
 {
-		if name="" write $$$appError("Выберите фильтр по пользователям параметр Логин пустой (Имена через запятую или по контексту)") q 1
-		if rolesmask="" write $$$appError("Выберите фильтр по ролям, параметр Роли пустой (Роли через запятую или по контексту)") q 1
-		set msg="Матрица прав доступа"
-		set:blockui onclick=$$$blockui("Ждите...")
+		if name="" write $$$appError($$$aText("Select the filter by user option Login blank (Names separated by commas or by the context","")) q 1
+		if rolesmask="" write $$$appError($$$aText("Select the filter control","")) q 1
+		set msg=$$$aText("Matrix of access rights","")
+		set:blockui onclick=$$$blockui($$$aText("Loading...",""))
 		set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
-		set butt=$$$appButton(divId_"appButtonSavePermiss","onclick="""_onclick_"""","Сохранить права доступа")
+		set butt=$$$appButton(divId_"appButtonSavePermiss","onclick="""_onclick_"""",$$$aText("Save access rights",""))
 		write butt_"<br><br>"
 		write "<form id='"_divId_"FormContentSave' >"
 		do ##class(App.sys).GetRoles(rolesmask,.roles)
-		if '$d(roles) write $$$appError("По этому фильтру роли не найдены") quit 1
+		if '$d(roles) write $$$appError($$$aText("This filter was","")) quit 1
 		;set roles("%all")=$lb("%All","The Super-User Role")
 		do ##class(App.sys).GetUsers(name,.users)
-		if '$d(users) write $$$appError("По этому фильтру пользователи не найдены") quit 1
+		if '$d(users) write $$$appError($$$aText("This filter users not found","")) quit 1
 		set r="UserName"
   		set gn="matrix"
  	    set @gn@(0,1)=$lb(r)
