@@ -14,7 +14,7 @@ ClassMethod GetAllApps(opt) As %Status
 	s key="AmenuMatrix"
 	s opt(key)=$$$aText("The matrix","") ;The name of the menu
 	s opt(key,"id")="Matrix"
-	s opt(key,"TabName")=$$$aText("The matrix","")_$mvv(58) ;the name of the tab
+	s opt(key,"TabName")=$$$aText("The matrix","") ;the name of the tab
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabItem"
 	s opt(key,"Disable")=0 ;developed

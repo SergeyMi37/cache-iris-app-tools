@@ -110,6 +110,10 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
             "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
+    Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls") 
+	s Status=##Class(Config.Startup).Get(.Properties)
+	i Status w !!,"http://localhost:"_$g(Properties("WebServerPort"),57772)_"/"_..#AppCSP_"/App.LogInfo.cls",!
+
 	$$$NspReturn(curNs)
     d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
@@ -178,6 +182,9 @@ ClassMethod RemoveProjection(cls As %String, ByRef params, recompile As %Boolean
 
     kill:st @$$$GNEnsConf
     write !, "Global "_$$$GNEnsConf_" removed."
+
+    kill:st @$$$GNLang
+    write !, "Global "_$$$GNLang_" removed."
 
     write !, "Unmapping App package from all namespaces:"
 	set st = ..UnMap(ns)

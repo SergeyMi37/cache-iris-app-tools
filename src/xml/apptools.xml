@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-28 20:33:47">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-29 21:19:18">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -306,7 +306,7 @@ Get the detail pane info object</Description>
 <Class name="App.ChartPanel">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.LogInfoPane</Super>
-<TimeChanged>65314,58923.889715</TimeChanged>
+<TimeChanged>65315,28952</TimeChanged>
 <TimeCreated>64985,34799.861897</TimeCreated>
 
 <Method name="DrawBODY">
@@ -465,13 +465,14 @@ d ##class(App.ChartPanel).ChartDbSize(.arg,1200,.res,.list,.mm)</Description>
 	s arg("type")="line"
 	s labels="["
 	s datasets="{  label: """_$$$aText("Error display on the graph","")_""", borderColor: '"_..ColorRGBa(0,1)_"',  data: [30],  }"
-	s bd="",max=0	f num=1:1 { s bd=$o(list(bd)) q:bd=""  
+	s bd="",(max,free,maxbd)=0
+	f num=1:1 { s bd=$o(list(bd)) q:bd=""  
 		s list(bd)=list(bd)*1024
 		i list(bd)>max s max=list(bd),free=list(bd,"free")*1024,maxbd=list(bd,"name")
 		s order(list(bd))=bd //Rangiroa size
 		s color(bd)=num
 	}
-	s list("free","name")="Disk Free Size + "_maxbd
+	s list("free","name")="Disk Free Size + "_$g(maxbd)
 	s list("free")=max+free
 	s order(max+free)="free"
 	s color("free")=0
@@ -1891,7 +1892,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65310,60113.640979</TimeChanged>
+<TimeChanged>65315,49111.430018</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 
 <Parameter name="DispatchClass">
@@ -2021,6 +2022,10 @@ This method is invoked when a class is compiled.</Description>
             "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
+    Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls") 
+	s Status=##Class(Config.Startup).Get(.Properties)
+	i Status w !!,"http://localhost:"_$g(Properties("WebServerPort"),57772)_"/"_..#AppCSP_"/App.LogInfo.cls",!
+
 	$$$NspReturn(curNs)
     d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
@@ -2101,6 +2106,9 @@ This method is invoked when a class is 'uncompiled'.</Description>
 
     kill:st @$$$GNEnsConf
     write !, "Global "_$$$GNEnsConf_" removed."
+
+    kill:st @$$$GNLang
+    write !, "Global "_$$$GNLang_" removed."
 
     write !, "Unmapping App package from all namespaces:"
 	set st = ..UnMap(ns)
@@ -6874,7 +6882,7 @@ Search result</Description>
 The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanelUikit</Super>
-<TimeChanged>65314,59832.619646</TimeChanged>
+<TimeChanged>65315,49876.529562</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
 
 <Parameter name="HeaderText">
@@ -6894,7 +6902,7 @@ what are the available applications</Description>
 	s key="AmenuMatrix"
 	s opt(key)=$$$aText("The matrix","") ;The name of the menu
 	s opt(key,"id")="Matrix"
-	s opt(key,"TabName")=$$$aText("The matrix","")_$mvv(58) ;the name of the tab
+	s opt(key,"TabName")=$$$aText("The matrix","") ;the name of the tab
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabItem"
 	s opt(key,"Disable")=0 ;developed
@@ -7600,7 +7608,7 @@ Get a comma-delimited list of databases</Description>
 <Class name="App.UploadCSP">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Page</Super>
-<TimeChanged>65314,73422.026432</TimeChanged>
+<TimeChanged>65315,28952</TimeChanged>
 <TimeCreated>65113,38880.765844</TimeCreated>
 
 <Parameter name="pathfiles">
@@ -7706,7 +7714,7 @@ WriteError w "<H3>"_$$$aText("An error has occurred","")_"</h3>"_$System.Status.
 <Class name="App.Use">
 <CompileAfter>App.Log</CompileAfter>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,72789.860389</TimeChanged>
+<TimeChanged>65315,28952</TimeChanged>
 <TimeCreated>63691,73040.917631</TimeCreated>
 
 <Method name="Test">
@@ -7746,7 +7754,7 @@ do ##class(App.Use).TestLogObjects(4)</Description>
 Utilities working with files</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65315,57981.082068</TimeChanged>
 <TimeCreated>64765,51020.18498</TimeCreated>
 
 <Method name="getSlash">
@@ -8216,7 +8224,7 @@ IncludDataTime(DateTime1,df,dt,stop)
 Count one journal as what globals modifierade
 k ^tmpJRN d ##class(App.files).OneJournalCount("/sdb/journals/20181225.003","^tmpJRN")</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>journal="",tempGlob=##class(App.LogInfoPane).#TEMPJRNL</FormalSpec>
+<FormalSpec>journal="",tempGlob=$$$TEMPJRNL</FormalSpec>
 <Implementation><![CDATA[
 	s TmpGN="^||log" k @TmpGN
 	i '$isobject(journal) s journal=##class(%SYS.Journal.File).%OpenId(journal)	q:'$isobject(journal)
@@ -8293,7 +8301,7 @@ To count in magazines which globals as modifierade for a specific date
  d ##class(App.files).OneDayJournalCount("/opt/isc/ensemble/mgr/journal/20181225","^tmpJRN")
  d ##class(App.files).OneDayJournalCount("/sdb/journals/20181225","^tmpJRN")</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>fileYYYYMMDD="",tempGlob=##class(App.LogInfoPane).#TEMPJRNL</FormalSpec>
+<FormalSpec>fileYYYYMMDD="",tempGlob=$$$TEMPJRNL</FormalSpec>
 <Implementation><![CDATA[
  i $g(@tempGlob)'="" w !,$$$aText("About is already underway","")_" "_$g(@tempGlob) q
  s @tempGlob=$zts ;the beginning of the formation
@@ -8327,11 +8335,12 @@ To count in magazines which globals as modifierade for a specific date
 Export to CSV file
 d ##class(App.files).Export2CSV("/backup/temp/JrnCount*.csv","^tmpJRN2")</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>aFileName=$$$EMAILXLSPATH_"JrnCount*.csv",tmpGN=##class(App.LogInfoPane).#TEMPJRNL,aCharset="CP1251"</FormalSpec>
+<FormalSpec>aFileName=$$$EMAILXLSPATH_"JrnCount*.csv",tmpGN=$$$TEMPJRNL,aCharset="CP1251"</FormalSpec>
 <Implementation><![CDATA[
 	s:aFileName["*" aFileName=$replace(aFileName,"*",$tr($zd($h,3)_$zt($p($h,",",2),-1),":- "))
 	#dim FileStream As %FileCharacterStream = ##class(%FileCharacterStream).%New()
 	s FileStream.Filename=aFileName
+	w !,tmpGN_222
 	s:(aCharset'="") FileStream.TranslateTable=aCharset
 	d FileStream.WriteLine("Instance;Date;Hour;Drive;Base;TypeOperation;GlobalRef;Counts;ByteOldValue;ByteNewValue")
 	s (c4,o4,n4)=0

@@ -388,7 +388,7 @@ IncludDataTime(DateTime1,df,dt,stop)
 
 /// Count one journal as what globals modifierade
 /// k ^tmpJRN d ##class(App.files).OneJournalCount("/sdb/journals/20181225.003","^tmpJRN")
-ClassMethod OneJournalCount(journal = "", tempGlob = {##class(App.LogInfoPane).#TEMPJRNL})
+ClassMethod OneJournalCount(journal = "", tempGlob = {$$$TEMPJRNL})
 {
 	s TmpGN="^||log" k @TmpGN
 	i '$isobject(journal) s journal=##class(%SYS.Journal.File).%OpenId(journal)	q:'$isobject(journal)
@@ -461,7 +461,7 @@ Count(TypeOp,OV,NV,base,gref)
 /// To count in magazines which globals as modifierade for a specific date
 ///  d ##class(App.files).OneDayJournalCount("/opt/isc/ensemble/mgr/journal/20181225","^tmpJRN")
 ///  d ##class(App.files).OneDayJournalCount("/sdb/journals/20181225","^tmpJRN")
-ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {##class(App.LogInfoPane).#TEMPJRNL})
+ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {$$$TEMPJRNL})
 {
  i $g(@tempGlob)'="" w !,$$$aText("About is already underway","")_" "_$g(@tempGlob) q
  s @tempGlob=$zts ;the beginning of the formation
@@ -491,11 +491,12 @@ ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {##class(App.LogInf
 
 /// Export to CSV file
 /// d ##class(App.files).Export2CSV("/backup/temp/JrnCount*.csv","^tmpJRN2")
-ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {##class(App.LogInfoPane).#TEMPJRNL}, aCharset = "CP1251")
+ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {$$$TEMPJRNL}, aCharset = "CP1251")
 {
 	s:aFileName["*" aFileName=$replace(aFileName,"*",$tr($zd($h,3)_$zt($p($h,",",2),-1),":- "))
 	#dim FileStream As %FileCharacterStream = ##class(%FileCharacterStream).%New()
 	s FileStream.Filename=aFileName
+	w !,tmpGN_222
 	s:(aCharset'="") FileStream.TranslateTable=aCharset
 	d FileStream.WriteLine("Instance;Date;Hour;Drive;Base;TypeOperation;GlobalRef;Counts;ByteOldValue;ByteNewValue")
 	s (c4,o4,n4)=0

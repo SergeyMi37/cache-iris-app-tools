@@ -135,13 +135,14 @@ ClassMethod ChartDbSize(arg, days, res, list, mm)
 	s arg("type")="line"
 	s labels="["
 	s datasets="{  label: """_$$$aText("Error display on the graph","")_""", borderColor: '"_..ColorRGBa(0,1)_"',  data: [30],  }"
-	s bd="",max=0	f num=1:1 { s bd=$o(list(bd)) q:bd=""  
+	s bd="",(max,free,maxbd)=0
+	f num=1:1 { s bd=$o(list(bd)) q:bd=""  
 		s list(bd)=list(bd)*1024
 		i list(bd)>max s max=list(bd),free=list(bd,"free")*1024,maxbd=list(bd,"name")
 		s order(list(bd))=bd //Rangiroa size
 		s color(bd)=num
 	}
-	s list("free","name")="Disk Free Size + "_maxbd
+	s list("free","name")="Disk Free Size + "_$g(maxbd)
 	s list("free")=max+free
 	s order(max+free)="free"
 	s color("free")=0
