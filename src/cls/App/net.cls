@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP
-Class App.net [ Abstract ]
+Class App.net [ Abstract, DependsOn = App.msg ]
 {
 
 /// Zip files and Send to email
@@ -252,9 +252,7 @@ ClassMethod ImportCSPFromGitHub(url, repo, target)
 	s unzip=$zu(12)_"Temp"_$$$slash_$p(##class(%File).TempFilename("unzip"),$$$slash,*)
 	s st=##class(%File).CreateDirectory(unzip)
 	i 'st q st
-	s cmd="7z x "_tempdir_$$$slash_repo_"-master.zip -y -o"_unzip ;_" >d:\!\log.log"
-	s st=$ZF(-1,cmd)
-	w !,cmd 
+	d ##class(App.files).UnzipToDirectory(tempdir_$$$slash_repo_"-master.zip",unzip)
 	s source=unzip_$$$slash_repo_"-master"_$$$slash_"src"_$$$slash_"csp"
 	w !,source_" copy to "_target,!
 	s st=##class(%File).CopyDir(source,target,1,1,1)

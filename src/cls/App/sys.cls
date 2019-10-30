@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-Class App.sys [ Abstract ]
+Class App.sys [ Abstract, DependsOn = App.msg ]
 {
 
 /// Add two languages to global translation

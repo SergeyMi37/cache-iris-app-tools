@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-Class App.security [ Abstract ]
+Class App.security [ Abstract, DependsOn = App.msg ]
 {
 
 /// Increase system security to LockDown, except for InactiveLimit = 90

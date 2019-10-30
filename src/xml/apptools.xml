@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-29 21:19:18">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-30 21:50:22">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -7,8 +7,9 @@ Withdraw the necessary actions</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65316,74064.66256</TimeChanged>
 <TimeCreated>64746,75062.988786</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="OnPage">
 <Description>
@@ -180,7 +181,7 @@ To disassemble the drain to Json</Description>
 <Description>
 Updated at 12/08/2017 16:19:10</Description>
 <Super>%CSP.Util.AutoPage</Super>
-<TimeChanged>65310,40937</TimeChanged>
+<TimeChanged>65316,58993.352192</TimeChanged>
 <TimeCreated>64621,43886.94639</TimeCreated>
 
 <Parameter name="DOMAIN">
@@ -739,8 +740,9 @@ cgivar="fileName" to send a file via the full path (insecure)]]></Description>
 The representation of the stored classes for viewing and editing</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,59122.002277</TimeChanged>
+<TimeChanged>65316,74100.220196</TimeChanged>
 <TimeCreated>64751,31992.250217</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="PREFIXFIELD">
 <Description>
@@ -1471,8 +1473,9 @@ Get the detail pane info object</Description>
 </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.LogInfoPane</Super>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65316,74113.566494</TimeChanged>
 <TimeCreated>64760,79525.802682</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="DrawBODY">
 <Description>
@@ -1892,8 +1895,9 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65315,49111.430018</TimeChanged>
+<TimeChanged>65316,74126.626327</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="DispatchClass">
 <Default>App.RestMetrics</Default>
@@ -2022,13 +2026,29 @@ This method is invoked when a class is compiled.</Description>
             "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
-    Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls") 
-	s Status=##Class(Config.Startup).Get(.Properties)
-	i Status w !!,"http://localhost:"_$g(Properties("WebServerPort"),57772)_"/"_..#AppCSP_"/App.LogInfo.cls",!
 
+	s Status=##Class(Config.Startup).Get(.Properties)
+	i Status s ServerPort="http://"_$zu(110)_":"_$g(Properties("WebServerPort"),57772)
+	w !
+   d ..AddAndWriteFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls",$g(ServerPort))
+   d ..AddAndWriteFavorite(..#AppName_" Permission Matrx","/"_..#AppCSP_"/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix",$g(ServerPort))
+   d ..AddAndWriteFavorite(..#AppName_" Samples Admin Panel","/"_..#AppCSP_"/App.TabsPanelUikitAdmin.cls?autoload=Matrix",$g(ServerPort))
+   	w !
 	$$$NspReturn(curNs)
     d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
+]]></Implementation>
+</Method>
+
+<Method name="AddAndWriteFavorite">
+<Description>
+AddFavorite</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name:%String,url,ServerPort</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(name,url) 
+    if ServerPort'="" w !,ServerPort_url
 ]]></Implementation>
 </Method>
 
@@ -2759,8 +2779,9 @@ To load the context from the table Protocol</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Modified>0</Modified>
 <Super>App.AutoPage</Super>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65316,75025.64659</TimeChanged>
 <TimeCreated>64621,44286.491046</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="CSPURL">
 <Default>App.LogInfo.cls</Default>
@@ -3010,8 +3031,9 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65314,60425.850804</TimeChanged>
+<TimeChanged>65316,78540.534523</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="GetLink">
 <ClassMethod>1</ClassMethod>
@@ -3370,14 +3392,14 @@ Drawing the form to enter information</Description>
 		<tr>
 			<td>
 				#(selectNS)# #(selectDSN)#
-				 | <a name='Hist' href='#("App.LogInfo.cls?NSP="_$zu(5)_"&Next=-1&WHAT="_$zconvert($$$HISTORYGN,"O","URL")_"")#' title='#($$$aText("Show command input history",""))#' id='Hist'>#($$$aText("History",""))#</a>
+				 | <a name='Hist' href='#("App.LogInfo.cls?NSP="_$zu(5)_"&Next=-1&WHAT="_$zconvert($$$HISTORYGN,"O","URL")_"")#' id='Hist'>#($$$aText("History",""))#</a>
 				 | <a target='Explore' name='Explore' href='#("App.FormExp.cls?NSP="_$zu(5))#' id='Explorer'>#($$$aText("Selection Classes",""))#</a>
 				 | <a target='ExploreTab' name='ExploreTab' href='#("App.FormExp.cls?panel=AccordionExp&NSP="_$zu(5))#'  id='ExplorerTab'>#($$$aText("Explorer tables",""))#</a>
 				 | <a target='Param' name='Param' href='#("App.FormExp.cls?NSP="_$zu(5)_"&SelClass=App.Parameter")#' title='#($$$aText("Go to the options table",""))#' id='Param'>#($$$aText("Parameters",""))#</a>
-				 | <a target='Tabs' name='Tabs' href='#("App.TabsPanelSample.cls")#' title='#($$$aText("Sample Tabs Application",""))#' id='Param'>#($$$aText("SampleTabsApplication",""))#</a>
+				 | <a target='Tabs' name='Tabs' href='#("App.TabsPanelSample.cls")#' id='Param'>#($$$aText("Sample Tabs Application",""))#</a>
 				 
-				 | <a target='Chart' name='Chart'  id='Chart' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartDbSize&NSP="_$zu(5))#'>#($$$aText("ChartDbSize",""))#</a>
-				 | <a target='ChartAlert' name='ChartAlert'  id='ChartAlert' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartAlert&NSP="_$zu(5))#'>#($$$aText("ChartAlert",""))#</a>
+				 | <a target='Chart' name='Chart'  id='Chart' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartDbSize&NSP="_$zu(5))#'>#($$$aText("Database growth Chart",""))#</a>
+				 | <a target='ChartAlert' name='ChartAlert'  id='ChartAlert' href='#("App.Chart.cls?panel=class(App.ChartPanel).ChartAlert&NSP="_$zu(5))#'>#($$$aText("Event Chart",""))#</a>
  			 | 
  			</td>
 		</tr>
@@ -4381,8 +4403,8 @@ Get call stack</Description>
 <Implementation><![CDATA[
 	&html< <tr style='vertical-align: middle;' >
 	<td> | <a target="ensprod" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.ProductionConfig.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Production",""))#</a> 
-	 | <a target="ensproderr" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.EventLog.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionErrors",""))#</a> 
-	 | <a target="ensqueues" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.Queues.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("ProductionQueues",""))#</a> 
+	 | <a target="ensproderr" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.EventLog.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Production Errors",""))#</a> 
+	 | <a target="ensqueues" href='#("/"_csp_"/"_$zconvert($zu(5),"L")_"/EnsPortal.Queues.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Production Queues",""))#</a> 
 	 | <a target="query" href='#("/csp/sys/exp/%25CSP.UI.Portal.SQL.Home.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Query",""))# </a> 
 	 | <a target="globals" href='#("/csp/sys/exp/%25CSP.UI.Portal.GlobalList.zen?$NAMESPACE="_$zu(5))#' > #($$$aText("Globals",""))# </a> 
 	#($s(##class(App.sys).ClassExist("WebTerminal.Engine"):" | "_$$$addAppLog($$$aText("WebTerminal",""),$$$aText("Load WebTerminal",""),"trm",""),1:""))#
@@ -4452,7 +4474,7 @@ Get call stack</Description>
 </Class>
 
 
-<Routine name="App.LogMacro" type="INC" timestamp="65314,51107.640197"><![CDATA[
+<Routine name="App.LogMacro" type="INC" timestamp="65316,73988.983125"><![CDATA[
 #include EnsSQLTypes
 #Include %occMessages
 #Include App.JsonUtils
@@ -4582,7 +4604,7 @@ Get call stack</Description>
 #define DBCACHESizeMon $G(@$$$GNEnsConf@("DBCACHESizeMon"))
 
 #define aTextOld(%ru,%en) ##function($$AddLangMsg^App.util(%ru,%en))
-#define aText(%en,%ru) ##Expression(##class(App.sys).AddLangMsg(%en,%ru))
+#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
 
 
 
@@ -5093,8 +5115,9 @@ The template GUI of the application selector and tabs on the basis jQueryUi</Des
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65314,59705.201629</TimeChanged>
+<TimeChanged>65316,75129.749917</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="HeaderText">
 <Description>
@@ -5522,15 +5545,16 @@ The output of the First button</Description>
 
 <Class name="App.TabsPanelSample">
 <Description>
-The template GUI of the application selector and tabs / Simple GUI Application Template</Description>
+The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanel</Super>
-<TimeChanged>65314,59819.939672</TimeChanged>
+<TimeChanged>65316,75162.338773</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="HeaderText">
 <Description>
-The application title / Application title</Description>
+The application title</Description>
 <Default>Tabs Application Sample</Default>
 </Parameter>
 
@@ -5835,8 +5859,9 @@ Template GUI based application Uikit</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65314,60018.349275</TimeChanged>
+<TimeChanged>65316,75170.731136</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="JSLIB">
 <Description>
@@ -6235,17 +6260,18 @@ Search result</Description>
 
 <Class name="App.TabsPanelUikitAdmin">
 <Description>
-The template GUI of the application selector and tabs on the basis jQueryUi / Simple GUI based Application Template jQueryUi</Description>
+The template GUI of the application selector and tabs on the basis jQueryUi</Description>
 <ClassType/>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65314,60233.855939</TimeChanged>
+<TimeChanged>65316,75176.978499</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="HeaderText">
 <Description>
-The application title / Application title</Description>
+The application title</Description>
 <Default>AdminTabsApplication</Default>
 </Parameter>
 
@@ -6882,8 +6908,9 @@ Search result</Description>
 The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanelUikit</Super>
-<TimeChanged>65315,49876.529562</TimeChanged>
+<TimeChanged>65316,75184.560363</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="HeaderText">
 <Description>
@@ -7536,79 +7563,11 @@ Get a comma-delimited list of databases</Description>
 </Class>
 
 
-<Class name="App.Task.PurgeOldBackupFiles">
-<Super>%SYS.Task.Definition</Super>
-<TimeChanged>65220,27685</TimeChanged>
-<TimeCreated>65184,36683.082794</TimeCreated>
-
-<Property name="BackupsToKeep">
-<Type>%Integer</Type>
-<InitialExpression>30</InitialExpression>
-<Required>1</Required>
-<Parameter name="MAXVAL" value="30"/>
-<Parameter name="MINVAL" value="1"/>
-</Property>
-
-<Property name="BackupFolder">
-<Type>%String</Type>
-<Required>1</Required>
-</Property>
-
-<Property name="BackupFileType">
-<Type>%String</Type>
-<Required>1</Required>
-</Property>
-
-<Method name="OnTask">
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-     //s BackupsToKeep = 2
-     //s Folder = "c:\backupfolder"
-     //s BackupFileType = "FullAllDatabases" // or "FullDBList"
-
-     s SortOrder = "DateModified"
-
-     If ..BackupsToKeep<1 Quit $$$ERROR($$$GeneralError,"Invalid - Number of Backups to Keep must be greater than or equal to 1")
-     If ..BackupFolder="" Quit $$$ERROR($$$GeneralError,"Invalid - BackupFolder - not supplied")
-     if ..BackupFileType = "" Quit $$$ERROR($$$GeneralError,"Invalid - BackupFileType - not supplied")
-     if (..BackupFileType '= "FullAllDatabases")&&(..BackupFileType '= "FullDBList") Quit $$$ERROR($$$GeneralError,"Invalid - BackupFileType")
-
-     s BackupCount=0
-     k zPurgeOldBackupFiles(..BackupFileType)
-     Set rs=##class(%ResultSet).%New("%Library.File:FileSet")
-     w !,"backuplist",!
-
-     s BackupFileWildcard = ..BackupFileType _ "*.cbk"
-     set status=rs.Execute(..BackupFolder, BackupFileWildcard, SortOrder)
-     WHILE rs.Next() {
-          Set FullFileName=rs.Data("Name")
-          Set FName=##class(%File).GetFilename(FullFileName)
-          Set FDateTime=##class(%File).GetFileDateModified(FullFileName)
-          w "File "_FName_" "_FDateTime,!
-          Set FDate=$PIECE(FDateTime,",")
-          Set CDate=$PIECE($H,",")
-          s BackupCount=$I(BackupCount)
-          s zPurgeOldBackupFiles(..BackupFileType, BackupCount)=FullFileName 
-     }
-     s zPurgeOldBackupFiles(..BackupFileType, "BackupCount")=BackupCount
-     do rs.Close()
-     if BackupCount > ..BackupsToKeep {
-          for i=1:1:BackupCount-..BackupsToKeep {
-               s FullFileName = zPurgeOldBackupFiles(..BackupFileType, i)
-               d ##class(%File).Delete(FullFileName)
-               w "File Purged "_FullFileName_" Purged",!
-          }
-     }
-     q status
-]]></Implementation>
-</Method>
-</Class>
-
-
 <Class name="App.UploadCSP">
+<CompileAfter>App.msg</CompileAfter>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Page</Super>
-<TimeChanged>65315,28952</TimeChanged>
+<TimeChanged>65316,76114.916932</TimeChanged>
 <TimeCreated>65113,38880.765844</TimeCreated>
 
 <Parameter name="pathfiles">
@@ -7712,9 +7671,9 @@ WriteError w "<H3>"_$$$aText("An error has occurred","")_"</h3>"_$System.Status.
 
 
 <Class name="App.Use">
-<CompileAfter>App.Log</CompileAfter>
+<CompileAfter>App.msg</CompileAfter>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65315,28952</TimeChanged>
+<TimeChanged>65316,75233.040658</TimeChanged>
 <TimeCreated>63691,73040.917631</TimeCreated>
 
 <Method name="Test">
@@ -7749,13 +7708,201 @@ do ##class(App.Use).TestLogObjects(4)</Description>
 </Class>
 
 
+<Class name="App.XLSX">
+<Description>
+Report generation in a given directory upon request with a given field format</Description>
+<IncludeCode>App.LogMacro,%occODBC</IncludeCode>
+<TimeChanged>65316,76338.541092</TimeChanged>
+<TimeCreated>64273,2606.599454</TimeCreated>
+
+<Method name="Report2xlsx">
+<Description>
+Report generation in a given directory upon request with a given field format
+set sc = ##class(App.XLSX).Report2xlsx("/backup/temp/",##class(App.sql).getSQL("mvk.ext.SQLext:LsPlan"),"LsPlanFileName",",N")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>directory:%String,sql="",filename="",format="",args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	q:sql="" $$$OK
+	set directory = ##class(%File).NormalizeDirectory(directory)
+	
+	#dim sc As %Status = $$$OK
+
+	if ('##class(%File).DirectoryExists(directory)) {
+		do ##class(%File).CreateDirectoryChain(directory)
+	}
+	
+	if ##class(%Dictionary.CompiledClass).%ExistsId("isc.SetEnv") {
+		set env = "EXCELMEMSIZE"
+		set sc = ##class(isc.SetEnv).Setup()
+		quit:$$$ISERR(sc) sc
+		set sc = ##class(isc.SetEnv).SetEnvVar(env, "4096m")
+		quit:$$$ISERR(sc) sc
+		set val = $system.Util.GetEnviron(env)
+	}
+	
+	i filename="" s filename=query_"-"_$system.Util.CreateGUID()
+	set file = filename _ ".xlsx"
+	set sc = ..generateFileFromSQL(directory _ file, sql,format,args...)
+	quit:$$$ISERR(sc) sc
+	w !,directory _ file
+	;set ..reportStream.Filename = directory _ file 
+	;set sc = ..%Save()
+	quit sc
+]]></Implementation>
+</Method>
+
+<Method name="generateFileFromSQL">
+<Description>
+Outputs Excel-compliant table from sql into file. args are sql arguments
+Does not support
+w ##class(mvk.util.XLSX).generateFileFromSQL(,"SELECT * FROM Sample.Person")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>file:%String=##class(%File).TempFilename("xlsx"),sql:%String,format="",args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
+	
+	set xmlfile = ##class(%File).TempFilename("xml")
+	set sc = ..generateXMLFromSQL(xmlfile, sql,format, args...)
+	quit:$$$ISERR(sc) sc
+	
+	set sc = ..generateXLSXfromXML(xmlfile, file)
+	
+	do:$$$ISOK(sc) ##class(%File).Delete(xmlfile)	
+
+	
+	quit sc
+]]></Implementation>
+</Method>
+
+<Method name="generateXMLFromSQL">
+<Description>
+Outputs XML to be fed into %SYS.ZENReportExcelExporter Excel-compliant stream from sql into file. args are sql arguments</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlfile:%String,sql:%String,format="",args...</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
+	set st = ##class(%SQL.Statement).%New()
+	set sc = st.%Prepare(sql)
+	quit:$$$ISERR(sc) sc
+	
+	#dim result As %SQL.StatementResult
+	set result = st.%Execute(args...)
+	
+	set stream = ##class(%Stream.FileCharacter).%New()
+	set sc=stream.LinkToFile(xmlfile)
+	
+	set header = ##class(%Dictionary.XDataDefinition).IDKEYOpen($classname(), "header").Data.Read(10000)
+	do stream.Write(header)
+
+	#dim metadata As SQL.StatementMetadata
+	set metadata = result.%GetMetadata()
+	
+	set columnCount = metadata.columns.Count()
+	for i=1:1:columnCount {
+		#dim column As %SQL.StatementColumn
+		set column = metadata.columns.GetAt(i)
+		
+		set class(i) = "<item excelName="""_ column.colName _ """"
+		if $p(format,",",i)'="" {
+			s type=$e($zconvert($p(format,",",i),"L"),1)
+			set type="isExcel"_$s(type="n":"Number",type="d":"Date",type="t":"Time",1:"")_"=""1"" "
+			set class(i) = class(i) _ " "_type
+		}
+		elseif column.IsNumeric() {
+			set class(i) = class(i) _ " isExcelNumber=""1"""
+		} elseif ..isDate(column.ODBCType) {
+			set class(i) = class(i) _ " isExcelDate=""1"""
+		} elseif ..isTime(column.ODBCType)  {
+			set class(i) = class(i) _ " isExcelTime=""1"""	
+		}
+		set class(i) = class(i) _ ">"
+		;set $$$AppL("MSW","metadata-"_i)=$$$AppObJs(column)
+		;set $$$AppL("MSW","metadata---"_i)=class(i)
+	}
+	
+	while result.%Next() {
+		do stream.WriteLine("<Row>")
+		for i=1:1:columnCount {
+			set data = result.%GetData(i)
+			set:$lv(data) data = $lts(data)
+			do stream.WriteLine(class(i) _ $zcvt(data, "O", "XML") _ "</item>")
+		}
+		do stream.WriteLine("</Row>")
+	}
+	
+	do stream.WriteLine("</sheet></MyReport>")
+	do stream.%Save()
+	return sc
+]]></Implementation>
+</Method>
+
+<Method name="generateXLSXfromXML">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlfile:%String,file:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set exportType = "xlsx"
+	set outputdir = ##class(%File).GetDirectory(file)
+	set outputfile = file
+	set isMultiSheet = $$$YES
+	set aggregateTag = ""
+	set reportName = "Report"
+	set logfile = ##class(%File).TempFilename("log")
+	set suppresExcelHeaders = $$$NO
+	set ExcelMode = "element"
+	set DisplayLog= $$$NO
+	
+	set sc = ##class(%SYS.ZENReportExcelExporter).CommonExport(exportType, xmlfile, outputdir, outputfile, isMultiSheet, aggregateTag, reportName, logfile, suppresExcelHeaders, ExcelMode, DisplayLog)
+	
+	do:$$$ISOK(sc) ##class(%File).Delete(logfile)	
+	
+	return sc
+]]></Implementation>
+</Method>
+
+<Method name="isDate">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>odbcType:%Integer</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	return:odbcType=$$$ODBCTYPEtimestamp $$$YES
+	return:odbcType=$$$ODBCTYPEdate $$$YES
+	return $$$NO
+]]></Implementation>
+</Method>
+
+<Method name="isTime">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>odbcType:%Integer</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	return:odbcType=$$$ODBCTYPEtime $$$YES
+	return $$$NO
+]]></Implementation>
+</Method>
+
+<XData name="header">
+<XMLNamespace>http://www.intersystems.com/xml</XMLNamespace>
+<Data><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+ <MyReport xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:zr="http://www.intersystems.com/zenreports" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:svg="http://www.w3.org/2000/svg">
+ <sheet excelSheetName="Report">
+]]></Data>
+</XData>
+</Class>
+
+
 <Class name="App.files">
 <Description>
 Utilities working with files</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65315,57981.082068</TimeChanged>
+<TimeChanged>65316,74088.657183</TimeChanged>
 <TimeCreated>64765,51020.18498</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="getSlash">
 <ClassMethod>1</ClassMethod>
@@ -8545,13 +8692,38 @@ ParamField - field name ;"OfficeFile"</Description>
 </Class>
 
 
+<Class name="App.msg">
+<Abstract>1</Abstract>
+<IncludeCode>App.LogMacro</IncludeCode>
+<TimeChanged>65316,73859.188057</TimeChanged>
+<TimeCreated>64734,80043.870644</TimeCreated>
+
+<Method name="AddLangMsg">
+<Description>
+Add two languages to global translation
+Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>en,other</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s otherLang="ru"
+	;s @$$$GNLang@($$$GNLangDOMAIN) = otherLang
+	s @$$$GNLang@($$$GNLangDOMAIN,"en",$zcrc(en,7)) = en
+	s:other'="" @$$$GNLang@($$$GNLangDOMAIN,otherLang,$zcrc(en,7)) = other
+	q "$s("_$zcrc(en,7)_":$g("_$$$GNLang_"("""_$$$GNLangDOMAIN_""",$get("_$$$GNEnsConf_"(""Language""),$mvv(58)),"_$zcrc(en,7)_"),"""_en_"""),1:"""_other_""")"
+]]></Implementation>
+</Method>
+</Class>
+
+
 <Class name="App.net">
 <Description>
 Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,58439.383948</TimeChanged>
+<TimeChanged>65316,75046.562344</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="SendFilesToEmail">
 <Description>
@@ -8847,9 +9019,7 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 	s unzip=$zu(12)_"Temp"_$$$slash_$p(##class(%File).TempFilename("unzip"),$$$slash,*)
 	s st=##class(%File).CreateDirectory(unzip)
 	i 'st q st
-	s cmd="7z x "_tempdir_$$$slash_repo_"-master.zip -y -o"_unzip ;_" >d:\!\log.log"
-	s st=$ZF(-1,cmd)
-	w !,cmd 
+	d ##class(App.files).UnzipToDirectory(tempdir_$$$slash_repo_"-master.zip",unzip)
 	s source=unzip_$$$slash_repo_"-master"_$$$slash_"src"_$$$slash_"csp"
 	w !,source_" copy to "_target,!
 	s st=##class(%File).CopyDir(source,target,1,1,1)
@@ -8946,8 +9116,9 @@ Kclo s status=mailserver.%Close()
 sample servise JSON-RPC 2.0 https://www.jsonrpc.org/specification</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.REST</Super>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65316,75061.725232</TimeChanged>
 <TimeCreated>65090,49155.438126</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Parameter name="CONTENTTYPE">
 <Default>application/json</Default>
@@ -9091,8 +9262,9 @@ http://localhost:57772/apptoolsrest/finduser/super</Description>
 <Class name="App.security">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,60344.124368</TimeChanged>
+<TimeChanged>65316,75073.485006</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="LockDown">
 <Description>
@@ -9429,8 +9601,9 @@ s sql=##class(App.sql).getSQL("mvk.ext.SQLext:ContObjHouseLsErrors",1,.desc)</De
 <Class name="App.sys">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,50989.531351</TimeChanged>
+<TimeChanged>65316,75140.669557</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="AddLangMsg">
 <Description>
@@ -10199,8 +10372,9 @@ s class="Spgz.model.PP.Files" d ##class(App.sys).Export("OEBS",.msg,class,1,"sel
 Utility types</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65316,75196.344013</TimeChanged>
 <TimeCreated>64735,32446.061315</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="Date3">
 <Description>

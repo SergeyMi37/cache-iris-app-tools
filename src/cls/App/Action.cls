@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// Withdraw the necessary actions
-Class App.Action Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
+Class App.Action Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
 /// Main method generate the content of page

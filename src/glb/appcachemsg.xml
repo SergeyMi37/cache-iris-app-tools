@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-29 21:19:18">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-30 21:50:22">
 <Global>
 <Node><Sub>^%AppCacheMsg</Sub>
 <Node><Sub>AppTools</Sub>
@@ -45,6 +45,9 @@
 </Node>
 <Node><Sub>375029700</Sub>
 <Data>Sparen Sie Als Neue</Data>
+</Node>
+<Node><Sub>426017985</Sub>
+<Data>Ereignis-Chart</Data>
 </Node>
 <Node><Sub>478911237</Sub>
 <Data>Dieser filter wurde</Data>
@@ -102,6 +105,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Anzeigen call stack</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>Produktion Warteschlangen</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -175,6 +181,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Wählen Sie eine Datei</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Chart Alert</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Ja</Data>
 </Node>
@@ -186,6 +195,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Ein Beispiel, um eine Reihe von Beschreibungen</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Setzen Sie einen link, um den Kontext wiederherzustellen, in dem terminal in die Zwischenablage</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Wählen Sie Einstellungen</Data>
@@ -201,6 +213,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer-Tabellen</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Erste</Data>
@@ -301,6 +316,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Laden und ausführen-Befehl</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Suche für Beschwerden, Störungen, Bestellungen, Aufträge und änderungen in der</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Eingang</Data>
 </Node>
@@ -309,6 +327,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Dieser filter Benutzer nicht gefunden</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Export-Quelle</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Gesendet mit %1, Datei %2</Data>
@@ -475,6 +496,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Undefinierte Objekt</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Dokumentation</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Fehler In Der Produktion</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Die Ausführung des Befehls</Data>
 </Node>
@@ -498,6 +525,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>zeigen Sie die Liste globalaw mit den besetzten Größe Zugeordnet MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Diagramm Der Größe Der Datenbank</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>Der Schlüssel ist nicht eindeutig definiert</Data>
@@ -525,6 +555,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Wenn dieses makro zum einfügen in das test-Programm</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Datenbank-Wachstum-Diagramm</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Rollen getrennt durch ein Komma oder durch den Kontext</Data>
@@ -708,6 +741,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Save As New</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Event Chart</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>This filter was</Data>
 </Node>
@@ -764,6 +800,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Show call stack</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>Production Queues</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -837,6 +876,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Select a file</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Chart Alert</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Yes</Data>
 </Node>
@@ -848,6 +890,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>An example of obtaining an array of descriptions</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Put a link to the context restore in the terminal in the clipboard</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Select settings</Data>
@@ -863,6 +908,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer tables</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>First</Data>
@@ -963,6 +1011,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Load and run command</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Search for appeals, incidents, orders and changes in the</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Entrance</Data>
 </Node>
@@ -971,6 +1022,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>This filter users not found</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Export Source</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Sent to %1 file %2</Data>
@@ -1137,6 +1191,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Undefined object</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Documentation</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Production Errors</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Executing the command</Data>
 </Node>
@@ -1160,6 +1220,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>show the list globalaw with the occupied size Allocated MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Chart Database Size</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>The key is not defined uniquely</Data>
@@ -1187,6 +1250,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>If this macro is to insert in the test program</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Database growth Chart</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Roles separated by a comma or by context</Data>
@@ -1367,6 +1433,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Guardar Como Nuevo</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Diagrama De Evento</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>Este filtro fue</Data>
 </Node>
@@ -1423,6 +1492,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Mostrar la pila de llamadas</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>La Producción De Colas</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -1496,6 +1568,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Seleccione un archivo</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Gráfico De Alerta</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Sí</Data>
 </Node>
@@ -1507,6 +1582,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Un ejemplo de la obtención de un conjunto de descripciones</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Poner un enlace a la contexto de restauración en el terminal en el portapapeles</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Seleccione la configuración de</Data>
@@ -1522,6 +1600,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>El explorador de tablas</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Primero</Data>
@@ -1622,6 +1703,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Cargar y ejecutar el comando</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Búsqueda de apelaciones, los incidentes, las órdenes y los cambios en la</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Entrada</Data>
 </Node>
@@ -1630,6 +1714,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Este filtro de los usuarios no se encuentran</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>La Exportación De Origen</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Enviado a %1 %2</Data>
@@ -1796,6 +1883,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Objeto indefinido</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Documentación</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Errores De Producción</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Ejecutando el comando</Data>
 </Node>
@@ -1819,6 +1912,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>mostrar la lista de globalaw con el espacio ocupado Asignado MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Gráfico De Tamaño De Base De Datos</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>La clave no está definida de forma única</Data>
@@ -1846,6 +1942,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Si esta macro es para insertar en el programa de prueba</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Gráfico de crecimiento de la base de datos</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Roles separados por una coma o por el contexto</Data>
@@ -2026,6 +2125,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Enregistrer En Tant Que Nouveau</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Tableau Événement</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>Ce filtre a été</Data>
 </Node>
@@ -2082,6 +2184,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Afficher la pile des appels</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>La Production De Files D&apos;Attente</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -2155,6 +2260,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Sélectionnez un fichier</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Graphique Alerte</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Oui</Data>
 </Node>
@@ -2166,6 +2274,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Un exemple de l&apos;obtention d&apos;un tableau de descriptions de</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Mettre un lien vers le contexte de restauration dans le terminal dans le presse-papiers</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Sélectionnez paramètres</Data>
@@ -2181,6 +2292,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer les tables</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Première</Data>
@@ -2281,6 +2395,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Charger et exécuter la commande</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Recherche pour les appels, les incidents, des commandes et des changements dans la</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Entrée</Data>
 </Node>
@@ -2289,6 +2406,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Ce filtre n&apos;est pas les utilisateurs trouvé</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Exportation Source</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Envoyé à %1 fichier %2</Data>
@@ -2455,6 +2575,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Objet non défini</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>La Documentation</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Les Erreurs De Production</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>L&apos;exécution de la commande</Data>
 </Node>
@@ -2478,6 +2604,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>afficher la liste globalaw avec la taille occupée Alloué MO</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Diagramme De Taille De Base De Données</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>La clé n&apos;est pas défini de manière unique</Data>
@@ -2505,6 +2634,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Si cette macro est à insérer dans le programme de test</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Base de données Graphique de croissance</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Les rôles séparés par une virgule ou par le contexte</Data>
@@ -2685,6 +2817,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Salva Come Nuovo</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Diagramma Di Evento</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>Questo filtro è stato</Data>
 </Node>
@@ -2741,6 +2876,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Mostra stack di chiamate</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>La Produzione Di Code</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -2814,6 +2952,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Selezionare un file</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Grafico Avviso</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Sì</Data>
 </Node>
@@ -2825,6 +2966,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Un esempio di ottenere un array di descrizioni</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Mettere un link al contesto di ripristino del terminale in appunti</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Selezionare impostazioni</Data>
@@ -2840,6 +2984,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer tavoli</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Prima</Data>
@@ -2940,6 +3087,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Caricare ed eseguire il comando</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Di ricerca per i ricorsi, incidenti, ordini e modifiche nel</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Ingresso</Data>
 </Node>
@@ -2948,6 +3098,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Questo filtro utenti non trovato</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Esportazione Di Origine</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Inviato a %1 %2</Data>
@@ -3114,6 +3267,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Oggetto non definito</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Documentazione</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Errori Di Produzione</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Eseguire il comando</Data>
 </Node>
@@ -3137,6 +3296,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>vedi la lista globalaw con occupati dimensione Allocata MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Grafico Dimensione Del Database</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>La chiave non è definito in modo univoco</Data>
@@ -3164,6 +3326,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Se questa macro è quello di inserire nel programma di test</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>La crescita del Database Grafico</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Ruoli separati da una virgola o da un contesto</Data>
@@ -3344,6 +3509,9 @@
 <Node><Sub>375029700</Sub>
 <Data>&quot;新規保存</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>イベント図</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>このフィルター</Data>
 </Node>
@@ -3400,6 +3568,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>ショー呼び出しスタック</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>生産キュー</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -3473,6 +3644,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>ファイルを選択</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>図表アラート</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>あり</Data>
 </Node>
@@ -3484,6 +3658,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>の取得例を示し配列の記述</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>リンクを貼るこの回復のターミナルのクリップボード</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>選択設定</Data>
@@ -3499,6 +3676,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorerのテーブル</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>第</Data>
@@ -3599,6 +3779,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>負荷の実行コマンド</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>検索の訴えで、事件、注文の変更</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>入り口</Data>
 </Node>
@@ -3607,6 +3790,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>このフィルターユーザーに見つかりませんで</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>輸出源</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>送られ%1ファイル%2</Data>
@@ -3773,6 +3959,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>未定義のオブジェクト</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>文書</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>生産エラー</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>コマンドを実行し</Data>
 </Node>
@@ -3796,6 +3988,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>&quot;次へ&quot;をクリックしglobalawの占領に割り当てられたサイズMB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>図表データベースのサイズ</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>キーが定義されていない独特の</Data>
@@ -3823,6 +4018,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>このマクロを挿入し、試験プログラム</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>データベースの成長を図</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>役割をカンマで区切った文脈</Data>
@@ -4003,6 +4201,9 @@
 <Node><Sub>375029700</Sub>
 <Data>으로 저장하는 새로운</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>이벤트차트</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>이 필터</Data>
 </Node>
@@ -4059,6 +4260,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>쇼를 호출 스택</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>큐를 생산</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -4132,6 +4336,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>을 선택한 파일</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>차트에 경고</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>네</Data>
 </Node>
@@ -4143,6 +4350,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>예를 들어를 얻는 배열에 대한 설명</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>로 연결되는 링크를 넣어 컨텍스트의 복원에서는 터미널에 클립보드</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>선택 설정</Data>
@@ -4158,6 +4368,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>테이블 탐색기</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>첫째</Data>
@@ -4258,6 +4471,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>부하고 실행하는 명령</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>검색에 대한 이의 신청,사고,주문에서 변경</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>입학</Data>
 </Node>
@@ -4266,6 +4482,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>이 필터는 사용자가 발견되지 않았</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>수출원</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>전송%1%2</Data>
@@ -4432,6 +4651,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>정의되지 않은 객체</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>문서</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>생산 오류</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>실행하는 명령</Data>
 </Node>
@@ -4455,6 +4680,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>목록을 표시합니다 globalaw 으로 점유 할당된 크기 MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>차트 데이터베이스 크기</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>핵심 정의하지 않은 독특</Data>
@@ -4482,6 +4710,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>주의:html 과 php 은 기본 설정을 삽입하는 테스트 프로그램</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>데이터베이스의 성장 차트</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>역할을 쉼표로 구분하여 또는 의 컨텍스트</Data>
@@ -4662,6 +4893,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Opslaan Als Nieuw</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Evenement Grafiek</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>Dit filter is</Data>
 </Node>
@@ -4718,6 +4952,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Toon call-stack</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>Productie Wachtrijen</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -4791,6 +5028,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Selecteer een bestand</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Grafiek Alert</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Ja</Data>
 </Node>
@@ -4802,6 +5042,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Een voorbeeld van het verkrijgen van een reeks van beschrijvingen</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Plaats een link naar de context te herstellen in de terminal in het klembord</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Selecteer instellingen</Data>
@@ -4817,6 +5060,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer tabellen</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Eerste</Data>
@@ -4917,6 +5163,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Laden en uit te voeren opdracht</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Zoeken naar een beroep, incidenten, bestellingen en wijzigingen in de</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Entree</Data>
 </Node>
@@ -4925,6 +5174,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Dit filter gebruikers niet gevonden</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Bron Exporteren</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Verzonden naar %1 - %2</Data>
@@ -5091,6 +5343,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Niet gedefinieerd object</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Documentatie</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Productie Fouten</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>De uitvoering van de opdracht</Data>
 </Node>
@@ -5114,6 +5372,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>toon de lijst globalaw met de bezette grootte Toegewezen MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Grafiek Grootte Van De Database</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>De sleutel is niet bepaald uniek</Data>
@@ -5141,6 +5402,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Als u deze macro is om in te voegen in de test programma</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Database groei Grafiek</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Rollen gescheiden door een komma of door kader</Data>
@@ -5321,6 +5585,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Salvar Como Novo</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Gráfico De Evento</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>Este filtro foi</Data>
 </Node>
@@ -5377,6 +5644,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Mostrar pilha de chamada</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>A Produção De Filas</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -5450,6 +5720,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Escolha um ficheiro</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Gráfico Alerta</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Sim</Data>
 </Node>
@@ -5461,6 +5734,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Um exemplo da obtenção de uma matriz de descrições</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Coloque um link para o contexto de restauração no terminal, na área de transferência</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Seleccione definições</Data>
@@ -5476,6 +5752,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer tabelas</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Primeira</Data>
@@ -5576,6 +5855,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Carregar e executar o comando</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Pesquisa para interposição de recursos, incidentes, pedidos e mudanças no</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Entrada</Data>
 </Node>
@@ -5584,6 +5866,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Esse filtro de usuários não encontrado</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Exportação De Origem</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Enviado para %1 ficheiro %2</Data>
@@ -5750,6 +6035,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Objeto indefinido</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Documentação</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Erros De Produção</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Executar o comando</Data>
 </Node>
@@ -5773,6 +6064,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>mostrar a lista globalaw com o tamanho ocupado Alocados MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Gráfico Tamanho Do Banco De Dados</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>A chave não é definida exclusivamente</Data>
@@ -5800,6 +6094,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Se esta macro é inserir no programa de teste</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Crescimento da base de dados do Gráfico</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Papéis separados por uma vírgula ou por contexto</Data>
@@ -5983,6 +6280,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Сохранить как новый</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>График Мероприятия </Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>По этому фильтру роли не найдены</Data>
 </Node>
@@ -5996,7 +6296,7 @@
 <Data>Редактировать</Data>
 </Node>
 <Node><Sub>559828760</Sub>
-<Data>Выгрузить</Data>
+<Data>Загрузить</Data>
 </Node>
 <Node><Sub>596285180</Sub>
 <Data>октябрь</Data>
@@ -6039,6 +6339,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Показать стэк вызовов</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>Очереди Производства </Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>Загруженные из ЕИС Классы</Data>
@@ -6112,6 +6415,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Выберите файл</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Предупреждение Графике </Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Да</Data>
 </Node>
@@ -6123,6 +6429,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Пример получения массива описания</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Поместить ссылку в контексте восстановления в терминале в буфер обмена</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Выберите параметров</Data>
@@ -6138,6 +6447,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Табличный Навигатор</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ЭкспортироватьКод</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Сначала</Data>
@@ -6238,6 +6550,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Загрузить и выполнить команду</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Поиск Обращений, инцидентов, нарядов и изменений в</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Вход</Data>
 </Node>
@@ -6246,6 +6561,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>По этому фильтру пользователи не найдены</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>ЭкспортироватьКод</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Направлено по адресу %1 файла %2</Data>
@@ -6412,6 +6730,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Неопределен объект</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Документация</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Производственные Ошибки</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Выполнение команды</Data>
 </Node>
@@ -6435,6 +6759,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>показать список глобалов с занимаемым размером Allocated MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Размер Базы Данных Диаграммы </Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>Ключ не определен однозначно</Data>
@@ -6462,6 +6789,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Если этот макрос вставить в исследуемую программу</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Рост базы данных диаграммы</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Роли через запятую или по контексту</Data>
@@ -6642,6 +6972,9 @@
 <Node><Sub>375029700</Sub>
 <Data>Зберегти Як Новий</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>Графік Заходи </Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>Цей фільтр був</Data>
 </Node>
@@ -6698,6 +7031,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>Показати стек викликів </Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>Черги Виробництва </Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -6771,6 +7107,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>Виберіть файл</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>Попередження Графіку </Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>Так</Data>
 </Node>
@@ -6782,6 +7121,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>Приклад отримання масиву описів</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>Помістити посилання в контексті відновлення в терміналі в буфер обміну</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>Виберіть Параметри</Data>
@@ -6797,6 +7139,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Столи провідник </Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>Перший</Data>
@@ -6897,6 +7242,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>Навантаження і виконати команду</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>Шукайте звернень, інцидентів, замовлень та змін до</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>Вхід</Data>
 </Node>
@@ -6905,6 +7253,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>Користувачі цього фільтра не знайшов</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>Експорт Джерело</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>Відправлено %1 файл %2</Data>
@@ -7071,6 +7422,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>Невизначений об&apos;єкт</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>Документація</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>Виробничі Помилки</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>Виконання команди</Data>
 </Node>
@@ -7094,6 +7451,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>Показати список globalaw з окупованих розмір виділених МБ</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>Розмір Бази Даних Діаграми </Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>Ключ не визначено однозначно</Data>
@@ -7121,6 +7481,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>Якщо цей макрос вставити в програму випробувань</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>Зростання бази даних діаграми</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>Ролей через кому або за контекстом</Data>
@@ -7301,6 +7664,9 @@
 <Node><Sub>375029700</Sub>
 <Data>保存如新</Data>
 </Node>
+<Node><Sub>426017985</Sub>
+<Data>事件的图表</Data>
+</Node>
 <Node><Sub>478911237</Sub>
 <Data>这个过滤器</Data>
 </Node>
@@ -7357,6 +7723,9 @@
 </Node>
 <Node><Sub>851625156</Sub>
 <Data>显示通话堆</Data>
+</Node>
+<Node><Sub>860160453</Sub>
+<Data>生产队</Data>
 </Node>
 <Node><Sub>860669020</Sub>
 <Data>ChartFtpEIS4</Data>
@@ -7430,6 +7799,9 @@
 <Node><Sub>1262406798</Sub>
 <Data>选择文件</Data>
 </Node>
+<Node><Sub>1290135130</Sub>
+<Data>图警报</Data>
+</Node>
 <Node><Sub>1303016265</Sub>
 <Data>是的</Data>
 </Node>
@@ -7441,6 +7813,9 @@
 </Node>
 <Node><Sub>1336789284</Sub>
 <Data>一个例子获得一系列的说明</Data>
+</Node>
+<Node><Sub>1340706435</Sub>
+<Data>把一个链接到的背景下恢复在终端中的剪贴板</Data>
 </Node>
 <Node><Sub>1358118017</Sub>
 <Data>选择设置</Data>
@@ -7456,6 +7831,9 @@
 </Node>
 <Node><Sub>1394395436</Sub>
 <Data>Explorer表</Data>
+</Node>
+<Node><Sub>1396710429</Sub>
+<Data>ExportSourceCode</Data>
 </Node>
 <Node><Sub>1404092755</Sub>
 <Data>第一</Data>
@@ -7556,6 +7934,9 @@
 <Node><Sub>2095380537</Sub>
 <Data>装载和运行命令</Data>
 </Node>
+<Node><Sub>2123479680</Sub>
+<Data>搜索的申诉、事件、命令和变化</Data>
+</Node>
 <Node><Sub>2125202399</Sub>
 <Data>入口</Data>
 </Node>
@@ -7564,6 +7945,9 @@
 </Node>
 <Node><Sub>2185800102</Sub>
 <Data>这个过滤器的用户找不到</Data>
+</Node>
+<Node><Sub>2202536061</Sub>
+<Data>出口源</Data>
 </Node>
 <Node><Sub>2263765174</Sub>
 <Data>发送到%1文件%2</Data>
@@ -7730,6 +8114,12 @@
 <Node><Sub>3221513761</Sub>
 <Data>不确定的对象</Data>
 </Node>
+<Node><Sub>3232490190</Sub>
+<Data>文档</Data>
+</Node>
+<Node><Sub>3235795022</Sub>
+<Data>生产错误</Data>
+</Node>
 <Node><Sub>3247252537</Sub>
 <Data>执行命令</Data>
 </Node>
@@ -7753,6 +8143,9 @@
 </Node>
 <Node><Sub>3405131149</Sub>
 <Data>表演列表中globalaw与被占领的大小分配MB</Data>
+</Node>
+<Node><Sub>3406478307</Sub>
+<Data>图表数据库的尺寸</Data>
 </Node>
 <Node><Sub>3419337166</Sub>
 <Data>关键不是唯一定义</Data>
@@ -7780,6 +8173,9 @@
 </Node>
 <Node><Sub>3546229831</Sub>
 <Data>如果这个宏插入在测试程序</Data>
+</Node>
+<Node><Sub>3546391037</Sub>
+<Data>数据库的增长图表</Data>
 </Node>
 <Node><Sub>3561681707</Sub>
 <Data>角色分离的一个逗号或上下文</Data>

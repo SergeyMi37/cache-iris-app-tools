@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-Class App.UploadCSP Extends %CSP.Page
+Class App.UploadCSP Extends %CSP.Page [ CompileAfter = App.msg ]
 {
 
 /// The path to the directory on the server for storing files

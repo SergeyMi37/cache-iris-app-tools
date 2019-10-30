@@ -1,10 +1,10 @@
 Include App.LogMacro
 
-/// The template GUI of the application selector and tabs on the basis jQueryUi / Simple GUI based Application Template jQueryUi
-Class App.TabsPanelUikitAdmin Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
+/// The template GUI of the application selector and tabs on the basis jQueryUi
+Class App.TabsPanelUikitAdmin Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
-/// The application title / Application title
+/// The application title
 Parameter HeaderText = "AdminTabsApplication";
 
 /// is there a right to work with this form

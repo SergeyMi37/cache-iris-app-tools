@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// The template GUI of the application selector and tabs
-Class App.TabsPanelUikitPermissMatrx Extends App.TabsPanelUikit
+Class App.TabsPanelUikitPermissMatrx Extends App.TabsPanelUikit [ DependsOn = App.msg ]
 {
 
 /// The application title

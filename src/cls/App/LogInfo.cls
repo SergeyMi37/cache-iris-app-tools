@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-Class App.LogInfo Extends App.AutoPage
+Class App.LogInfo Extends App.AutoPage [ DependsOn = App.msg ]
 {
 
 Parameter CSPURL = "App.LogInfo.cls";

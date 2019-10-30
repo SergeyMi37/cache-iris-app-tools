@@ -1,10 +1,10 @@
 Include App.LogMacro
 
-/// The template GUI of the application selector and tabs / Simple GUI Application Template
-Class App.TabsPanelSample Extends App.TabsPanel
+/// The template GUI of the application selector and tabs
+Class App.TabsPanelSample Extends App.TabsPanel [ DependsOn = App.msg ]
 {
 
-/// The application title / Application title
+/// The application title
 Parameter HeaderText = "Tabs Application Sample";
 
 /// what are the available applications

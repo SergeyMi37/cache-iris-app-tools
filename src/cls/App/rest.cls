@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// sample servise JSON-RPC 2.0 https://www.jsonrpc.org/specification
-Class App.rest Extends %CSP.REST
+Class App.rest Extends %CSP.REST [ DependsOn = App.msg ]
 {
 
 Parameter CONTENTTYPE = "application/json";

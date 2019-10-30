@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// Utilities working with files
-Class App.files [ Abstract ]
+Class App.files [ Abstract, DependsOn = App.msg ]
 {
 
 ClassMethod getSlash() As %String

@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// The representation of the stored classes for viewing and editing
-Class App.Form [ Abstract ]
+Class App.Form [ Abstract, DependsOn = App.msg ]
 {
 
 /// prefix the field name of the object

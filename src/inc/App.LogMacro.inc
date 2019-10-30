@@ -128,7 +128,7 @@ ROUTINE App.LogMacro [Type=INC]
 #define DBCACHESizeMon $G(@$$$GNEnsConf@("DBCACHESizeMon"))
 
 #define aTextOld(%ru,%en) ##function($$AddLangMsg^App.util(%ru,%en))
-#define aText(%en,%ru) ##Expression(##class(App.sys).AddLangMsg(%en,%ru))
+#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
 
 
 

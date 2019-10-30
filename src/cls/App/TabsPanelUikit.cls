@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// Template GUI based application Uikit
-Class App.TabsPanelUikit Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
+Class App.TabsPanelUikit Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
 /// Javascript library

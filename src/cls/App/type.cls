@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// Utility types
-Class App.type [ Abstract ]
+Class App.type [ Abstract, DependsOn = App.msg ]
 {
 
 /// To return the date in the format 3 

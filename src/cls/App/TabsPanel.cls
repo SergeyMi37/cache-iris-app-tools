@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// The template GUI of the application selector and tabs on the basis jQueryUi
-Class App.TabsPanel Extends %CSP.Page [ ClassType = "", ProcedureBlock ]
+Class App.TabsPanel Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
 /// The application title

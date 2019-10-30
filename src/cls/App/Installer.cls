@@ -2,7 +2,7 @@ Include App.LogMacro
 
 /// Importing this class will install App Tools properly.
 /// fork from 
-Class App.Installer Extends %Projection.AbstractProjection
+Class App.Installer Extends %Projection.AbstractProjection [ DependsOn = App.msg ]
 {
 
 Parameter DispatchClass = "App.RestMetrics";
@@ -110,13 +110,24 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
             "AppTools user role which may grant access to /"_..#AppCSP_" application if set up.",
             ..#ResourceName_":RWU")
     }
-    Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls") 
-	s Status=##Class(Config.Startup).Get(.Properties)
-	i Status w !!,"http://localhost:"_$g(Properties("WebServerPort"),57772)_"/"_..#AppCSP_"/App.LogInfo.cls",!
 
+	s Status=##Class(Config.Startup).Get(.Properties)
+	i Status s ServerPort="http://"_$zu(110)_":"_$g(Properties("WebServerPort"),57772)
+	w !
+   d ..AddAndWriteFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls",$g(ServerPort))
+   d ..AddAndWriteFavorite(..#AppName_" Permission Matrx","/"_..#AppCSP_"/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix",$g(ServerPort))
+   d ..AddAndWriteFavorite(..#AppName_" Samples Admin Panel","/"_..#AppCSP_"/App.TabsPanelUikitAdmin.cls?autoload=Matrix",$g(ServerPort))
+   	w !
 	$$$NspReturn(curNs)
     d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
+}
+
+/// AddFavorite
+ClassMethod AddAndWriteFavorite(name As %String, url, ServerPort) As %Status
+{
+    Set tSC = ##class(%SYS.Portal.Users).%AddFavorite(name,url) 
+    if ServerPort'="" w !,ServerPort_url
 }
 
 ClassMethod RegisterWebApplication(name As %String, spec) As %Status

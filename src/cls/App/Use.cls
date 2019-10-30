@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-Class App.Use [ CompileAfter = App.Log ]
+Class App.Use [ CompileAfter = App.msg ]
 {
 
 /// do ##class(App.Use).Test()

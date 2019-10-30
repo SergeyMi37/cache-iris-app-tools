@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// 
-Class App.FormExplorer Extends App.LogInfoPane
+Class App.FormExplorer Extends App.LogInfoPane [ DependsOn = App.msg ]
 {
 
 /// Draw a shape for input information
