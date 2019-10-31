@@ -7,6 +7,8 @@ ROUTINE App.LogMacro [Type=INC]
 #;		;2016.1 set title={}.$fromJSON(json).title
 #;		set title={}.$$$jsonFromJSON(json).title
 
+#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
+
 #define R(%property) %request.Content.##Expression(%property)
 #define RG(%property) %request.Get(%property)
 #define StackPlace 		$st($st(-1),"PLACE")
@@ -126,13 +128,6 @@ ROUTINE App.LogMacro [Type=INC]
 #define  EXPORTPROJPATH $G(@$$$GNEnsConf@("EXPORTPROJPATH")) 
 #; List of databases to monitor free space in App..Chart.cls?panel=class(App.ChartPanel).ChartDbSize
 #define DBCACHESizeMon $G(@$$$GNEnsConf@("DBCACHESizeMon"))
-
-#define aTextOld(%ru,%en) ##function($$AddLangMsg^App.util(%ru,%en))
-#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
-
-
-
-
 
 
 #; --------------- Application section

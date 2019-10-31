@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-30 21:50:22">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-31 19:40:26">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -7,7 +7,7 @@ Withdraw the necessary actions</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65316,74064.66256</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64746,75062.988786</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -740,7 +740,7 @@ cgivar="fileName" to send a file via the full path (insecure)]]></Description>
 The representation of the stored classes for viewing and editing</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,74100.220196</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64751,31992.250217</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -1473,7 +1473,7 @@ Get the detail pane info object</Description>
 </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.LogInfoPane</Super>
-<TimeChanged>65316,74113.566494</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64760,79525.802682</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -1895,7 +1895,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65316,74126.626327</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -2779,7 +2779,7 @@ To load the context from the table Protocol</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Modified>0</Modified>
 <Super>App.AutoPage</Super>
-<TimeChanged>65316,75025.64659</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64621,44286.491046</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -3031,7 +3031,7 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65316,78540.534523</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -4474,7 +4474,7 @@ Get call stack</Description>
 </Class>
 
 
-<Routine name="App.LogMacro" type="INC" timestamp="65316,73988.983125"><![CDATA[
+<Routine name="App.LogMacro" type="INC" timestamp="65317,31322.970883"><![CDATA[
 #include EnsSQLTypes
 #Include %occMessages
 #Include App.JsonUtils
@@ -4482,6 +4482,8 @@ Get call stack</Description>
 #;		;2016.2<= set title={}.%FromJSON(json).title 
 #;		;2016.1 set title={}.$fromJSON(json).title
 #;		set title={}.$$$jsonFromJSON(json).title
+
+#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
 
 #define R(%property) %request.Content.##Expression(%property)
 #define RG(%property) %request.Get(%property)
@@ -4602,13 +4604,6 @@ Get call stack</Description>
 #define  EXPORTPROJPATH $G(@$$$GNEnsConf@("EXPORTPROJPATH")) 
 #; List of databases to monitor free space in App..Chart.cls?panel=class(App.ChartPanel).ChartDbSize
 #define DBCACHESizeMon $G(@$$$GNEnsConf@("DBCACHESizeMon"))
-
-#define aTextOld(%ru,%en) ##function($$AddLangMsg^App.util(%ru,%en))
-#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
-
-
-
-
 
 
 #; --------------- Application section
@@ -5115,7 +5110,7 @@ The template GUI of the application selector and tabs on the basis jQueryUi</Des
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65316,75129.749917</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -5548,7 +5543,7 @@ The output of the First button</Description>
 The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanel</Super>
-<TimeChanged>65316,75162.338773</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -5859,7 +5854,7 @@ Template GUI based application Uikit</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65316,75170.731136</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -6265,7 +6260,7 @@ The template GUI of the application selector and tabs on the basis jQueryUi</Des
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65316,75176.978499</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -6908,7 +6903,7 @@ Search result</Description>
 The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanelUikit</Super>
-<TimeChanged>65316,75184.560363</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -7563,11 +7558,80 @@ Get a comma-delimited list of databases</Description>
 </Class>
 
 
+<Class name="App.Task.PurgeOldBackupFiles">
+<Super>%SYS.Task.Definition</Super>
+<TimeChanged>65220,27685</TimeChanged>
+<TimeCreated>65184,36683.082794</TimeCreated>
+
+<Property name="BackupsToKeep">
+<Type>%Integer</Type>
+<InitialExpression>30</InitialExpression>
+<Required>1</Required>
+<Parameter name="MAXVAL" value="30"/>
+<Parameter name="MINVAL" value="1"/>
+</Property>
+
+<Property name="BackupFolder">
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="BackupFileType">
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Method name="OnTask">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+     //s BackupsToKeep = 2
+     //s Folder = "c:\backupfolder"
+     //s BackupFileType = "FullAllDatabases" // or "FullDBList"
+
+     s SortOrder = "DateModified"
+
+     If ..BackupsToKeep<1 Quit $$$ERROR($$$GeneralError,"Invalid - Number of Backups to Keep must be greater than or equal to 1")
+     If ..BackupFolder="" Quit $$$ERROR($$$GeneralError,"Invalid - BackupFolder - not supplied")
+     if ..BackupFileType = "" Quit $$$ERROR($$$GeneralError,"Invalid - BackupFileType - not supplied")
+     if (..BackupFileType '= "FullAllDatabases")&&(..BackupFileType '= "FullDBList") Quit $$$ERROR($$$GeneralError,"Invalid - BackupFileType")
+
+     s BackupCount=0
+     k zPurgeOldBackupFiles(..BackupFileType)
+     Set rs=##class(%ResultSet).%New("%Library.File:FileSet")
+     w !,"backuplist",!
+
+     s BackupFileWildcard = ..BackupFileType _ "*.cbk"
+     set status=rs.Execute(..BackupFolder, BackupFileWildcard, SortOrder)
+     WHILE rs.Next() {
+          Set FullFileName=rs.Data("Name")
+          Set FName=##class(%File).GetFilename(FullFileName)
+          Set FDateTime=##class(%File).GetFileDateModified(FullFileName)
+          w "File "_FName_" "_FDateTime,!
+          Set FDate=$PIECE(FDateTime,",")
+          Set CDate=$PIECE($H,",")
+          s BackupCount=$I(BackupCount)
+          s zPurgeOldBackupFiles(..BackupFileType, BackupCount)=FullFileName 
+     }
+     s zPurgeOldBackupFiles(..BackupFileType, "BackupCount")=BackupCount
+     do rs.Close()
+     if BackupCount > ..BackupsToKeep {
+          for i=1:1:BackupCount-..BackupsToKeep {
+               s FullFileName = zPurgeOldBackupFiles(..BackupFileType, i)
+               d ##class(%File).Delete(FullFileName)
+               w "File Purged "_FullFileName_" Purged",!
+          }
+     }
+     q status
+]]></Implementation>
+</Method>
+</Class>
+
+
 <Class name="App.UploadCSP">
 <CompileAfter>App.msg</CompileAfter>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Page</Super>
-<TimeChanged>65316,76114.916932</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65113,38880.765844</TimeCreated>
 
 <Parameter name="pathfiles">
@@ -7673,7 +7737,7 @@ WriteError w "<H3>"_$$$aText("An error has occurred","")_"</h3>"_$System.Status.
 <Class name="App.Use">
 <CompileAfter>App.msg</CompileAfter>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,75233.040658</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>63691,73040.917631</TimeCreated>
 
 <Method name="Test">
@@ -7712,7 +7776,7 @@ do ##class(App.Use).TestLogObjects(4)</Description>
 <Description>
 Report generation in a given directory upon request with a given field format</Description>
 <IncludeCode>App.LogMacro,%occODBC</IncludeCode>
-<TimeChanged>65316,76338.541092</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64273,2606.599454</TimeCreated>
 
 <Method name="Report2xlsx">
@@ -7900,7 +7964,7 @@ Outputs XML to be fed into %SYS.ZENReportExcelExporter Excel-compliant stream fr
 Utilities working with files</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,74088.657183</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64765,51020.18498</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -8695,7 +8759,7 @@ ParamField - field name ;"OfficeFile"</Description>
 <Class name="App.msg">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,73859.188057</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 
 <Method name="AddLangMsg">
@@ -8721,7 +8785,7 @@ Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))</Description>
 Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,75046.562344</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9116,7 +9180,7 @@ Kclo s status=mailserver.%Close()
 sample servise JSON-RPC 2.0 https://www.jsonrpc.org/specification</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.REST</Super>
-<TimeChanged>65316,75061.725232</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>65090,49155.438126</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9262,7 +9326,7 @@ http://localhost:57772/apptoolsrest/finduser/super</Description>
 <Class name="App.security">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,75073.485006</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9601,7 +9665,7 @@ s sql=##class(App.sql).getSQL("mvk.ext.SQLext:ContObjHouseLsErrors",1,.desc)</De
 <Class name="App.sys">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,75140.669557</TimeChanged>
+<TimeChanged>65317,30981</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -10372,7 +10436,7 @@ s class="Spgz.model.PP.Files" d ##class(App.sys).Export("OEBS",.msg,class,1,"sel
 Utility types</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65316,75196.344013</TimeChanged>
+<TimeChanged>65317,51389.363283</TimeChanged>
 <TimeCreated>64735,32446.061315</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -10659,20 +10723,6 @@ w ##class(App.type).GetTableName("App.sss.user")</Description>
 	set:$SYSTEM.SQL.IsReservedWord(table) table = """"_table_""""
 	set tab=$tr($p(SelectClass,"."_tab,1),".","_")_"."_table
 	q tab
-]]></Implementation>
-</Method>
-
-<Method name="tempGN">
-<Description>
-To obtain a temporary globalno link
-w ##class(App.type).tempGN("GN")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>GN,NoKill=0</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	s gn=$na(^tmpSPGZ(GN,$j)) 
-	if 'NoKill KILL @gn	s @gn=$$$AppDT($h)
-	q gn
 ]]></Implementation>
 </Method>
 

@@ -204,15 +204,6 @@ ClassMethod GetTableName(SelectClass) As %String
 	q tab
 }
 
-/// To obtain a temporary globalno link
-/// w ##class(App.type).tempGN("GN")
-ClassMethod tempGN(GN, NoKill = 0) As %String
-{
-	s gn=$na(^tmpSPGZ(GN,$j)) 
-	if 'NoKill KILL @gn	s @gn=$$$AppDT($h)
-	q gn
-}
-
 /// The number to the normal mind
 /// w ##class(App.type).GetValidNumeric("14,650.00")
 ClassMethod GetValidNumeric(price) As %String
