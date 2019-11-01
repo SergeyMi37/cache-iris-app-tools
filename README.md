@@ -29,10 +29,10 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
   - output of the growth dynamics of DBMS database files using the iris.log protocol (cconsole.log)
 
 9. Load http://your-host:your-port/apptools/App.FormExp.cls?panel=AccordionExp
- - Navigation by namespaces, class, and class instance. Create, edit, and delete class instances in the on-screen form interface.
+  - Navigation by namespaces, class, and class instance. Create, edit, and delete class instances in the on-screen form interface.
   
 10. Load http://your-host:your-port/apptools/apptools/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix
- - Group assignment of roles to users by selecting them by filter in the screen panel
+  - Group assignment of roles to users by selecting them by filter in the screen panel
   
 11. Load http://your-host:your-port/apptools/App.TabsPanelSample.cls   
  - jQuery-Ui.js based application template.
