@@ -21,7 +21,7 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
  - code execution by XECUTE command in the interface panel.
  - saving commands and queries in the program history with the ability to run them again.
  - there is a module for implementing the LockedDown mode - ##class(App.security).LockDown(...)
- - multilanguage interface supported.
+ - multilanguage interface supported (install the global from C:\path\cache-iris-apptools-master\src\glb\appcachemsg.xml).
  
 7. Load http://your-host:your-port/apptools/App.Chart.cls?panel=class(App.ChartPanel).ChartAlert
   - output of the DBMS events using the iris.log protocol (cconsole.log)
