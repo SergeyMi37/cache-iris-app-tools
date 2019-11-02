@@ -41,5 +41,5 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
  - UiKit.js based application template
    
 13. Load http://your-host:your-port/apptools/App.TabsPanelUikitAdmin.cls
-  - UiKit.js based application template fof admin panels
+  - UiKit.js based application template for admin panels
    
