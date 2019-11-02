@@ -12,7 +12,8 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
 2. Go to the Management Portal -> System Explorer -> Classes -> Import and select the XML file;
 3. Execute `do $system.OBJ.Load("C:\path\cache-iris-apptools-master\src\xml\apptools.xml","ck")` in terminal.
 4. During installation, mappig will be created in all namespace through namespace %All
-5. If you have not installed utility 7z, copy the files from the directory C:\path\cache-iris-apptools-master\src\csp to c:\InterSystems\IRIS\CSP\app\
+5. For Windowqs, if you have not installed utility 7z.exe, copy the files from the directory C:\path\cache-iris-apptools-master\src\csp to c:\InterSystems\IRIS\CSP\app\
+   For linux CSP files should be installed automatically.
 6. Load http://your-host:your-port/apptools/App.LogInfo.cls
  - view the list of globals by mask with count blocks occupied by them.
  - viewing global and direct and reverse with a possible filter by links and node data. Edit global nodes. Export a selection of nodes and global data to an XLS file and send the archive to an email.
