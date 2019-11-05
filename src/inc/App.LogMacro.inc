@@ -1,5 +1,5 @@
 ROUTINE App.LogMacro [Type=INC]
-#include EnsSQLTypes
+#;include EnsSQLTypes
 #Include %occMessages
 #Include App.JsonUtils
 #;Include %msql $$$MaxStringLength

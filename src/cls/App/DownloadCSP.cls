@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-Class App.DownloadCSP Extends %CSP.Page
+Class App.DownloadCSP Extends %CSP.Page [ DependsOn = App.msg ]
 {
 
 /// Event handler for <b>PreHTTP</b> event: this is invoked before

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-10-31 19:40:26">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-05 18:13:40">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -570,8 +570,9 @@ Plot the error of the ensemble Protocol Ens_Util.Log where Type='2' </Descriptio
 <Class name="App.DownloadCSP">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Page</Super>
-<TimeChanged>65314,55157</TimeChanged>
+<TimeChanged>65322,31001.107873</TimeChanged>
 <TimeCreated>60726,81968.378213</TimeCreated>
+<DependsOn>App.msg</DependsOn>
 
 <Method name="OnPreHTTP">
 <Description><![CDATA[
@@ -4474,8 +4475,8 @@ Get call stack</Description>
 </Class>
 
 
-<Routine name="App.LogMacro" type="INC" timestamp="65317,31322.970883"><![CDATA[
-#include EnsSQLTypes
+<Routine name="App.LogMacro" type="INC" timestamp="65321,72426.507081"><![CDATA[
+#;include EnsSQLTypes
 #Include %occMessages
 #Include App.JsonUtils
 #;Include %msql $$$MaxStringLength
