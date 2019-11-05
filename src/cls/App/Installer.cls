@@ -70,7 +70,13 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 			set cspProperties("Path")=result.Data("Path")
 		}
 	}
-    ;zw cspProperties
+    if '$data(cspProperties("Path")) {
+	    set tempdir=$p($zu(12),$$$slash,1,*-2)_$$$slash_"CSP"_$$$slash_ns
+		w !,"Create directory ",tempdir
+		s st=##class(%File).CreateDirectory(tempdir)
+		i 'st w !,"Error creating directory " q $$$OK
+	    set cspProperties("Path")=tempdir
+    }
     set cspProperties("AutheEnabled") = $$$AutheCache ;$$$AutheUnauthenticated ;
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."

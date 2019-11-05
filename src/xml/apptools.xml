@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-05 18:13:40">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-05 22:43:39">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -1896,7 +1896,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65322,81787</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -1987,7 +1987,13 @@ This method is invoked when a class is compiled.</Description>
 			set cspProperties("Path")=result.Data("Path")
 		}
 	}
-    ;zw cspProperties
+    if '$data(cspProperties("Path")) {
+	    set tempdir=$p($zu(12),$$$slash,1,*-2)_$$$slash_"CSP"_$$$slash_ns
+		w !,"Create directory ",tempdir
+		s st=##class(%File).CreateDirectory(tempdir)
+		i 'st w !,"Error creating directory " q $$$OK
+	    set cspProperties("Path")=tempdir
+    }
     set cspProperties("AutheEnabled") = $$$AutheCache ;$$$AutheUnauthenticated ;
     set cspProperties("NameSpace") = ns
     set cspProperties("Description") = "A WEB application for "_..#AppName_"."
@@ -8786,7 +8792,7 @@ Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))</Description>
 Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65322,81778</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9089,8 +9095,10 @@ s repo="cache-iris-app-tools" d ##class(App.net).ImportCSPFromGitHub("https://co
 	w !,source_" copy to "_target,!
 	s st=##class(%File).CopyDir(source,target,1,1,1)
 	i 'st w !,st
-	d ##class(%File).Delete(tempdir)
-	d ##class(%File).Delete(unzip)
+	s source=unzip_$$$slash_repo_"-master"_$$$slash_"src"_$$$slash_"glb"_$$$slash_"appcachemsg.xml"
+	do $system.OBJ.Load(source,"ck")
+	d ##class(%File).RemoveDirectoryTree(tempdir)
+	d ##class(%File).RemoveDirectoryTree(unzip)
 	q $$$OK
 ]]></Implementation>
 </Method>

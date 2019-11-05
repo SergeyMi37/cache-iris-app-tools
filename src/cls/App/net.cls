@@ -257,8 +257,10 @@ ClassMethod ImportCSPFromGitHub(url, repo, target)
 	w !,source_" copy to "_target,!
 	s st=##class(%File).CopyDir(source,target,1,1,1)
 	i 'st w !,st
-	d ##class(%File).Delete(tempdir)
-	d ##class(%File).Delete(unzip)
+	s source=unzip_$$$slash_repo_"-master"_$$$slash_"src"_$$$slash_"glb"_$$$slash_"appcachemsg.xml"
+	do $system.OBJ.Load(source,"ck")
+	d ##class(%File).RemoveDirectoryTree(tempdir)
+	d ##class(%File).RemoveDirectoryTree(unzip)
 	q $$$OK
 }
 
