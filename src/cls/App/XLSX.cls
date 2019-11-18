@@ -145,13 +145,14 @@ ClassMethod isTime(odbcType As %Integer) As %Boolean
 	return:odbcType=$$$ODBCTYPEtime $$$YES
 	return $$$NO
 }
-
 XData header [ XMLNamespace = "http://www.intersystems.com/xml" ]
 {
 <?xml version="1.0" encoding="UTF-8"?>
  <MyReport xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:zr="http://www.intersystems.com/zenreports" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:svg="http://www.w3.org/2000/svg">
  <sheet excelSheetName="Report">
 }
+
+
 
 }
 

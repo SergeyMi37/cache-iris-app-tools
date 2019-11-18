@@ -1,4 +1,5 @@
 ROUTINE App.JsonUtils [Type=INC]
+#; ver 20191112
 #include %occReference
 
 #define formatJSON 		"aelotwc"
@@ -47,6 +48,7 @@ ROUTINE App.JsonUtils [Type=INC]
     #define jsonToJSON $toJSON								
     						//usage: obj.$$$jsonToJSON()
     #define jsonGet $get									
+    #define jsonNew $new									
     						//usage: obj.$$$jsonGet(key)
     #define jsonIsDefined $isDefined						
     						//usage: obj.$$$jsonIsDefined(key) 
@@ -85,6 +87,7 @@ ROUTINE App.JsonUtils [Type=INC]
     #define jsonToJSON %ToJSON								
     						//usage: obj.$$$jsonToJSON()
     #define jsonGet %Get									
+    #define jsonNew %New									
     						//usage: obj.$$$jsonGet(key)
     #define jsonIsDefined %IsDefined						
     						//usage: obj.$$$jsonIsDefined(key) 

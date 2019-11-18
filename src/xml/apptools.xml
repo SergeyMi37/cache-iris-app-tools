@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-05 22:43:39">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-18 21:47:20">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -1896,7 +1896,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65322,81787</TimeChanged>
+<TimeChanged>65323,51990</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -2245,7 +2245,8 @@ This method is invoked when a class is 'uncompiled'.</Description>
 </Class>
 
 
-<Routine name="App.JsonUtils" type="INC" timestamp="65286,54803.915564"><![CDATA[
+<Routine name="App.JsonUtils" type="INC" timestamp="65329,48420.905214"><![CDATA[
+#; ver 20191112
 #include %occReference
 
 #define formatJSON 		"aelotwc"
@@ -2294,6 +2295,7 @@ This method is invoked when a class is 'uncompiled'.</Description>
     #define jsonToJSON $toJSON								
     						//usage: obj.$$$jsonToJSON()
     #define jsonGet $get									
+    #define jsonNew $new									
     						//usage: obj.$$$jsonGet(key)
     #define jsonIsDefined $isDefined						
     						//usage: obj.$$$jsonIsDefined(key) 
@@ -2332,6 +2334,7 @@ This method is invoked when a class is 'uncompiled'.</Description>
     #define jsonToJSON %ToJSON								
     						//usage: obj.$$$jsonToJSON()
     #define jsonGet %Get									
+    #define jsonNew %New									
     						//usage: obj.$$$jsonGet(key)
     #define jsonIsDefined %IsDefined						
     						//usage: obj.$$$jsonIsDefined(key) 
@@ -4481,8 +4484,7 @@ Get call stack</Description>
 </Class>
 
 
-<Routine name="App.LogMacro" type="INC" timestamp="65321,72426.507081"><![CDATA[
-#;include EnsSQLTypes
+<Routine name="App.LogMacro" type="INC" timestamp="65322,31033.529333"><![CDATA[
 #Include %occMessages
 #Include App.JsonUtils
 #;Include %msql $$$MaxStringLength
@@ -7783,8 +7785,9 @@ do ##class(App.Use).TestLogObjects(4)</Description>
 <Description>
 Report generation in a given directory upon request with a given field format</Description>
 <IncludeCode>App.LogMacro,%occODBC</IncludeCode>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65335,38112.449842</TimeChanged>
 <TimeCreated>64273,2606.599454</TimeCreated>
+<ClassDefinitionError>1</ClassDefinitionError>
 
 <Method name="Report2xlsx">
 <Description>
@@ -7955,14 +7958,21 @@ Outputs XML to be fed into %SYS.ZENReportExcelExporter Excel-compliant stream fr
 ]]></Implementation>
 </Method>
 
-<XData name="header">
-<XMLNamespace>http://www.intersystems.com/xml</XMLNamespace>
-<Data><![CDATA[
+<UDLText name="T">
+<Category>error</Category>
+<Content><![CDATA[
+XData header [ XMLNamespace = "http://www.intersystems.com/xml" ]
+{
 <?xml version="1.0" encoding="UTF-8"?>
  <MyReport xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:zr="http://www.intersystems.com/zenreports" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:svg="http://www.w3.org/2000/svg">
  <sheet excelSheetName="Report">
-]]></Data>
-</XData>
+}
+
+
+}
+
+]]></Content>
+</UDLText>
 </Class>
 
 
@@ -8792,7 +8802,7 @@ Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))</Description>
 Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65322,81778</TimeChanged>
+<TimeChanged>65323,51977</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9645,12 +9655,14 @@ d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security
 <Description>
 Query and SQL statements</Description>
 <Abstract>1</Abstract>
-<TimeChanged>65311,52150.381602</TimeChanged>
+<IncludeCode>App.LogMacro</IncludeCode>
+<TimeChanged>65335,78429.342843</TimeChanged>
 <TimeCreated>64127,58953.319558</TimeCreated>
 
 <Method name="getSQL">
 <Description>
-s sql=##class(App.sql).getSQL("mvk.ext.SQLext:ContObjHouseLsErrors",1,.desc)</Description>
+s sql=##class(App.sql).getSQL("App.sql:TestXData",0,.desc) w !,sql,!!,desc
+s sql=##class(App.sql).getSQL("TestQuery",0,.desc) w !,sql,!!,desc</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[name:%String,removeNL=$$$NO,&Description]]></FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -9659,13 +9671,84 @@ s sql=##class(App.sql).getSQL("mvk.ext.SQLext:ContObjHouseLsErrors",1,.desc)</De
 	
 	set class = $case($l(name, ":"), 2:$p(name, ":"), :$classname())
 	set queryName = $p(name, ":", *)
-	set query = ##class(%Dictionary.QueryDefinition).IDKEYOpen(class, queryName,,.sc)
-	throw:$$$ISERR(sc) ##class(%Exception.StatusException).CreateFromStatus(sc)
-	;zw query
-	set sql = query.SqlQuery
-	s Description=query.Description
+	set Description=""
+		
+	if ##class(%Dictionary.QueryDefinition).IDKEYExists(class, queryName) {
+		set query = ##class(%Dictionary.QueryDefinition).IDKEYOpen(class, queryName,,.sc)
+		throw:$$$ISERR(sc) ##class(%Exception.StatusException).CreateFromStatus(sc)
+		set sql = query.SqlQuery
+		set Description=query.Description
+	} elseif ##class(%Dictionary.XDataDefinition).IDKEYExists(class, queryName) {
+		set stream = ##class(%Stream.TmpCharacter).%New()
+		for i=1:1:$$$comMemberKeyGet(class,$$$cCLASSxdata,queryName,$$$cXDATAdata) {
+			do stream.WriteLine($$$comMemberArrayGet(class,$$$cCLASSxdata,queryName,$$$cXDATAdata,i))
+		}
+		set sql = stream.Read($$$MaxLocalLength)
+		set Description=$$$comMemberKeyGet(class,$$$cCLASSxdata,queryName,$$$cXDATAdescription)
+		
+	} else {
+		throw ##class(%Exception.StatusException).CreateFromStatus($$$ERROR($$$GeneralError, $$$FormatText($$$aText("Class %1 does not have a Query or XData element named %2",""), class, queryName)))
+	}
+	
 	set:(removeNL = $$$YES) sql = $replace(sql, $$$NL, " ")
 	return sql_" -- Today "_$zd($h,3)_" "_$g(ssm)
+]]></Implementation>
+</Method>
+
+<Query name="TestQuery">
+<Description>
+test query
+stored in query</Description>
+<Type>%Query</Type>
+<SqlQuery>SELECT top 10 * from
+  App.Log</SqlQuery>
+</Query>
+
+<XData name="TestXData">
+<Description>
+test query
+stored in xdata</Description>
+<Data><![CDATA[
+SELECT
+  c.contractNumber,
+  TO_DATE(d."date", 'YYYY-MM-DD'),
+  d.year,
+  d.month,
+  d.amount,
+FROM mvk_model_payment.PayDoc d
+  JOIN mvk_model_payment.PayDocSession s ON s.ID = d.session
+  JOIN mvk_model_contract.Contract c ON d.contract = c.ID
+WHERE s.ID = ?
+ORDER BY c.contractNumber
+]]></Data>
+</XData>
+
+<Method name="getViewOrQuerySQL">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>viewOrQueryName:%String,*sql:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim sc As %Status = $$$OK
+	set sql = ""
+	
+	if (viewOrQueryName [ ".")
+	{
+		set sql = "select * from " _ viewOrQueryName _ " where 1=1 "
+	}
+	else
+	{
+		try
+		{
+			set sql = ..getSQL(viewOrQueryName)
+		}
+		catch ex
+		{
+			set sql = ""
+			set sc = $$$ADDSC($$$ERROR($$$GeneralError, "Error " _ viewOrQueryName), ex.AsStatus())
+		}
+	}
+	
+	quit sc
 ]]></Implementation>
 </Method>
 </Class>
