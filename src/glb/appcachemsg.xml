@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-18 21:47:21">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-21 20:13:35">
 <Global>
 <Node><Sub>^%AppCacheMsg</Sub>
 <Node><Sub>AppTools</Sub>
@@ -6824,7 +6824,7 @@
 <Data>Роли через запятую или по контексту</Data>
 </Node>
 <Node><Sub>3565164930</Sub>
-<Data>В классе %1 отсутствует элемент Query либо XData с именем %2</Data>
+<Data>Класс %1 нет запроса или элемент данных XData по имени %2</Data>
 </Node>
 <Node><Sub>3569599040</Sub>
 <Data>Насчет уже идет</Data>
