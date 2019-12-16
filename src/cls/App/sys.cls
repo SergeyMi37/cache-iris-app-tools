@@ -3,17 +3,6 @@ Include App.LogMacro
 Class App.sys [ Abstract, DependsOn = App.msg ]
 {
 
-/// Add two languages to global translation
-/// Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))
-ClassMethod AddLangMsg(en, other) As %String
-{
-	s otherLang="ru"
-	;s @$$$GNLang@($$$GNLangDOMAIN) = otherLang
-	s @$$$GNLang@($$$GNLangDOMAIN,"en",$zcrc(en,7)) = en
-	s:other'="" @$$$GNLang@($$$GNLangDOMAIN,otherLang,$zcrc(en,7)) = other
-	q "$s("_$zcrc(en,7)_":$g("_$$$GNLang_"("""_$$$GNLangDOMAIN_""",$get("_$$$GNEnsConf_"(""Language""),$mvv(58)),"_$zcrc(en,7)_"),"""_en_"""),1:"""_other_""")"
-}
-
 /// Sign Out
 /// d ##Expression(##class(App.sys).logout()
 ClassMethod logout() As %Status
@@ -639,6 +628,57 @@ ClassMethod Export(jdbc = "OEBS", msg, class, NoDel = 0, sql = "", write = 0)
 	s msg=$$$FormatText($$$aText("Unloaded %1 from %2",""),inscount,rowcount)
 	k @gnIns,@gn
 	w:write !,msg
+	q $$$OK
+}
+
+/// zn "app" w $System.Status.GetErrorText(##class(App.sys).DismountListDB("DOJO"))
+ClassMethod DismountListDB(Database, write = 0) As %Status
+{
+	s st=##class(App.sys).DismountDB(Database)
+	if st {
+		s st1=##class(App.sys).DismountDB(Database_"ENSTEMP")
+		if 'st1 q st1
+		s st2=##class(App.sys).DismountDB(Database_"SECONDARY")
+		if st2 q st2
+	} else { q st }
+	q $$$OK
+}
+
+/// w $System.Status.GetErrorText(##class(App.sys).DismountDB("ASURPROD"))
+ClassMethod DismountDB(Database) As %Status
+{
+	new $namespace
+	zn "%sys"
+	s st=$$$OK
+	If ##Class(Config.Databases).Get(Database,.Properties) {
+		Set Directory = $G(Properties("Directory"))
+  		Set st = ##class(SYS.Database).DismountDatabase(Directory)
+	}
+	q st
+}
+
+/// zn "app" w ##class(App.sys).MountDB("DOJO")
+ClassMethod MountDB(Database) As %Status
+{
+	new $namespace
+	zn "%sys"
+	If ##Class(Config.Databases).Get(Database,.Properties) {
+		Set Directory = $G(Properties("Directory"))
+  		q ##class(SYS.Database).MountDatabase(Directory)
+	}
+	q $$$OK
+}
+
+/// zn "app" w $System.Status.GetErrorText(##class(App.sys).MountListDB("DOJO"))
+ClassMethod MountListDB(Database) As %Status
+{
+	s st=##class(App.sys).MountDB(Database)
+	if st {
+		s st1=##class(App.sys).MountDB(Database_"ENSTEMP")
+		if 'st1 q st1
+		s st2=##class(App.sys).MountDB(Database_"SECONDARY")
+		if st2 q st2
+	} else { q st }
 	q $$$OK
 }
 

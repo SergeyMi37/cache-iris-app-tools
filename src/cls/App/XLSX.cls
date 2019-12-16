@@ -4,7 +4,7 @@ Include (App.LogMacro, %occODBC)
 Class App.XLSX
 {
 
-/// Report generation in a given directory upon request with a given field format "/opt/isc/report
+/// Report generation in a given directory upon request with a given field format
 /// set sc = ##class(App.XLSX).Report2xlsx("/backup/temp/","select top 10 id,ClassName  FROM App.Log order by id desc","AppLogReport",",N")
 ClassMethod Report2xlsx(directory As %String, sql = "", filename = "", format = "", args...) As %Status
 {
@@ -69,9 +69,6 @@ ClassMethod generateXMLFromSQL(xmlfile As %String, sql As %String, format = "", 
 	set sc=stream.LinkToFile(xmlfile)
 	quit:$$$ISERR(sc) sc
 	set header = ##class(%Dictionary.XDataDefinition).IDKEYOpen($classname(), "header").Data.Read(10000)
-	;w !,header
-	;s header=$p($p(header,"/*",2),"*/",1)
-	;s header="<?xml version=""1.0"" encoding=""UTF-8""?>"_$c(13,10)_"<MyReport xmlns:fo=""http://www.w3.org/1999/XSL/Format"" xmlns:xlink=""http://www.w3.org/1999/xlink"" xmlns:zr=""http://www.intersystems.com/zenreports"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:svg=""http://www.w3.org/2000/svg"">"_$c(13,10)_"<sheet excelSheetName=""Report"">"
 	do stream.Write(header)
 	set $$$AppL("MSW",$username_"header")=header
 	#dim metadata As SQL.StatementMetadata
@@ -95,25 +92,20 @@ ClassMethod generateXMLFromSQL(xmlfile As %String, sql As %String, format = "", 
 			set class(i) = class(i) _ " isExcelTime=""1"""	
 		}
 		set class(i) = class(i) _ ">"
-		;set $$$AppL("MSW",$username_"metadata-"_i)=$$$AppObJs(column)
-		;set $$$AppL("MSW",$username_"metadata---"_i)=class(i)
 	}
 	while result.%Next() {
 		do stream.WriteLine("<Row>")
 		for i=1:1:columnCount {
 			set data = result.%GetData(i)
 			set:$lv(data) data = $lts(data)
-			;set data=$tr(data,$c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,30,31))
 			set data=$zstrip(data,"*C")
 			do stream.WriteLine(class(i) _ $zcvt(data, "O", "XML") _ "</item>")
 			if $i(row)
 		}
 		do stream.WriteLine("</Row>")
 	}
-	;set $$$AppL("MSW",$username_"RowCount--------")=+$g(row)
 	do stream.WriteLine("</sheet></MyReport>")
 	set sc=stream.%Save()
-	;set $$$AppL("MSW",$username_"End--------")=sc
 	return sc
 }
 

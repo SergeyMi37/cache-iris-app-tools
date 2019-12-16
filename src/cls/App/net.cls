@@ -192,6 +192,7 @@ ClassMethod GetListIP() As %String
 
 /// Get IP address
 /// w ##class(App.net).GetIP("google.com")
+/// w $P($ZU(54,13,$zu(54,0)),",",1)
 ClassMethod GetIP(host = "") As %String
 {
 	if host="" set host=$zu(54,0) ;current host

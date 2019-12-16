@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-11-21 20:13:35">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2019-12-16 22:33:18">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -2245,8 +2245,8 @@ This method is invoked when a class is 'uncompiled'.</Description>
 </Class>
 
 
-<Routine name="App.JsonUtils" type="INC" timestamp="65329,48420.905214"><![CDATA[
-#; ver 20191112
+<Routine name="App.JsonUtils" type="INC" timestamp="65344,34759.663222"><![CDATA[
+#; ver 20191127
 #include %occReference
 
 #define formatJSON 		"aelotwc"
@@ -2256,8 +2256,9 @@ This method is invoked when a class is 'uncompiled'.</Description>
 
 #define toJSONClassMethod "toJSON"
 #define updateClassMethod "updateIdFromObject"
+#define IsNewJSON ##Expression($$$comClassDefined("%Library.DynamicAbstractObject"))
 
-#if $$$comClassDefined("%Library.dynamicAbstractObject")
+#if $$$IsNewJSON
     #define NewDynObj {}
     #define NewDynDTList []
     #define NewDynObjList $$$NewDynDTList
@@ -2266,59 +2267,6 @@ This method is invoked when a class is 'uncompiled'.</Description>
     #define ListToJSON(%obj) $$$DynObjToJSON(%obj)
     #define ListSize(%obj) %obj.%Size()
     #define ListGet(%obj,%i) %obj.%Get(%i-1)
-#else
-    #define NewDynObj ##class(%ZEN.proxyObject).%New()
-    #define NewDynDTList ##class(%ListOfDataTypes).%New()
-    #define NewDynObjList ##class(%ListOfObjects).%New()
-    #define Insert(%obj,%element) do %obj.Insert(%element)
-    #define DynObjToJSON(%obj) do %obj.%ToJSON()
-    #define ListToJSON(%obj) do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(%obj)
-    #define ListSize(%obj) %obj.Count()
-    #define ListGet(%obj,%i) %obj.GetAt(%i)
-#endif
-#define IsNewJSON ##Expression($$$comClassDefined("%Library.DynamicAbstractObject"))
-
-
-#if $$$comClassDefined("%Library.Object")
-    #define jsonClassIsLatestVersion $classIsLatestVersion 	
-    						//usage: obj.$$$jsonClassIsLatestVersion()
-    #define jsonExtends $extends							
-    						//usage: {}.$$$jsonExtends(classname) 
-    #define jsonFromJSON $fromJSON							
-    						//usage: {}.$$$jsonFromJSON(string) 
-    #define jsonGetIterator $getIterator 					
-    						//usage: obj.$$$jsonGetIterator()
-    #define jsonGetNext $getNext 					
-    						//usage: iterator.$$$jsonGetNext(.key, .value)
-    #define jsonIsA $isA									
-    						//usage: obj.$$$jsonIsA(classname)
-    #define jsonToJSON $toJSON								
-    						//usage: obj.$$$jsonToJSON()
-    #define jsonGet $get									
-    #define jsonNew $new									
-    						//usage: obj.$$$jsonGet(key)
-    #define jsonIsDefined $isDefined						
-    						//usage: obj.$$$jsonIsDefined(key) 
-    #define jsonRemove $remove								
-    						//usage: obj.$$$jsonRemove(key)
-    #define jsonSet $set									
-    						//usage: obj.$$$jsonSet(key, val)
-    #define jsonSize $size									
-    						// usage: obj.$$$jsonSize()
-    #define jsonPop $pop									
-    						//usage: obj.$$$jsonPop()
-    #define jsonPush $push									
-    						//usage: obj.$$$jsonPush(val) 
- 	#define jsonAbstractClass %Library.AbstractObject
-	#define jsonObjectClass %Library.Object
-	#define jsonArrayClass %Library.Array
-
-	#define jsonInitialArrayIndex 0
-	
-	#define jsonGetTypeOf $getTypeOf
-    						//usage: obj.$$$jsonGgetTypeOf()
-	
-#else
     #define jsonClassIsLatestVersion %ClassIsLatestVersion 	
     						//usage: obj.$$$jsonClassIsLatestVersion()
     #define jsonExtends %Extends							
@@ -2356,8 +2304,53 @@ This method is invoked when a class is 'uncompiled'.</Description>
 	
 	#define jsonGetTypeOf %GetTypeOf
     						//usage: obj.$$$jsonGgetTypeOf()
+#else
+    #define NewDynObj ##class(%ZEN.proxyObject).%New()
+    #define NewDynDTList ##class(%ListOfDataTypes).%New()
+    #define NewDynObjList ##class(%ListOfObjects).%New()
+    #define Insert(%obj,%element) do %obj.Insert(%element)
+    #define DynObjToJSON(%obj) do %obj.%ToJSON()
+    #define ListToJSON(%obj) do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(%obj)
+    #define ListSize(%obj) %obj.Count()
+    #define ListGet(%obj,%i) %obj.GetAt(%i)
 
+   #define jsonClassIsLatestVersion $classIsLatestVersion 	
+    						//usage: obj.$$$jsonClassIsLatestVersion()
+    #define jsonExtends $extends							
+    						//usage: {}.$$$jsonExtends(classname) 
+    #define jsonFromJSON $fromJSON							
+    						//usage: {}.$$$jsonFromJSON(string) 
+    #define jsonGetIterator $getIterator 					
+    						//usage: obj.$$$jsonGetIterator()
+    #define jsonGetNext $getNext 					
+    						//usage: iterator.$$$jsonGetNext(.key, .value)
+    #define jsonIsA $isA									
+    						//usage: obj.$$$jsonIsA(classname)
+    #define jsonToJSON $toJSON								
+    						//usage: obj.$$$jsonToJSON()
+    #define jsonGet $get									
+    #define jsonNew $new									
+    						//usage: obj.$$$jsonGet(key)
+    #define jsonIsDefined $isDefined						
+    						//usage: obj.$$$jsonIsDefined(key) 
+    #define jsonRemove $remove								
+    						//usage: obj.$$$jsonRemove(key)
+    #define jsonSet $set									
+    						//usage: obj.$$$jsonSet(key, val)
+    #define jsonSize $size									
+    						// usage: obj.$$$jsonSize()
+    #define jsonPop $pop									
+    						//usage: obj.$$$jsonPop()
+    #define jsonPush $push									
+    						//usage: obj.$$$jsonPush(val) 
+ 	#define jsonAbstractClass %Library.AbstractObject
+	#define jsonObjectClass %Library.Object
+	#define jsonArrayClass %Library.Array
+	#define jsonInitialArrayIndex 0
+	#define jsonGetTypeOf $getTypeOf
+    						//usage: obj.$$$jsonGgetTypeOf()
 #endif
+
 
 #def1arg jsonIsAbstract %IsA(##Quote($$$jsonAbstractClass))
 							//usage: obj.$$$jsonIsAbstract
@@ -7785,12 +7778,12 @@ do ##class(App.Use).TestLogObjects(4)</Description>
 <Description>
 Report generation in a given directory upon request with a given field format</Description>
 <IncludeCode>App.LogMacro,%occODBC</IncludeCode>
-<TimeChanged>65338,54012.708329</TimeChanged>
+<TimeChanged>65339,36950.182019</TimeChanged>
 <TimeCreated>64273,2606.599454</TimeCreated>
 
 <Method name="Report2xlsx">
 <Description>
-Report generation in a given directory upon request with a given field format "/opt/isc/report
+Report generation in a given directory upon request with a given field format
 set sc = ##class(App.XLSX).Report2xlsx("/backup/temp/","select top 10 id,ClassName  FROM App.Log order by id desc","AppLogReport",",N")</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>directory:%String,sql="",filename="",format="",args...</FormalSpec>
@@ -7867,9 +7860,6 @@ Outputs XML to be fed into %SYS.ZENReportExcelExporter Excel-compliant stream fr
 	set sc=stream.LinkToFile(xmlfile)
 	quit:$$$ISERR(sc) sc
 	set header = ##class(%Dictionary.XDataDefinition).IDKEYOpen($classname(), "header").Data.Read(10000)
-	;w !,header
-	;s header=$p($p(header,"/*",2),"*/",1)
-	;s header="<?xml version=""1.0"" encoding=""UTF-8""?>"_$c(13,10)_"<MyReport xmlns:fo=""http://www.w3.org/1999/XSL/Format"" xmlns:xlink=""http://www.w3.org/1999/xlink"" xmlns:zr=""http://www.intersystems.com/zenreports"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:svg=""http://www.w3.org/2000/svg"">"_$c(13,10)_"<sheet excelSheetName=""Report"">"
 	do stream.Write(header)
 	set $$$AppL("MSW",$username_"header")=header
 	#dim metadata As SQL.StatementMetadata
@@ -7893,25 +7883,20 @@ Outputs XML to be fed into %SYS.ZENReportExcelExporter Excel-compliant stream fr
 			set class(i) = class(i) _ " isExcelTime=""1"""	
 		}
 		set class(i) = class(i) _ ">"
-		;set $$$AppL("MSW",$username_"metadata-"_i)=$$$AppObJs(column)
-		;set $$$AppL("MSW",$username_"metadata---"_i)=class(i)
 	}
 	while result.%Next() {
 		do stream.WriteLine("<Row>")
 		for i=1:1:columnCount {
 			set data = result.%GetData(i)
 			set:$lv(data) data = $lts(data)
-			;set data=$tr(data,$c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,30,31))
 			set data=$zstrip(data,"*C")
 			do stream.WriteLine(class(i) _ $zcvt(data, "O", "XML") _ "</item>")
 			if $i(row)
 		}
 		do stream.WriteLine("</Row>")
 	}
-	;set $$$AppL("MSW",$username_"RowCount--------")=+$g(row)
 	do stream.WriteLine("</sheet></MyReport>")
 	set sc=stream.%Save()
-	;set $$$AppL("MSW",$username_"End--------")=sc
 	return sc
 ]]></Implementation>
 </Method>
@@ -8798,7 +8783,7 @@ Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))</Description>
 Network Utility %Net.HttpRequest, %Net.SMTP, %Net.FTP</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65323,51977</TimeChanged>
+<TimeChanged>65359,47745.267658</TimeChanged>
 <TimeCreated>64758,54536.238116</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9020,7 +9005,8 @@ $G(%request.CgiEnvs("REMOTE_ADDR")) - agrees client</Description>
 <Method name="GetIP">
 <Description>
 Get IP address
-w ##class(App.net).GetIP("google.com")</Description>
+w ##class(App.net).GetIP("google.com")
+w $P($ZU(54,13,$zu(54,0)),",",1)</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>host=""</FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -9652,7 +9638,7 @@ d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security
 Query and SQL statements</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65338,72764.582793</TimeChanged>
+<TimeChanged>65338,72935</TimeChanged>
 <TimeCreated>64127,58953.319558</TimeCreated>
 
 <Method name="getSQL">
@@ -9753,25 +9739,9 @@ ORDER BY c.contractNumber
 <Class name="App.sys">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65363,80603.208787</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 <DependsOn>App.msg</DependsOn>
-
-<Method name="AddLangMsg">
-<Description>
-Add two languages to global translation
-Samples ##Expression(##class(App.sys).AddLangMsg(%en,%ru))</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>en,other</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	s otherLang="ru"
-	;s @$$$GNLang@($$$GNLangDOMAIN) = otherLang
-	s @$$$GNLang@($$$GNLangDOMAIN,"en",$zcrc(en,7)) = en
-	s:other'="" @$$$GNLang@($$$GNLangDOMAIN,otherLang,$zcrc(en,7)) = other
-	q "$s("_$zcrc(en,7)_":$g("_$$$GNLang_"("""_$$$GNLangDOMAIN_""",$get("_$$$GNEnsConf_"(""Language""),$mvv(58)),"_$zcrc(en,7)_"),"""_en_"""),1:"""_other_""")"
-]]></Implementation>
-</Method>
 
 <Method name="logout">
 <Description>
@@ -10513,6 +10483,77 @@ s class="Spgz.model.PP.Files" d ##class(App.sys).Export("OEBS",.msg,class,1,"sel
 	s msg=$$$FormatText($$$aText("Unloaded %1 from %2",""),inscount,rowcount)
 	k @gnIns,@gn
 	w:write !,msg
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DismountListDB">
+<Description>
+zn "app" w $System.Status.GetErrorText(##class(App.sys).DismountListDB("DOJO"))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Database,write=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s st=##class(App.sys).DismountDB(Database)
+	if st {
+		s st1=##class(App.sys).DismountDB(Database_"ENSTEMP")
+		if 'st1 q st1
+		s st2=##class(App.sys).DismountDB(Database_"SECONDARY")
+		if st2 q st2
+	} else { q st }
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DismountDB">
+<Description>
+w $System.Status.GetErrorText(##class(App.sys).DismountDB("ASURPROD"))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Database</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	new $namespace
+	zn "%sys"
+	s st=$$$OK
+	If ##Class(Config.Databases).Get(Database,.Properties) {
+		Set Directory = $G(Properties("Directory"))
+  		Set st = ##class(SYS.Database).DismountDatabase(Directory)
+	}
+	q st
+]]></Implementation>
+</Method>
+
+<Method name="MountDB">
+<Description>
+zn "app" w ##class(App.sys).MountDB("DOJO")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Database</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	new $namespace
+	zn "%sys"
+	If ##Class(Config.Databases).Get(Database,.Properties) {
+		Set Directory = $G(Properties("Directory"))
+  		q ##class(SYS.Database).MountDatabase(Directory)
+	}
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MountListDB">
+<Description>
+zn "app" w $System.Status.GetErrorText(##class(App.sys).MountListDB("DOJO"))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Database</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s st=##class(App.sys).MountDB(Database)
+	if st {
+		s st1=##class(App.sys).MountDB(Database_"ENSTEMP")
+		if 'st1 q st1
+		s st2=##class(App.sys).MountDB(Database_"SECONDARY")
+		if st2 q st2
+	} else { q st }
 	q $$$OK
 ]]></Implementation>
 </Method>
