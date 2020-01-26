@@ -314,8 +314,8 @@ ClassMethod GetCountTab(SelectClass, ByRef tab)
 ClassMethod SelectObjects(SelectClass, sql = "", exec = "")
 {
 	set count=..GetCountTab(SelectClass,.tab)
-	set:sql="" sql="select * from "_tab
-	set add=" <span style='"_$$$styleurl_"' onclick=""WinOpen('"_$zu(5)_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_SelectClass_"&ID=');"" title='"_$$$aText("To create an object","")_"' >"_$$$aText("To create","")_"</span>"
+	set:sql="" sql="select * From "_tab
+	set add=" <span style='"_$$$styleurl_"' onclick=""WinOpen('"_$zu(5)_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_SelectClass_"&ID=','','"_##class(App.Action).WriteWinOpenREST(%request)_"');"" title='"_$$$aText("To create an object","")_"' >"_$$$aText("To create","")_"</span>"_sql
 	$$$jsstart
 		write "$('#MainObjEdit').empty();"
 	$$$jsstop
@@ -351,13 +351,13 @@ ClassMethod WinEditObj(Val, Col, Head, Temp, nspace, DSN)
 		if $D(Temp("ID",Col)) {
 			s %id=Val
 		}
-		set res=$replace(Val,Val,"<span title='"_$$$aText("Edit","")_"' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','SelectClass="_%SelectClass_"&ID="_$zconvert(%id,"O","URL")_"');"" >"_Val_"</span>")
+		set res=$replace(Val,Val,"<span title='"_$$$aText("Edit","")_"' style='"_$$$styleurl_"' onclick=""WinOpen('"_nspace_"','"_..%ClassName(1)_"','WinOpenEditObj','&SelectClass="_%SelectClass_"&ID="_$zconvert(%id,"O","URL")_"','','"_##class(App.Action).WriteWinOpenREST(%request)_"');"" >"_Val_"</span>")
 	}
 	quit res
 }
 
 /// To open the window to edit the object instance
-ClassMethod WinOpenEditObj(Par)
+ClassMethod WinOpenEditObj(Par, json)
 {
 	set id=$g(Par("ID"))
 	set ClassName=$tr($get(Par("SelectClass")),"_",".")

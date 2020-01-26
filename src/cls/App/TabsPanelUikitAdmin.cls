@@ -1,11 +1,14 @@
 Include App.LogMacro
 
-/// The template GUI of the application selector and tabs on the basis jQueryUi
+/// The template GUI of the application selector and tabs on the basis jQueryUi, Uikit
 Class App.TabsPanelUikitAdmin Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
 /// The application title
 Parameter HeaderText = "AdminTabsApplication";
+
+/// Global Name Store Referens files and id sessions
+Parameter GNStoreRef = "^%App.ui";
 
 /// is there a right to work with this form
 ClassMethod IsPermiss(role) As %Status
@@ -13,19 +16,29 @@ ClassMethod IsPermiss(role) As %Status
 	q $roles[role||($roles["%All")
 }
 
+/// Icons for the application
+ClassMethod GetAppIcon(path) As %String
+{
+ 	q "<link rel=""icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/><link rel=""shortcut icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/>"
+}
+
 /// Main method generate the content of page
 /// TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
 /// #3e454c - 2185D0 , 1c1f22 - 0FC0FC , 656a70 - 
-ClassMethod OnPage() As %Status
+ClassMethod OnPage(parameter = "") As %Status
 {
- s NSpace=$tr(%request.Get("ns"),"#")
- s:NSpace="" NSpace=$zu(5)
+ set NSpace=##class(App.Action).GetParam(.%request,"ns",parameter)
+ s:$g(NSpace)="" NSpace=$zu(5)
  zn NSpace
  // Save the session parameters debugging mode (implies extended disclosure)
- s %session.Data("debug")=%request.Get("debug")
+ ;s %session.Data("debug")=%request.Get("debug")
+ 
  // http://cip.mvk.ru/csp/spgz/App.MVK.gisui.cls?ns=MVK&autoload=Find# - Find the first startup
- set autoloadmenu=$p(%request.Get("autoload"),"#")
- do ##class(App.Log).AddRecord(..%ClassName(1), "OnPage", "Login", "INFO", "","")
+ // http://localhost:57773/apptoolsrest/get-html/App.TabsPanelUikitAdmin?ns=APP&autoload=Find
+ ;if $d(%request) {  set autoloadmenu=$p(%request.Get("autoload"),"#")
+ set autoload=##class(App.Action).GetParam(.%request,"autoload",parameter)
+ 
+ ;do ##class(App.Log).AddRecord(..%ClassName(1), "OnPage", "Login", "INFO", "","")
  &html<
  <!doctype html>
  <html>
@@ -39,7 +52,8 @@ ClassMethod OnPage() As %Status
    	   do ##class(App.LogInfoPane).AddStyle()
  	set menu=..DrawMenu() ;sidebar
 	set menuTop=..DrawMenuTop() ;top think
-	s path=$$$PATHCSP
+	set path=$$$PATHCSP
+	write ..GetAppIcon(path)
  &html<
 	
 <link rel="stylesheet" href="#(path)#/uikit-dark-admin/css/nav.css"> <!-- CSS reset -->
@@ -124,16 +138,20 @@ ClassMethod OnPage() As %Status
 </div>
 >
  $$$jsstart
- 	w "$('#account_status').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"_$c(13,10)
- 	w "$('#searchstr').keydown(function (e) { if (e.keyCode == 13) { $('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar=Search&Searchstr='+document.getElementById('searchstr').value); }});"_$c(13,10)
-  	if autoloadmenu="" {
-	 	d ..GetAllApps(.opt) 
+ 	;w "$('#account_status').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"_$c(13,10)
+ 	;w "$('#searchstr').keydown(function (e) { if (e.keyCode == 13) { $('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar=Search&Searchstr='+document.getElementById('searchstr').value); }});"_$c(13,10)
+ 	write ##class(App.Action).WriteActJs(%request,"","account_status",..%ClassName(1),"DrawStatus","")_$c(13,10)
+ 	set enter=##class(App.Action).WriteActJs(%request,"","MainHidden",..%ClassName(1),"ShowTab","&appPar=Search&Searchstr='+document.getElementById('searchstr').value")_$c(13,10)
+ 	write "$('#searchstr').keydown(function (e) { if (e.keyCode == 13) { "_enter_" }});"_$c(13,10)
+
+  	if autoload="" {
+	 	do ..GetAllApps(.opt) 
 	 	set i="" 
 	 	for { set i=$o(opt(i)) q:i=""
 	 		if $GET(opt(i,"Active")) write "$('#Menu"_opt(i,"id")_"').trigger('click');"_$c(13,10)
 	 	}
  	} else {
-	 	write "$('#Menu"_autoloadmenu_"').trigger('click');"_$c(13,10)
+	 	write "$('#Menu"_autoload_"').trigger('click');"_$c(13,10)
  	}
  $$$jsstop
  
@@ -155,14 +173,16 @@ ClassMethod DrawMenuTop(Par) As %String
 		if m=99 { ;account - with submenu
 			s ret=ret_"<li class='has-children account'><a href='#'><span id='account_status'>"_$lg(menu(m),2)_"</span></a><ul>"
 			for { set i=$o(menu(m,i)) quit:i=""
-		   		set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
+		   		;set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
+				set onclick=##class(App.Action).WriteActJs(%request,"","MainHidden",..%ClassName(1),"ShowTab","&appPar="_i)
 				set ret=ret_"<li><a id='Menu"_$g(opt(i,"id"))_"' href='#' onclick="""_onclick_""">"_$g(opt(i))_"</a></li>"
 			}
 			s ret=ret_"</ul></li>"
 		}
 		else {
 			for { set i=$o(menu(m,i)) quit:i=""
-		   		set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
+		   		;set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
+		   		set onclick=##class(App.Action).WriteActJs(%request,"","MainHidden",..%ClassName(1),"ShowTab","&appPar="_i)
 				set ret=ret_"<li><a id='Menu"_$g(opt(i,"id"))_"' href='#' onclick="""_onclick_""">"_$g(opt(i))_"</a></li>"
 			}
 		}
@@ -181,7 +201,8 @@ ClassMethod DrawMenu(Par) As %String
 		s active=$s($lg(menu(m),3):"active",1:"")
 		s ret=ret_"<li class='has-children overview "_active_"'><a href='#'>"_$lg(menu(m),2)_"</a><ul>"
 		for { set i=$o(menu(m,i)) quit:i=""
-	   		set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
+	   		;set onclick="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar="_i_"');"
+	   		set onclick=##class(App.Action).WriteActJs(%request,"","MainHidden",..%ClassName(1),"ShowTab","&appPar="_i)
 			set ret=ret_"<li><a id='Menu"_$g(opt(i,"id"))_"' href='#' onclick="""_onclick_""">"_$g(opt(i))_"</a></li>"
 		}
 		s ret=ret_"</ul></li>"
@@ -214,10 +235,11 @@ ClassMethod DrawStatus(Par) As %Status
 	;do ##class(App.Form).BlockUI(0)
 	s fio=##class(App.sys).GetFullName($username)
 	s:fio="" fio=$$$aText("The user","")
-	w $s(%request.Get("debug"):"<font color=red><b>"_$$$aText("Administrator mode","")_"</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"-"_$zu(5)_"'>"_$$$aText("User","")_": "_fio_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
- 	$$$jsstart
-	w "$('.tip').tooltip();"
-	$$$jsstop
+	;w $s(%request.Get("debug"):"<font color=red><b>"_$$$aText("Administrator mode","")_"</b></font>",1:"")_" <span class='tip' title='"_$username_"-"_$j_"-"_$zu(5)_"'>"_$$$aText("User","")_": "_fio_"</span>, "_$tr(##class(App.type).GetDateTime($h),"T"," ")
+	write "<span class='tip' title='"_fio_"-"_$j_"-"_$zu(5)_"'>"_$username_"</span>"
+ 	;$$$jsstart
+	;	w "$('.tip').tooltip();"
+	;$$$jsstop
  q $$$OK
 }
 
@@ -247,9 +269,9 @@ ClassMethod GetAllApps(opt) As %Status
 	;make them zavisimye from the area
 	;------------ sidebar
 	s key="menu-first"
-	s opt(key)="Find" ;The name of the menu
-	s opt(key,"id")="Find"
-	s opt(key,"TabName")="Tab finding" ;the name of the tab
+	s opt(key)="Find users" ;The name of the menu
+	s opt(key,"id")="Find" ;use methods: FindFirstHead FindResult
+	s opt(key,"TabName")="finding users" ;the name of the tab
 	s opt(key,"ClassName")=..%ClassName(1)
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=0 ;developed
@@ -257,6 +279,16 @@ ClassMethod GetAllApps(opt) As %Status
 	s opt(key,"Menu")=$lb(1,"Mode",1) ;$lg(,3)=1 - open menu level 1
 	s opt(key,"Active")=1 ;active menu item
 
+	s key="menu-first2"
+	s opt(key)="Sample gallery" ;The name of the menu
+	s opt(key,"id")="Lighbox" ;use methods: LighboxFirstHead LighboxResult
+	s opt(key,"TabName")="Gallery" ;the name of the tab
+	s opt(key,"ClassName")=..%ClassName(1)
+	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Disable")=0 ;developed
+	s opt(key,"TabMenu","Close")=1
+	s opt(key,"Menu")=$lb(1,"Mode",1) ;$lg(,3)=1 - open menu level 1
+	
 	s key="menu-second"
 	s opt(key)="Help"
 	s opt(key,"id")="Help"
@@ -346,17 +378,19 @@ ClassMethod ShowTabSearch(key = "") As %Status
 /// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTab(Par) As %Status
 {
+	if $g(Par("appPar"))'="" set Par=Par("appPar")
 	do ..GetAllApps(.opt) 
 	if Par="Search" {
-		s Searchstr=$g(Par("%request.Data","Searchstr"))
+		s Searchstr=$g(Par("%request.Data","Searchstr"),Par("Searchstr"))
 		if Searchstr="" q $$$OK
 		;s tr=$tr(##class(App.MSW.type).Transliteration(Searchstr)," №`()\/*;'"":%","_N---")
-		s tr=$tr(Searchstr," №`()\/*;'"":%","_N---")
-		s key=Searchstr
+		;s tr=$tr($zts,".,") 
+		s tr=$e($tr(Searchstr," №`()\/*;'"":%?$@&.,",""),1,10)_$i(@..#GNStoreRef@("jobs",$j))
+		s key=tr ;Searchstr
 		MERGE opt(key)=opt(Par)
-		s opt(key)=opt(key)_Searchstr
+		s opt(key)=opt(key)_tr ;Searchstr
 		i $g(opt(Par,"TabMenu","Mode"))=1 { ;mode add a new tab 
-			s opt(key,"id")=opt(key,"id")_tr 
+			s opt(key,"id")=opt(key,"id")_tr
 		} else { ;mode add a new replace the old 
 			set tabId="tab-"_opt(Par,"id")
 			set tabIdMenu="tabMenu-"_opt(Par,"id")
@@ -365,8 +399,9 @@ ClassMethod ShowTab(Par) As %Status
 		  	 w "$('#"_tabIdMenu_"').remove();"
 		  	$$$jsstop
 		}
-		s opt(key,"TabName")=opt(key,"TabName")_Searchstr
-		s Par=key 
+		s opt(key,"TabName")=opt(key,"TabName")_tr 
+		s Par=key
+		s CGIvar="&Searchstr="_Searchstr ;$zconvert(Searchstr,"O","URI")
 	}
 	set tabId="tab-"_opt(Par,"id")
 	set tabIdMenu="tabMenu-"_opt(Par,"id")
@@ -381,18 +416,20 @@ ClassMethod ShowTab(Par) As %Status
 	 	 }
  	}
 	else {
- 	 write "if (!$('li').is('#"_tabId_"')) { $('.uk-active').removeClass('uk-active');"
- 		write " $('#tabList').append('<li id="_tabId_"></li>');"
- 		write " $('#tabMenu').append('<li id="_tabIdMenu_"><a>"_$g(opt(Par,"TabName"))_$g(IconMenu)_"</a></li>');"
- 		write " $('#t1,#ta1').hide();" //" $('#t1').prop('disabled',true);"
+ 	 write "if (!$('li').is('#"_tabId_"')) { $('.uk-active').removeClass('uk-active');"_$c(13,10)
+ 		write " $('#tabList').append('<li id="_tabId_"></li>');"_$c(13,10)
+ 		write " $('#tabMenu').append('<li id="_tabIdMenu_"><a>"_$g(opt(Par,"TabName"))_$g(IconMenu)_"</a></li>');"_$c(13,10)
+ 		write " $('#t1,#ta1').hide();"_$c(13,10) //" $('#t1').prop('disabled',true);"
  		if $g(opt(Par,"Disable")) {
-	 		write "$('#"_tabId_"').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTabAbout&appNsp="_$zu(5)_"&appPar="_Par_"');"
+	 		;write "$('#"_tabId_"').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTabAbout&appNsp="_$zu(5)_"&appPar="_Par_"');"
+	 		write ##class(App.Action).WriteActJs(%request,"",tabId,..%ClassName(1),"ShowTabAbout","&appPar="_Par_$g(CGIvar))
  		}
  		elseif $g(opt(Par,"MethodUrl"))'="" {
 	 		write "$('#"_tabId_"').load('"_$g(opt(Par,"MethodUrl"))_"');"
  		}
  		else {
-	 		write "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+	 		;write "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
+	 		write ##class(App.Action).WriteActJs(%request,"",tabId,$g(opt(Par,"ClassName")),$g(opt(Par,"Method")),"&appPar="_Par_$g(CGIvar))
  		}
  	 write "};"
  	 write " UIkit.tab('#tabMenu').show($('#"_tabIdMenu_"'));"
@@ -403,8 +440,19 @@ ClassMethod ShowTab(Par) As %Status
 /// Return in a single string
 ClassMethod Logout(Par) As %Status
 {
+ if $g(Par("appPar"))'="" set Par=Par("appPar")
  do ##class(App.sys).logout()
  set onclick = "top.document.location.reload();"
+ do ..GetAllApps(.opt) 
+ $$$jsstart
+ set i=""
+ for { set i=$o(opt(i)) q:i=""
+ 	continue:i=Par
+ 	set tabId="tab-"_opt(i,"id")
+	set tabIdMenu="tabMenu-"_opt(i,"id")
+ 	write "$('#"_tabIdMenu_",#"_tabId_"').remove();"
+ }
+ $$$jsstop
  &html<
  <br>
  <div class="uk-align-center uk-width-1-1 uk-margin-left uk-margin-right " style='overflow: auto;'>
@@ -423,25 +471,55 @@ ClassMethod ButtonAgain(divId = "", key = "") As %Status
 {
 	set mhead=divId_"MainHeader"
 	set mcont=divId_"MainContent"
-	set onclick="$('#"_mcont_"').empty();AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
+	set onclick="$('#"_mcont_"').empty();"_##class(App.Action).WriteActJs(%request,divId_"MainForm",mhead,..%ClassName(1),divId_"FirstHead","&key="_key_"&divId="_divId)
+	;AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
 	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
 }
 
 /// the render Tab On the program"
 /// Par - code menu item from the GetAllApps ..
-ClassMethod ShowTabAbout(Par = "") As %Status
+ClassMethod ShowTabAbout(key = "") As %Status
 {
+	if $g(key("appPar"))'="" set key=key("appPar")
 	do ..GetAllApps(.opt) 
-	if $g(opt(Par,"Disable")) write ..GetSupportInfo() quit $$$OK
-	set divId=$g(opt(Par,"id"))
-	write "Hello world! Parameter: "_Par
-	write ..ButtonAgain(divId,Par)
+	if $g(opt(key,"Disable")) write ..GetSupportInfo() quit $$$OK
+	set divId=$g(opt(key,"id"))
+	write "Hello world! Parameter: "_key
+	write ..ButtonAgain(divId,key)
+}
+
+/// rendering the Tab previously submitted
+/// Par - code menu item from the GetAllApps ..
+ClassMethod ShowInIFrame(key = "") As %Status
+{
+ if $g(key("appPar"))'="" set key=key("appPar")
+ do ..GetAllApps(.opt) 
+ if $g(opt(key,"Disable")) write ..GetSupportInfo() quit $$$OK
+ set NSpace=$zu(5)
+ set pref=$g(opt(key,"id"))
+ set mhead=pref_"MainHeader"
+ set mcont=pref_"MainContent"
+ &html<
+<form id="#(pref_"MainForm")#">
+<div class="uk-grid">
+    <iframe id="#(mcont)#" width="100%" height="100%" style='overflow: auto;' src='#($g(opt(key,"InFrameUrl")))#' ></iframe>
+    </div>
+</div>
+</form>
+>
+ $$$jsstart
+  ;	; to calculate the height of the container as a result of wijetunge victory container-Taba height of the container header
+ 	w "$('#"_mcont_"').height($(window).height()-($('#t1').height()+$('#MainNavbar').height()+150));"
+  ;	w $$$blockui($$$aText("Loading...",""))
+ $$$jsstop
+ quit $$$OK
 }
 
 /// rendering the Tab previously submitted
 /// Par - code menu item from the GetAllApps ..
 ClassMethod ShowTabSample(key = "") As %Status
 {
+ if $g(key("appPar"))'="" set key=key("appPar")
  do ..GetAllApps(.opt) 
  if $g(opt(key,"Disable")) write ..GetSupportInfo() quit $$$OK
  set NSpace=$zu(5)
@@ -457,10 +535,11 @@ ClassMethod ShowTabSample(key = "") As %Status
 </form>
 >
  ;d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
+ 
  $$$jsstart
   	; to calculate the height of the container as a result of wijetunge victory container-Taba height of the container header
-  	w "ActionJs('"_pref_"MainForm','"_mhead_"','','"_pref_"FirstHead','divId="_pref_"~key="_key_"');"
-	w "$('#"_mcont_"').height($(window).height()-($('#"_mhead_"').height()+$('#t1').height()+$('#MainNavbar').height()+300));"
+    w ##class(App.Action).WriteActJs(%request,pref_"MainForm",mhead,..%ClassName(1),pref_"FirstHead","&divId="_pref_"&key="_key)
+	w "$('#"_mcont_"').height($(window).height()-($('#"_mhead_"').height()+$('#t1').height()+$('#MainNavbar').height()+300));"_$c(13,10)
   	w $$$blockui($$$aText("Loading...",""))
  $$$jsstop
  quit $$$OK
@@ -472,21 +551,21 @@ ClassMethod FindFirstHead(Par = "") As %Status
 	do ##class(App.Form).BlockUI(0)
 	set key=Par("key")
 	set divId=Par("divId")
-	set onclick=$$$blockui("Load...")_";ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+	set onclick=$$$blockui("Load...")_";"_##class(App.Action).WriteActJs(%request,divId_"MainForm",divId_"MainContent",..%ClassName(1),divId_"Result","~key="_key_"~divId="_divId_"~mode=*")
+	;ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
 		&html<
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
-		Context film name
+		Context name users
 			</td>
 			<td>
-			#($$$appText(divId_"Name","","New"))#
+				#($$$appText(divId_"textName","title='context in Name'","m"_$username))#
+			</td>		
+			<td>
+				#($$$appText(divId_"textDesc","title='context in FullName'","m"))#
 			</td>
 			<td>
-
-			</td>
-			<td>
-
 			</td>
 			<td>
 		
@@ -500,10 +579,9 @@ ClassMethod FindFirstHead(Par = "") As %Status
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find film in namespase SAMPLES"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find USERS"))#
 			</td>
 			<td>
-
 			</td>
 			<td>
 			</td>
@@ -516,6 +594,11 @@ ClassMethod FindFirstHead(Par = "") As %Status
 		</tr>
 		</table>
 	>
+ $$$jsstart
+ 	//for all identifiers starting with "_divId_"text by pressing Enter, click on the button (ending with $("[id$='txtTitle']"))
+ 	w "$('[id^="""_divId_"text""]').keydown(function (e) { if (e.keyCode == 13) { $('#"_divId_"appButtonResult1').click(); }});"_$c(13,10)
+ $$$jsstop
+	
 	quit $$$OK
 }
 
@@ -526,29 +609,131 @@ ClassMethod FindResult(Par = "") As %Status
 	set key=Par("key")
 	set divId=Par("divId")
 	set mode=Par("mode")
-	set Name=$g(Par("%request.Data",divId_"Name"))
-	set Desc=$g(Par("%request.Data",divId_"Desc"))
-	set Date=$g(Par("%request.Data",divId_"Date"))
+	;Geting elements from form and prepare array Par
+	s Name=##class(App.Action).GetElemForm(%request,.Par,divId_"textName")	
+	set Desc=$g(Par("%request.Data",divId_"textDesc"))
 	set st=$$$OK
-	write ..ButtonAgain(divId,key)
 	if mode=1 {
+		write ..ButtonAgain(divId,key)
 		if Name="" w $$$appError($$$aText("Context is empty","")) quit $$$OK
-		zn "samples"
-		set sql="select * from Cinema.Film where title is not null "
-		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
-		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		zn "%sys"
+		set sql="select ID,name,EmailAddress,fullName from Security.Users where Enabled [ '1' "
+		if Name'="" s sql=sql_" and (name like '%"_Name_"%') "
+		if Desc'="" s sql=sql_" and (fullName like '%"_Desc_"%') "
 		set msg="Query: "_sql
+
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
 		if 'st  w $$$appError($System.Status.GetErrorText(st))
 		quit $$$OK
 
 	} 
-	elseif mode=2 {
+	write "<br>"
+	quit $$$OK
+}
 
+/// download template forms search
+ClassMethod LighboxFirstHead(Par = "") As %Status
+{
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set onclick=$$$blockui("Load...")_";"_##class(App.Action).WriteActJs(%request,divId_"MainForm",divId_"MainContent",..%ClassName(1),divId_"Result","~key="_key_"~divId="_divId_"~mode=*")
+	Set path=$p($p($zu(86),"*",1),$$$slash,1,*-1)
+	Set path1=path_$tr("\csp\broker\images\","\",$$$slash)
+	Set path2=path_$tr("\docs\","\",$$$slash)
+		&html<
+		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
+		<tr>
+			<td>
+				#($$$appText(divId_"path1","size=50 title='path to images'",path1))#
+			</td>
+			<td>
+				#($$$appText(divId_"path2","size=50 title='path to images docs'",path2))#
+			</td>
+		</tr>
+		<tr>
+			<td>
+			#($$$appButton(divId_"appButtonResult1"," onclick="""_$tr(onclick,"*",1)_"""","Generate gallery via App /csp/broker"))#			
+			</td>
+			<td>
+			#($$$appButton(divId_"appButtonResult2"," onclick="""_$tr(onclick,"*",2)_"""","Generate gallery dinamic rest"))#			
+			</td>
+		</tr>
+		</table>
+	>
+ $$$jsstart
+ 	;for all identifiers starting with "_divId_"text by pressing Enter, click on the button (ending with $("[id$='txtTitle']"))
+ 	w "$('[id^="""_divId_"path""]').keydown(function (e) { if (e.keyCode == 13) { $('#"_divId_"appButtonResult2').click(); }});"_$c(13,10)
+ $$$jsstop
+	
+	quit $$$OK
+}
+
+/// Its result
+ClassMethod LighboxResult(Par = "") As %Status
+{
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+	;Geting elements from form and prepare array Par
+	s path1=##class(App.Action).GetElemForm(%request,.Par,divId_"path1")	
+	set path2=$g(Par("%request.Data",divId_"path2"))
+	set st=$$$OK
+	s wc=##class(App.filesMimeTypes).GetTypesWildcards("image")_##class(App.filesMimeTypes).GetTypesWildcards("video")
+	if mode=1 {
+	 d ##class(App.files).GetList(path1,wc,.List)
+	 s cspappstatic="/csp/broker/images/"
+	 ;zw List
+	 $$$jsstart
+ 		w "UIkit.lightboxPanel({"
+   		w "items: [ "
+		  d ..LighboxDrawJson(.List,cspappstatic)
+  		w " ] }).show();"
+	 $$$jsstop
+	} 
+	elseIF mode=2 {
+	;	w path2
+	 d ##class(App.files).GetList(path2,wc,.List)
+	 ;zw List
+	 s appdinamic=%request.Application_"get-files/"
+	 $$$jsstart
+ 		w "UIkit.lightboxPanel({"
+   		w "items: [ "
+		  d ..LighboxDrawJson(.List,,appdinamic,..#GNStoreRef)
+  		w " ] }).show();"
+	 $$$jsstop
 	}
 	write "<br>"
 	quit $$$OK
+}
+
+/// Lighbox Draw JSON
+/// List - files array 
+/// subdir - application static
+ClassMethod LighboxDrawJson(List, subdir = "", appdinamic, gn = "") As %Status
+{
+ s i=""
+ for { s i=$o(List(i)) q:i=""
+ 	if $lv($g(List(i))),$lg($g(List(i)),2)="F" {
+		 	s fullpath=$lg($g(List(i)),1)
+		 	s ItemName=$lg($g(List(i)),4)
+ 	} else {
+ 		s ItemName=$g(List(i,"ItemName"))
+ 		s fullpath=$g(List(i,"Name"))
+ 	}
+ 	set ext=$p(ItemName,".",*)
+ 	s mimetype=##class(App.filesMimeTypes).GetMimeTypes4ext(ext)
+ 	s type=$s(mimetype[("video"):"video",(mimetype)[("image"):"image",1:"iframe")
+ 	if subdir'="" {
+ 		w "{source: '"_subdir_ItemName_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
+ 	} else {
+	 	set fileId=##class(App.files).GetFileIdView(fullpath,gn) 
+		w "{source: '"_appdinamic_fileId_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
+ 	}
+	w:$o(List(i))'="" ","
+ }
 }
 
 }

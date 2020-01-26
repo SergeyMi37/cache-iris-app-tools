@@ -45,7 +45,7 @@ SELECT top 10 * from
 
 /// test query
 /// stored in xdata
-XData TestXData
+XData TestXData [ MimeType = application/yaml ]
 {
 SELECT
   c.contractNumber,

@@ -4,11 +4,34 @@ Include App.LogMacro
 Class App.Action Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
+/// s par=##class(App.Action).GetParam(.%request,"ns",param)
+ClassMethod GetParam(req, paramName, param) As %Status
+{
+ if $d(req) { q $tr(req.Get(paramName),"#")
+ }
+ else { set val=$p($p(param,("&"_paramName_"="),2),"&",1)
+ }
+}
+
 /// Main method generate the content of page
-ClassMethod OnPage() As %Status
+ClassMethod OnPage(param) As %Status
 {
 	set $zt="Err"
  	#dim %request as %CSP.Request
+
+	if '$d(%request) {
+		d ##class(App.type).ParseURL(param,.appPar,"&")
+		if $g(appPar("appAct"))'="" {
+			d ..RunMethod($p(appPar,":",1),$p(appPar,":",2),$p(appPar,":",3),.appPar)
+			q $$$OK
+		}
+		if $g(appPar("appClass"))'="" {
+			d ..RunMethod($g(appPar("appNsp")),$g(appPar("appClass")),$g(appPar("appMethod")),.appPar)
+			q $$$OK
+		}
+		
+		q $$$OK
+	}
 
  	;set $$$AppL("MSW","req")=$$$AppObJs(%request)
  	;merge $$$AppL("MSW","%request.Data")=%request.Data
@@ -93,7 +116,7 @@ ClassMethod RunMethod(appNsp, appClass, appMethod, appPar) As %Status
 }
 
 /// Show a formatted json 
-ClassMethod ShowJson(appPar) As %Status
+ClassMethod ShowJson(appPar, json) As %Status
 {
 	set gn=$zconvert(appPar,"I","URL")
 	try {
@@ -105,7 +128,7 @@ ClassMethod ShowJson(appPar) As %Status
 }
 
 /// Show formatted XNL
-ClassMethod ShowXML(appPar) As %Status
+ClassMethod ShowXML(appPar, json) As %Status
 {
 	set gn=$zconvert(appPar,"I","URL")
 	try {
@@ -117,7 +140,7 @@ ClassMethod ShowXML(appPar) As %Status
 }
 
 /// To disassemble the drain to Json
-ClassMethod Test(appPar) As %Status
+ClassMethod Test(appPar, json) As %Status
 {
 	write "ClassMethod Test."
 	zwrite appPar
@@ -137,6 +160,92 @@ ClassMethod ParseJson(jsonStr, appClass, appMethod, appPar) As %Status
  	write $zconvert($ze,"O","HTML")
  }
  quit $$$OK
+}
+
+/// Write Action Js 
+/// w ##class(App.Action).WriteWinOpenREST(%request)
+ClassMethod WriteWinOpenREST(req) As %String
+{
+  	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) { //is static content
+  		q req.Application_"post-json"
+  	} else {
+  		q ""
+  	}
+}
+
+/// Write Action Js 
+/// w ##class(App.Action).WriteActJs(%request,pref_"MainForm",mhead,..%ClassName(1),pref_"FirstHead",key)
+ClassMethod WriteAppAct(req, fornId, resultDivId, ns, classname, method, CGIVar = "") As %Status
+{
+  	;s $$$AppL("MML","%request-WriteActJs-")=$$$AppObJs(req)
+  	set:CGIVar'["'" CGIVar=CGIVar_"'"
+  	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) { //is static content
+  		q "AppRpc('"_fornId_"','"_resultDivId_"','"_$zu(5)_":"_classname_":"_method_":"_CGIVar_",'"_req.Application_"post-json');"
+  	} else {
+	  	q "AppAct('"_fornId_"','"_resultDivId_"','AppAct="_ns_":"_classname_":"_method_":"_CGIVar_");"
+  		
+  	}
+	quit ""
+}
+
+/// Write Action Js 
+/// w ##class(App.Action).WriteActJs(%request,pref_"MainForm",mhead,..%ClassName(1),pref_"FirstHead",key)
+ClassMethod WriteActJs(req, fornId, resultDivId, classname, method, CGIVar = "") As %Status
+{
+  	;s $$$AppL("MML","%request-WriteActJs-")=$$$AppObJs(req)
+  	set:CGIVar'["'" CGIVar=CGIVar_"'"
+  	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) { //is static content
+  		q "AppRpc('"_fornId_"','"_resultDivId_"','"_$zu(5)_":"_classname_":"_method_":"_CGIVar_",'"_req.Application_"post-json');"
+  	} else {
+  		q "ActionJs('"_fornId_"','"_resultDivId_"','','"_method_"','"_CGIVar_");"
+  	}
+	quit ""
+}
+
+/// Write Action Js 
+/// w ##class(App.Action).GetElemParseForm(form,.Par,pref_"text")
+ClassMethod GetElemParseForm(form, Par, divIdname, convert = 1) As %Status
+{
+ i form'="" {
+	s aray=[].$$$jsonFromJSON(form)
+	for i=0:1:aray.$$$jsonSize()-1 {
+		set item = aray.$$$jsonGet(i)
+		i $isobject(item) {
+			;s $$$AppL("MML","%request-GetElemForm-item")=$zconvert(item.value,"I","UTF8")
+			s value=item.value
+			if convert s value=$zconvert(item.value,"I","UTF8")
+			;if item.name=divIdname set val=value
+			s:item.name'="" Par("%request.Data",item.name)=value
+		}
+	}
+ }
+ q $$$OK
+}
+
+/// Write Action Js 
+/// w ##class(App.Action).GetElemForm(%request,.Par,pref_"text")
+ClassMethod GetElemForm(req, Par, divIdname) As %Status
+{
+  	;s $$$AppL("MML","%request-GetElemForm-")=$$$AppObJs(req)
+	;s $$$AppL("MML","%request.Cont")=$$$AppObJs(req.Content)
+
+  	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) {
+  		if $isobject(req.Content) {
+	  		set stream=req.Content
+			set sc=##class(App.files).Stream2String(req.Content,.str)
+			if 'sc quit sc
+			;s $$$AppL("MML","%request.str")=str
+			if $g(str)["{" {
+				s form={}.$$$jsonFromJSON(str).params.form
+   				;s $$$AppL("MML","%request-GetElemForm-aray")=form
+				d ..GetElemParseForm(form,.Par,divIdname)
+			}
+		 	;merge $$$AppL("MSW","Content")=str
+  			;s val=req.Content.$$$jsonGet(name)
+  		}
+  	} else {	
+  	}
+	quit $g(Par("%request.Data",divIdname))
 }
 
 }

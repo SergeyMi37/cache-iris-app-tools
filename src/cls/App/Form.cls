@@ -37,6 +37,7 @@ ClassMethod GetJsonProp(obj, propName, gn, out)
 				s out("filesStore")={}.$$$jsonFromJSON(json).filesStore
 				if out("filesMethod")="" set out("filesMethod")="##class(App.type).UploadFilesJS(%id)"
 				if "TempDir"[out("filesStore") set out("filesStore")=##class(%File).GetDirectory(##class(%File).TempFilename())
+				if "stream"=out("filesStore") set out("filesStore")=$$defdir^%SYS.GLO($ZU(5))_"stream"_$$$slash
 			}
 			elseif $g(out("inputpattern"))["select" {
 				s out("selectMethod")={}.$$$jsonFromJSON(json).selectMethod
@@ -61,6 +62,8 @@ ClassMethod GetJsonProp(obj, propName, gn, out)
 /// Get all property values
 ClassMethod GetPropVal(obj, propName, gn, nameAttr)
 {
+	;q:nameAttr=""||(propName="")||('$g(gn)) "" 
+	;i '$d(gn("Properties",propName)) q ""
 	q $g(gn("Properties",propName,nameAttr))
 	;set col=$g(@gn@(-1,nameAttr))
 	;quit:'col ""
@@ -210,7 +213,6 @@ ClassMethod ObjectDelete(Param = "", Ref = 0)
 	set Class=$g(Param("ClassName")) ;$p(Param,",",2)
 	set PrefixIdDIV=$g(Param("pref")) ;$p(Param,",",3)
 	#dim obj As %Persistent
-	;m $$$AppL("MSW","req")=%request.Data
 	if id="" w $$$appError($$$aText("Undefined object identifier",""))_"<br>" d:'Ref ..ButtonRef() q
 	set obj=$classmethod(Class,"%OpenId",id)
 	if '$isobject(obj) w $$$appError($$$aText("Undefined object",""))_"<br>" d:'Ref ..ButtonRef() q
@@ -247,7 +249,6 @@ ClassMethod GetObj(Par) As %Status
 /// Save the default object
 ClassMethod ObjectSave(Param = "", Ref = 0)
 {
-	;AppAct('WinOpenEditObjMainForm','WinOpenEditObjMainContent','AppAct=APP:App.Form:ObjectSave:&objId=2&ClassName=App.Parameter&pref=WinOpenEditObj
 	set id=$g(Param("objId")) ;$p(Param,",")
 	set Class=$g(Param("ClassName")) ;$p(Param,",",2)
 	set PrefixIdDIV=$g(Param("pref")) ;$p(Param,",",3)
@@ -255,25 +256,35 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 	if Mode["WithoutRef" s Ref=1
 	if id="" s obj=$classmethod(Class,"%New")
 	else  s obj=$classmethod(Class,"%OpenId",id)
-	if '$isobject(obj) w $$$appError($$$aText("Undefined object",""))_"<br>" d:'Ref ..ButtonRef() q ""
+	if '$isobject(obj) w $$$appError(..UikitNote($$$aText("Undefined object","")))_"<br>" d:'Ref ..ButtonRef() q ""
 	;set gn="%prop"
 	set st=..GetPropertyDefinition(obj,.gn)
-	if 'st w $$$appError($System.Status.GetErrorText(st))_"<br>" d:'Ref ..ButtonRef() q ""
+	if 'st w $$$appError(..UikitNote($System.Status.GetErrorText(st)))_"<br>" d:'Ref ..ButtonRef() q ""
 	set prefix=$g(PrefixIdDIV)_..#PREFIXFIELD
 	set i=prefix
 	;m $$$AppL("SPZ",".gn")=gn
 	;m m=%request.Data	zw m
 	;zw gn
-	for { set i=$o(%request.Data(i)) quit:i=""  quit:i'[prefix
-			set nameProp=$p(i,prefix,2)
+	;zw Param
+	if '$d(Param("%request.Data")) {
+		for { set i=$o(%request.Data(i)) quit:i=""  quit:i'[prefix
+			set nameProp=i
 			s Value=$g(%request.Data(i,1))
-	
+			set:nameProp'="" Param("%request.Data",nameProp)=Value
+		}
+	} 
+	s i=""
+	for { set i=$o(Param("%request.Data",i)) quit:i=""
+			set nameProp=$p(i,prefix,2)  
+			continue:nameProp=""
+			set Value=$g(Param("%request.Data",i))
+			continue:'$d(gn("Properties",nameProp))
+			
 			if ..GetPropVal(obj,nameProp,.gn,"Required"),Value="" {
 				;to get property - description of pr("description")
 				d ..GetJsonProp(obj, nameProp, .gn, .pr)
 				s err=$g(err)_"<li>"_nameProp_" "_$$$aText("Mandatory field is empty","")_" ("_$g(pr("description"))_")</li>" continue
 			}
-			;write "<li>NameField: "_nameProp_" Value:("_$g(%request.Data(i,1))_")"
 			if $d(gn("Properties",nameProp)) {
 				;set sysType=..GetPropVal(obj,nameProp,.gn,"Type")
 				; if the property is - the stream from the stored file
@@ -297,11 +308,20 @@ ClassMethod ObjectSave(Param = "", Ref = 0)
 				}
 			}
 	}
-	if $d(err) w "<br><br>"_$$$appError($$$aText("Error checking properties","")_"<hr>"_$g(err)) d:'Ref ..ButtonRef() q ""
+	if $d(err) w "<br><br>"_$$$appError(..UikitNote($$$aText("Error checking properties",""))_"<hr>"_$g(err)) d:'Ref ..ButtonRef() q ""
 	set st=obj.%Save()
-	if 'st w "<br><br>"_$$$appError($System.Status.GetErrorText(st))_" <br>" d:'Ref ..ButtonRef() q ""
-	write "<br><br>"_$$$appMsg($$$aText("Saved",""))_"<br>" d:'Ref ..ButtonRef()
+	if 'st w "<br><br>"_$$$appError(..UikitNote($System.Status.GetErrorText(st)))_" <br>" d:'Ref ..ButtonRef() q ""
+	write "<br><br>"_$$$appMsg(..UikitNote($$$aText("Saved",""),"success"))_"<br>" d:'Ref ..ButtonRef()
 	quit obj
+}
+
+/// To list the properties of a class
+ClassMethod UikitNote(msg, status = "warning")
+{
+	$$$jsstart
+	w "UIkit.notification({message: '"_msg_"', status: '"_status_"',pos: 'top-center'});"
+	$$$jsstop
+	q msg
 }
 
 /// To list the properties of a class
@@ -439,7 +459,9 @@ ClassMethod Show(obj, Mode = 0, PrefixIdDIV = "", orderProp = "")
 		}
 	}
 	write "<tr><td style='text-align: right;'>"
-		set onclick="AppAct('"_PrefixIdDIV_"MainForm','"_PrefixIdDIV_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":*:&objId="_obj.%Id()_"&ClassName="_obj.%ClassName(1)_"&pref="_PrefixIdDIV_"&mode="_Mode_"');"
+		;set onclick="AppAct('"_PrefixIdDIV_"MainForm','"_PrefixIdDIV_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":*:&objId="_obj.%Id()_"&ClassName="_obj.%ClassName(1)_"&pref="_PrefixIdDIV_"&mode="_Mode_"');"
+		set onclick=##class(App.Action).WriteAppAct(%request,PrefixIdDIV_"MainForm",PrefixIdDIV_"MainContent",$zu(5),..%ClassName(1),"*","&objId="_obj.%Id()_"&ClassName="_obj.%ClassName(1)_"&pref="_PrefixIdDIV_"&mode="_Mode)
+		
 		if Mode {
 			
 			if Mode'["WithoutSave" {

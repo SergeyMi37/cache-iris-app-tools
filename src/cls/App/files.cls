@@ -529,6 +529,7 @@ ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {$
 
 /// Get all files in a directory and subdirectories
 /// d ##class(App.files).GetAllDir("d:\dev\app1\src\",,.a)
+/// ext = "*.jpg;*.jpeg;*.3gp" 
 ClassMethod GetAllDir(dir, ext = "", ByRef out)
 {
 	set dir = ##class(%File).NormalizeDirectory(dir)
@@ -542,16 +543,16 @@ ClassMethod GetAllDir(dir, ext = "", ByRef out)
 	q $$$OK
 }
 
-/// Can I convert XSL file to CSV format and upload to GD
+/// Convert XSL file to CSV format and upload to GD
 /// d ##class(App.files).TransXLS2CSV
 /// 
 ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef error, tempDir = {##class(%File).GetDirectory(##class(%File).TempFilename())})
 {
 		;s path=;"/opt/isc/ensemble/csp/spgz/files/"
-		s path=$p(fileXSL,"/",1,*-1)
+		s path=$p(fileXSL,$$$slash,1,*-1)
 		if path="" s error="Empty "_path q $$$ERROR($$$GeneralError,error)
 		;	s fileXSL=path_NameFileXLS
-		;w "<br> "_fileXSL 
+		;w "<br> xls "_fileXSL 
 		s gn2=..tempGN("Xls2") k @gn2
 
 		;Convert xls to csv in UTF8 format delimited by commas and field values enclosed in double quotes
@@ -562,7 +563,7 @@ ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef e
 
 		s fileCSV=$p(fileXSL,".",1,*-1)_".csv"
 		;Load and parse the received CSV
-
+		;w "<br> csv "_fileCSV
 		s gn3=..tempGN("Xls3") k @gn3
 		s st=##class(App.files).ReadFile2Arr(fileCSV,"RSK","UTF8",gn3)
 		i 'st s error=$System.Status.GetErrorText(st) q st
@@ -676,6 +677,23 @@ ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField,
 		s msg=msg_"<li><a title="""_$$$aText("Save this file on your disk","")_""" href='"_url_"'>"_$$$aText("To the formed document file","")_" "_$g(desc)_"</a>"
 		w msg
 	}
+}
+
+/// %request.Application_"get-files/"_id
+ClassMethod GetFileIdView(FileName, gn = "") As %String
+{
+	set st=$$$OK
+	if gn="" { //store referals is temporary
+		s gn = ##class(App.DownloadCSP).GetGN()
+		set id=$r(+$h)_$zcrc(7,FileName)_$r(+$h)_"."_$p(FileName,".",*)
+		set @gn@(id)=FileName
+	} else {
+		set id=$SYSTEM.Encryption.Base64Encode($SYSTEM.Encryption.MD5Hash(FileName))_"."_$p(FileName,".",*)
+		if $g(@gn@(id))=""	s @gn@(id)=FileName
+	}
+ 		;set @gn@(id,"origname")=origname
+ 		;set URL=..%ClassName(1)_".cls?"_cgivar_"="_id
+ 	quit id
 }
 
 }

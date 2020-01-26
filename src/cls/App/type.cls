@@ -132,7 +132,7 @@ ClassMethod GetInpretDate(pStringDate As %String, time = "") As %String
 		i pStringDate?1n.n s date=$zd(pStringDate,3) q
 		i pStringDate["." s date=$p(pStringDate,".",3)_"-"_$p(pStringDate,".",2)_"-"_$p(pStringDate,".",1)
 		i pStringDate["-" s date=pStringDate q
-		i pStringDate["/" s date=$p(pStringDate,"/",3)_"-"_$p(pStringDate,"/",1)_"-"_$p(pStringDate,"/",2)
+		i pStringDate["/" s date=..AddZerro($p(pStringDate,"/",3))_"-"_..AddZerro($p(pStringDate,"/",1))_"-"_..AddZerro($p(pStringDate,"/",2))
 	} catch e {}
 	q $g(date)_$s($g(date)'=""&&(time'=""):" "_time,1:"")
 }
@@ -145,9 +145,15 @@ ClassMethod getYYYYMMDD(pStringDate As %String) As %String
 		i pStringDate?1n.n s date=$zd(pStringDate,3) q
 		i pStringDate["." s date=$p(pStringDate,".",3)_"-"_$p(pStringDate,".",2)_"-"_$p(pStringDate,".",1)
 		i pStringDate["-" s date=pStringDate q
-		i pStringDate["/" s date=$p(pStringDate,"/",3)_"-"_$p(pStringDate,"/",1)_"-"_$p(pStringDate,"/",2)
+		i pStringDate["/" s date=..AddZerro($p(pStringDate,"/",3))_"-"_..AddZerro($p(pStringDate,"/",1))_"-"_..AddZerro($p(pStringDate,"/",2))
 	} catch e {}
 	q $g(date)
+}
+
+ClassMethod AddZerro(m As %String) As %String
+{
+	if $l(m)=1 q "0"_m
+	q m
 }
 
 /// Interpreterpath string with the current date type

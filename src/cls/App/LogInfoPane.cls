@@ -7,8 +7,8 @@ ClassMethod GetLink()
 {
 	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_$c(13,10)_
 	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"_$c(13,10)_
-	"<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_$c(13,10)_
-	"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_
+	//"<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_$c(13,10)_
+	//"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_
 	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"uikit/css/uikit.min.css""/>"
 	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link_$c(13,10)
 }
@@ -37,9 +37,9 @@ $('#tWHAT').keydown(function (e) {
     document.forms['loginfo'].submit();
    }
 });
-//
+// 
 function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
-	var $data ={};
+	var $data =[];
 	;var appNspace ='#(ns)#';
 	;if (!appNsp) {appNsp =appNspace;}
 	var classname ='#(class)#';
@@ -48,6 +48,7 @@ function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
 		$data = $('#'+FormId).serializeArray(); 
 		//alert(FormId);
 	}
+	//Add to array
 	$data.push({name:"appClass",value:appClass});
 	$data.push({name:"appMethod",value:appMethod});
 	$data.push({name:"appNsp",value:appNsp});
@@ -56,34 +57,88 @@ function ActionJs(FormId,ResultId,appClass,appMethod,appPar,appNsp){
 	  url: 'App.Action.cls',
 	  type: 'post',
 	  data: $data,
+	  crossDomain: true,
 	  success: function(result) {
 	  if (ResultId) {$('#'+ResultId).html(result);}
 	  }
 	});
 }
-//
+// Collect data from the form, serialize, send to the server, execute and paste the result into the container
+// FormId - source form identifier <form id='FormInpur'>...</form>
+// ResultId -  identifier of the target container <div id='ResultDiv'>...</div>
+// appAct -  parameters for executing code on the server
+//     namespace:classname:methodname:par1=val1&par2=val2...&parX-valX
 function AppAct(FormId,ResultId,appAct){
-	var $data ={};
-	if (FormId) {$data = $('#'+FormId).serializeArray();}
-	$data.push({name:"appAct",value:appAct});
-	$.ajax({
+	var $data =[]; //json array initialization
+	$data.push({name:"params",value:{}});
+	if (FormId) { //if the form id is specified, then we collect all input elements from it
+		// elements must have an id attribute matching the name.
+		// For example <input type='text' id='elem2' name='elem2'>
+		$data = $('#'+FormId).serializeArray();
+	}
+	$data.push({name:"appAct",value:appAct}); //add execution parameters that will be parsed in App.Action.cls
+	//if (jsonExt) {
+	//  if there is additional json, then add it
+	//	$data.push({"jsonExt":jsonExt});
+	//	}
+	//var url1='App.Action.cls';	if (url2) { url1=url2;}
+	//execute an asynchronous request to the App.Action.cls
+	$.ajax({  
 	  url: 'App.Action.cls',
 	  type: 'post',
 	  data: $data,
+	  success: function(result) {  // if successful
+	  	// if the resulting container is specified, put everything sent from the server into it
+	  	if (ResultId) {$('#'+ResultId).html(result);}
+	  }
+	});
+}
+// Collect data from the form, serialize, send to the server, execute and paste the result into the container
+// FormId - source form identifier <form id='FormInpur'>...</form>
+// ResultId -  identifier of the target container <div id='ResultDiv'>...</div>
+// appAct -  parameters for executing code on the server
+//     namespace:classname:methodname:par1=val1&par2=val2...&parX-valX
+//     namespace:routine:label:par1=val1&par2=val2...&parX-valX
+function AppRpc(FormId,ResultId,appAct,url,json){
+	var data ={"jsonrpc":"2.0",params:{}};
+	
+	if (FormId) {
+		data.params.formId=FormId;
+		data.params.form=JSON.stringify($('#'+FormId).serializeArray());
+	}
+	if (json) {
+		data.params.json = json;
+	}
+	
+	data.method=appAct;
+	$.ajax({
+	  url: url,
+	  type: 'post',
+	  contentType:'application/json; charset=UTF-8',
+	  dataType:'html', 
+	  crossDomain: true,
+	  data: JSON.stringify(data),
 	  success: function(result) {
-	  if (ResultId) {$('#'+ResultId).html(result);}
+	  if (ResultId) {
+		  $('#'+ResultId).html(result);
+	  }
+	  else {
+		  return result;
+	  	}
 	  }
 	});
 }
 
 // The function of opening the dialog box
-function WinOpen(ns,classname,met,el,title) {
+function WinOpen(ns,classname,met,el,title,rest) {
 	
 	var titlename="Method "+met+" parameter "+decodeURIComponent(el);
 	if (title) {titlename=title;}
 
 	//$("#dialogContent").load("App.Action.cls","appClass="+classname+"&appMethod="+met+"&appNsp="+ns+"&appPar="+el);
-	ActionJs('anyForm',"dialogContent",classname,met,el,ns);
+	
+	if (rest) {AppRpc('anyForm','dialogContent',ns+':'+classname+':'+met+':'+decodeURIComponent(el),rest);}
+	else { ActionJs('anyForm',"dialogContent",classname,met,el,ns);}
 	$( "#dialog" ).dialog({
 		modal: true, 
         title: titlename, 
@@ -720,12 +775,12 @@ ClassMethod DrawNodeGN(node As %String = "", val As %String = "", ByRef count, j
 		} 
 		// If there is a serialized object, then open the browse window.
 		elseif $e(val,1)="{"&&($e(val,*)="}")||($e(val,1,4)="""\""{") {
-			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowJson','"_$zconvert(gn,"O","URL")_"');"""
+			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowJson','"_$zconvert(gn,"O","URL")_"','','"_##class(App.Action).WriteWinOpenREST(%request)_"');"""
 			set title=$$$aText("Show formatted json","")
 			set node="<a title='"_title_"' "_href_" >"_node_"</a> "
 		}
 		elseif $e(val,1)="<"&&($e(val,*)=">") {
-			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowXML','"_$zconvert(gn,"O","URL")_"');"""
+			set href="style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','','ShowXML','"_$zconvert(gn,"O","URL")_"','','"_##class(App.Action).WriteWinOpenREST(%request)_"');"""
 			set title=$$$aText("Show","")_" XML"
 			set node="<a title='"_title_"' "_href_" >"_node_"</a> "
 			set val=$zconvert(val,"O","HTML")
@@ -766,7 +821,7 @@ ClassMethod DrawNodeGN(node As %String = "", val As %String = "", ByRef count, j
 		s node=..AddExecute(Execute,node, 2, NSpace = "",.countEx) 
 		s val=..AddExecute(Execute,val, 3, NSpace = "",.countEx) 
 	}
-	s count2="<span title='Edit' style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','"_..%ClassName(1)_"','WinOpenEditNode','&node="_$zconvert(gn,"O","URL")_"','EditNode');"" >"_count_"</span>"
+	s count2="<span title='Edit' style='"_$$$styleurl_"' onclick=""WinOpen('"_NSpace_"','"_..%ClassName(1)_"','WinOpenEditNode','&node="_$zconvert(gn,"O","URL")_"','EditNode','"_##class(App.Action).WriteWinOpenREST(%request)_"');"" >"_count_"</span>"
 	&html<
 	<tr class=trs >
 		<td align="left" >#(count2)#</td>

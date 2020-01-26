@@ -66,7 +66,7 @@ $( ".tip" ).tooltip();
 ClassMethod GetSupportInfo() As %String
 {
 	s msg=$$$aText("Software complex to debug. Try to log in later, or contact tech support:","")
-	q msg_"Support info mailto: sergey.mikhaylenko@gmail.com"
+	q msg_"Support info mailto: sergey.mikhaylenko@gmail.com <div id=test></div><button onclick=""$('#test').load('/apprest/getrpc/aaa:::label%5EApp.routine(3333,%22green%22)');"" >test</button>"
 }
 
 /// To add to the form js code if development mode
@@ -263,7 +263,6 @@ ClassMethod ShowTab(Par) As %Status
  		w "var a = $('#li-"_tabId_"'); a.show();" ; open the tab
  		w "var index = $('#tabs a[href=""#"_tabId_"""]').parent().index();"
 		w "$('#tabs').tabs({'active':index});" ;make it active
- 		;w "alert('"_tabId_"');"
  		if $g(opt(Par,"Url"))'="" {
 	 		w "$('#"_tabId_"').load('"_$g(opt(Par,"Url"))_"');"
  		}

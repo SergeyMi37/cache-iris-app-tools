@@ -5,7 +5,7 @@ Include App.LogMacro
 Class App.Installer Extends %Projection.AbstractProjection [ DependsOn = App.msg ]
 {
 
-Parameter DispatchClass = "App.RestMetrics";
+Parameter DispatchClass = "App.rest";
 
 Parameter ResourceName = "%AppTools";
 
@@ -123,6 +123,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
    d ..AddAndWriteFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls",$g(ServerPort))
    d ..AddAndWriteFavorite(..#AppName_" Permission Matrx","/"_..#AppCSP_"/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix",$g(ServerPort))
    d ..AddAndWriteFavorite(..#AppName_" Samples Admin Panel","/"_..#AppCSP_"/App.TabsPanelUikitAdmin.cls?autoload=Matrix",$g(ServerPort))
+   d ..AddAndWriteFavorite(..#AppName_" REST service Admin Panel","/"_..#AppCSP_"rest/get-html/App.TabsPanelUikitAdmin.cls?autoload=Find",$g(ServerPort))
    	w !
 	$$$NspReturn(curNs)
     d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))

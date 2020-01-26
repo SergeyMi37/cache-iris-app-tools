@@ -14,8 +14,15 @@ Parameter DASHPREFIX = {..#ISCPREFIX_"_dashboard"};
 XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 {
 <Routes>
+<Route Url="/get-html/:text" Method="GET" Call="App.rest:Index"/>
+<Route Url="/post-json" Method="POST" Call="App.rest:jsonrpc"/>
+<Route Url="/get-files/:text" Method="GET" Call="App.rest:Files"/>
+
 <Route Url="/finduser/:text" Method="GET" Call="App.rest:FindUser"/>
 <Route Url="/jsonrpc" Method="POST" Call="App.rest:jsonrpc"/>
+<Route Url="/getrpc" Method="GET" Call="App.rest:getrpc"/>
+<Route Url="/index/:text" Method="GET" Call="App.rest:Index"/>
+
 <Route Url="/cache" Method="GET" Call="getMetrics"/>
 <Route Url="/mgstat/:delay" Method="GET" Call="getMgstat"/>
 <Route Url="/db" Method="GET" Call="getDBsize"/>

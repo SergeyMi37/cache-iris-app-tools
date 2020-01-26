@@ -1,6 +1,6 @@
 Include App.LogMacro
 
-/// sample servise JSON-RPC 2.0 https://www.jsonrpc.org/specification
+/// // The REST interface: class that routes HTTP requests
 Class App.rest Extends %CSP.REST [ DependsOn = App.msg ]
 {
 
@@ -11,14 +11,24 @@ Parameter CHARSET = "UTF-8";
 XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 {
 <Routes>
-<Route Url="/finduser/:text" Method="GET" Call="FindUser"/>
-<Route Url="/jsonrpc" Method="POST" Call="jsonrpc"/>
-<Route Url="/test" Method="POST" Call="Test"/>  
+<Route Url="/get-html/:text" Method="GET" Call="Index"/>
+<Route Url="/post-json" Method="POST" Call="jsonrpc"/>
+<Route Url="/get-files/:text" Method="GET" Call="Files"/>
 
+<Route Url="/testpost" Method="POST" Call="Test"/>
+<Route Url="/testget/:text" Method="GET" Call="Test"/>  
+<Route Url="/finduser/:text" Method="GET" Call="FindUser"/>
+
+<Route Url="/auth" Method="GET" Call="Auth"/>
+<Route Url="/css/index.css" Method="GET" Call="GetCss"/>
+<Route Url="/css/themes/:theme" Method="GET" Call="GetTheme"/>
+<Route Url="/js/index.js" Method="GET" Call="GetJs"/>
 </Routes>
 }
 
 /*
+/// sample servise JSON-RPC 2.0 https://www.jsonrpc.org/specification
+
 {"jsonrpc": "2.0", "result": {"likes": 123}, "id": 1}
 If error:
 {"jsonrpc": "2.0", "error": {"code": 666, "message": "Post not found"}, "id": "1"}
@@ -39,39 +49,71 @@ ClassMethod jsonrpc(ns = "", class = "", meth = "") As %Status
 {
 	set sc = $$$OK
 	try {
+	 	;merge $$$AppL("MML","%request.Data")=%request.Data
+		;set $$$AppL("MML","%request.AppData")=%request.AppData
+		;set $$$AppL("MML","req")=$$$AppObJs(%request)
+		;if %request.Get("Username")'="",'..Authorize(%request.Get("Username"),%request.Get("Password")) {
+		; 	;set %response.Status = "401 Unauthorized" quit
+		; 	d ..jsonrpcError(401,"Unauthorized "_%request.Content) 
+		;}
 		if $isobject(%request.Content) { //POST
 			d %request.Content.Rewind() 
 			set json=%request.Content.Read($$$MaxStringLength) 
 			set json = $ZCVT(json,"I","UTF8") 
+			s $$$AppL("MML","jsonrpc-json")=json
 	 		if ($g(json)["{") {
 	 			set method={}.$$$jsonFromJSON(json).method
 	 			set params={}.$$$jsonFromJSON(json).params
 	 			set jsonrpc={}.$$$jsonFromJSON(json).jsonrpc
 	 			set id={}.$$$jsonFromJSON(json).id
 	 			if jsonrpc'="2.0" w ..jsonrpcError(2,"Version not supported "_jsonrpc) q
-	 			
-	 			;i method'="GetOrganisation" d ..jsonrpcError(4,"Method not supported "_method) q
-	 			;s $$$AppL("MSW","jsonrpc-resjson")=resjson
-				if method[":" { if $p(method,":",1)'="" s ns=$p(method,":",1)
+	 			s appPar=""
+	 			if method[":" { if $p(method,":",1)'="" s ns=$p(method,":",1)
 					if $p(method,":",2)'="" s class=$p(method,":",2)
 					if $p(method,":",3)'="" s meth=$p(method,":",3)
+					if $p(method,":",4)'="" s appPar=$p(method,":",4,*)
 				}
 				if ns'="" zn ns
-				do $classmethod(class,meth,.json) quit
+				if $e(class,1)="^" {
+					do @(meth_class_"(.par,.json)") ;??? xec public 
+				} else {
+					if appPar["~" {
+						do ##class(App.type).ParseURL(appPar,.appPar,"~")  ;parse in array
+					}
+					elseif appPar["&" {
+						d ##class(App.type).ParseURL(appPar,.appPar,"&")
+					}
+				   ;set %response.CharSet = "utf-8"
+    			;	set %response.ContentType = "text/html"
+    				;s appPar("params")=params
+    				if $isobject(params) d ##class(App.Action).GetElemParseForm(params.form,.appPar,"z",0)
+      				do $classmethod(class,meth,.appPar) 
+					quit
+				}
 				;w "{""text"":""Hello world"",""inn"":"""_params.inn_"""}" q
 				;w $ZCVT(str,"O","UTF8") 
 				;w resjson
 	 			
 	 		}
 		} else {
+			;s $$$AppL("MML","%request")=$$$AppObJs(%request)
+			;m $$$AppL("MML","%request.Data")=%request.Data
+			;m $$$AppL("MML","%request.Content")=%request.Content
+			;set $$$AppL("MML","%request.AppData")=%request.AppData
 			 d ..jsonrpcError(3,"Bad request "_%request.Content)
 			 q
 		}
 	} catch ex {
 		set sc = ex.AsStatus()
-		d ..jsonrpcError(4,"exception: "_$System.Status.GetErrorText(sc))
+		;s $$$AppL("MML","jsonrpc-err")=$System.Status.GetErrorText(sc)
+		d ..jsonrpcError(4,"exception: "_$zconvert($System.Status.GetErrorText(sc),"O","HTML"))
 	}
 	return $$$OK
+}
+
+ClassMethod Authorize(user, password) As %String
+{
+	q $SYSTEM.Security.Login(user, password)
 }
 
 ClassMethod jsonrpcError(code, message) As %Status
@@ -85,8 +127,46 @@ ClassMethod jsonrpcError(code, message) As %Status
 	q $$$OK
 }
 
-ClassMethod Test() As %Status
+/// Method writes files.
+/// /apptoolsrest/get-files/fileId
+ClassMethod Files(fileId) As %Status
 {
+ s file=##class(App.DownloadCSP).GetfileName(fileId)
+ ;get date modification	file
+ set dh=$zu(140,2,file)
+ if dh<0 set dh=$now(0)
+ set date=$zd(dh, 11) _ ", "_ $zdt(dh, 2,1) _ " GMT"
+ 
+ ;do %response.SetHeader("Last-Modified", date)
+ if (%request.GetCgiEnv("HTTP_IF_MODIFIED_SINCE")=date) {
+	        set %response.Status = "304 Not Modified"
+	    } 
+ else {
+	set %response.CharSet="raw"
+	;d %response.SetHeader("Expires", "0")
+	;d %response.SetHeader("Accept-Ranges","bytes")
+
+	set ext=$p(file,".",*)
+	set mimetype=##class(App.filesMimeTypes).GetMimeTypes4ext(ext)
+	set %response.ContentType=mimetype
+	
+	set stream=##class(%FileBinaryStream).%New()
+	set stream.Filename=file
+	set size=stream.Size
+	do %response.SetHeader("Content-Length",size)
+
+	while 'stream.AtEnd {
+		set line=stream.Read()
+		write line
+	}
+ }
+  return $$$OK
+}
+
+ClassMethod Test(parameter) As %Status
+{
+	set %response.CharSet = "utf-8"
+    set %response.ContentType = "text/html"
 	&html<<h1>Status: OK!</h1><br>>
 	zw %request
 	&html<<br><br>>
@@ -111,6 +191,113 @@ ClassMethod FindUser(text = "") As %Status
 		set st = $$$ERROR($$$GeneralError,"Class %ZEN.Auxiliary.jsonSQLProvider does not exist")
 	#endif
 	return st
+}
+
+/// Calls StaticContent.Write method or sends not modified header. Type have to be "css" or "js"
+ClassMethod WriteStatic(type As %String, ContentType As %String = "", xDataClass = "App.rest", ClassCSPPage = "", IsCached = 0) [ Private ]
+{
+    #define CompileTime ##Expression("""" _ $zd($h, 11) _ ", "_ $zdt($NOW(0), 2,1) _ " GMT""")
+    set %response.CharSet = "utf-8"
+    set %response.ContentType = $case(type,
+        "css": "text/css",
+        "js": "text/javascript",
+        "html": "text/html",
+        : $case(ContentType="", 1:"text/plain", :ContentType)
+    )
+    do %response.SetHeader("Last-Modified", $$$CompileTime)
+    try{
+		;if %request.Get("Username")'="",'..Authorize(%request.Get("Username"),%request.Get("Password")) {
+		; 	set %response.Status = "401 Unauthorized" quit
+		;}
+	    if IsCached,(%request.GetCgiEnv("HTTP_IF_MODIFIED_SINCE")=$$$CompileTime) {
+	        set %response.Status = "304 Not Modified"
+	    } 
+	    elseif ClassCSPPage'="" {
+		    s param=$p(ClassCSPPage,"?",2,*)
+		    s ClassCSPPage=$p(ClassCSPPage,"?")
+		    s:ClassCSPPage[".cls" ClassCSPPage=$p(ClassCSPPage,".cls",1)
+		    ;set $$$AppL("MMM","WriteStatic")=$lb(type,ClassCSPPage) ;$$$AppObJs(id)
+		    ;set $$$AppL("MMM","%request")=$$$AppObJs(%request)
+		    do $classmethod(ClassCSPPage,"OnPage",param)
+	    }
+	    else {
+	        do ..WriteStaticContent(xDataClass,type)
+	    }
+    }
+    catch e { 
+    	w $ze
+    	set %response.Status = "501 Not Implemented" ;"405 Method Not Allowed" ;"400 Bad Request"
+    }
+}
+
+/// Method writes application CSS.
+ClassMethod GetCss(class) As %Status
+{
+    do ..WriteStatic("css")
+    return $$$OK
+}
+
+/// Method writes application theme.
+ClassMethod GetTheme(Theme As %String) As %Status
+{
+    do ..WriteStatic("Theme"_$REPLACE(Theme, ".css", ""),"text/css")
+    return $$$OK
+}
+
+/// Method writes application JavaScript.
+ClassMethod GetJs() As %Status
+{
+    do ..WriteStatic("js")
+    return $$$OK
+}
+
+/// Method writes application HTML.
+ClassMethod Index(class) As %Status
+{
+    do ..WriteStatic("html","","",class)
+    return $$$OK
+}
+
+/// Write the contents of xData tag
+ClassMethod WriteStaticContent(Class As %String, Const As %String) As %Status
+{
+    set obj = ##class(%Dictionary.CompiledXData).%OpenId(Class_"||"_Const)
+    return:(obj = "") $$$OK
+    set xdata = obj.Data
+    set status = ##class(%XML.TextReader).ParseStream(xdata, .textreader)
+    while textreader.Read() { if (textreader.NodeType="chars") {
+        write textreader.Value
+    } }
+    return $$$OK
+}
+
+XData Themecache
+{
+<data>
+<![CDATA[<!-- @include client/css/themes/cache.css -->]]>
+</data>
+}
+
+XData html
+{
+<data>
+<![CDATA[
+<!-- @include client/index.html -->]]>
+</data>
+}
+
+XData css
+{
+<data>
+<![CDATA[<!-- @include client/css/index.css -->]]>
+</data>
+}
+
+XData js
+{
+<data>
+<![CDATA[<!-- @include client/js/index.js -->]]>
+</data>
 }
 
 }

@@ -240,7 +240,6 @@ ClassMethod ShowTabSample(key = "") As %Status
 >
  ;d ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
  $$$jsstart
-  	; to calculate the height of the container as a result of wijetunge victory container-Taba height of the container header
   	w "ActionJs('"_pref_"MainForm','"_mhead_"','','"_pref_"FirstHead','divId="_pref_"~key="_key_"');"
 	w "$('#"_mcont_"').height($(window).height()-($('#"_mhead_"').height()+$('#t1').height()+$('#MainNavbar').height()+200));"
   	w $$$blockui($$$aText("Loading...",""))

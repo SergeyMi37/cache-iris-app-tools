@@ -14,7 +14,7 @@ ClassMethod OnPage() As %Status
 	        if $lg(%loadFileSuccess,1) {
 		        if $lg(%loadFileSuccess,5)'=1 d WriteError q 1
 	    		s orig=$lg(%loadFileSuccess,6)
-	    		s orig=$s(orig["\":$p(orig,"\",*),1:$p(orig,"/",*))
+	    		s orig=$p(orig,$$$slash,*)
 	    		s orig=$tr(orig," №`()\/*;'"":","_N---")
 	    		w "<script>"
 	    		w "window.opener.document.getElementById('"_$g(%request.Data("FieldName",1))_"').value='"_$lg(%loadFileSuccess,2)_"*"_orig_"';"
@@ -81,7 +81,8 @@ ClassMethod OnPreHTTP() As %Boolean
         }
         i $isobject(Content),Content.Size>0 {
 	        s fileName=Content.FileName
-	        s name=$tr(##class(App.type).GetDateTime($h),"T: ","_")_"_"_$zcrc($p(fileName,"\",*),7)
+	        s name=$tr(##class(App.type).GetDateTime($h),"T: ","_")_"_"_$zcrc($p(fileName,$$$slash,*),7) //TODO tranlit
+	        if fileName["." s name=name_"."_$p(fileName,".",*)
 	        s %loadFileSuccess=$lb(1,$g(name),Content.Size)
 	        s sc=##class(App.files).Stream2Log(Content, ServerDirPath,$zconvert( name,"O","UTF8"),.path) 
 	        if sc s %loadFileSuccess=%loadFileSuccess_$lb($g(path),1,fileName)
