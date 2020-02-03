@@ -98,11 +98,14 @@ ClassMethod DeleteFileId(FileId, gn = {..GetGN()}) As %Status
 }
 
 /// To obtain the full name of the file ID for download
-ClassMethod GetfileName(FileId, gn = {..GetGN()}, origname = "") As %String
+ClassMethod GetfileName(FileId, gn = {..GetGN()}, origname = "", ContentType = "") As %String
 {
 	if '$d(@gn@(FileId)) quit ""
 	set origname=$g(@gn@(FileId,"origname"))
-	if $g(@gn@(FileId))'=""	quit $g(@gn@(FileId))
+	if $g(@gn@(FileId))'=""	{
+		if $g(@gn@(FileId,"ContentType"))'="" s ContentType=$g(@gn@(FileId,"ContentType")) 
+		quit $g(@gn@(FileId))
+	}
 	quit ""
 }
 

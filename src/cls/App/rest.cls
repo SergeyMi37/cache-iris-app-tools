@@ -131,7 +131,7 @@ ClassMethod jsonrpcError(code, message) As %Status
 /// /apptoolsrest/get-files/fileId
 ClassMethod Files(fileId) As %Status
 {
- s file=##class(App.DownloadCSP).GetfileName(fileId)
+ s file=##class(App.DownloadCSP).GetfileName(fileId,,,.ContentType)
  ;get date modification	file
  set dh=$zu(140,2,file)
  if dh<0 set dh=$now(0)
@@ -146,14 +146,24 @@ ClassMethod Files(fileId) As %Status
 	;d %response.SetHeader("Expires", "0")
 	;d %response.SetHeader("Accept-Ranges","bytes")
 
-	set ext=$p(file,".",*)
-	set mimetype=##class(App.filesMimeTypes).GetMimeTypes4ext(ext)
+	if $g(ContentType)'="" {
+		s mimetype=ContentType
+	} else {
+		set ext=$p(file,".",*)
+		set mimetype=##class(App.filesMimeTypes).GetMimeTypes4ext(ext)
+	}
 	set %response.ContentType=mimetype
 	
 	set stream=##class(%FileBinaryStream).%New()
 	set stream.Filename=file
 	set size=stream.Size
 	do %response.SetHeader("Content-Length",size)
+
+	if ContentType["application/force-download" {
+		set name=$p(file,$$$slash,*)
+		set name=$ZCVT($ZCVT(name,"O","UTF8"),"O","URL")
+		d %response.SetHeader("Content-Disposition","attachment;filename="_name)
+	}
 
 	while 'stream.AtEnd {
 		set line=stream.Read()
@@ -218,7 +228,9 @@ ClassMethod WriteStatic(type As %String, ContentType As %String = "", xDataClass
 		    s:ClassCSPPage[".cls" ClassCSPPage=$p(ClassCSPPage,".cls",1)
 		    ;set $$$AppL("MMM","WriteStatic")=$lb(type,ClassCSPPage) ;$$$AppObJs(id)
 		    ;set $$$AppL("MMM","%request")=$$$AppObJs(%request)
-		    do $classmethod(ClassCSPPage,"OnPage",param)
+		    s method="OnPage"
+		    s:ClassCSPPage[":" method=$p(ClassCSPPage,":",2,*),ClassCSPPage=$p(ClassCSPPage,":",1)
+		    do:method["OnPage" $classmethod(ClassCSPPage,method,param)
 	    }
 	    else {
 	        do ..WriteStaticContent(xDataClass,type)

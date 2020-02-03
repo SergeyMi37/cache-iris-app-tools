@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2020-01-26 21:40:55">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2020-02-03 20:30:19">
 <Global>
 <Node><Sub>^%AppCacheMsg</Sub>
 <Node><Sub>AppTools</Sub>
@@ -342,6 +342,9 @@
 </Node>
 <Node><Sub>2318587073</Sub>
 <Data>Fehlerprüfung Eigenschaften</Data>
+</Node>
+<Node><Sub>2339408822</Sub>
+<Data>Titel durch ein Komma getrennt oder durch den Kontext</Data>
 </Node>
 <Node><Sub>2359244304</Sub>
 <Data>Datei</Data>
@@ -1041,6 +1044,9 @@
 <Node><Sub>2318587073</Sub>
 <Data>Error checking properties</Data>
 </Node>
+<Node><Sub>2339408822</Sub>
+<Data>Title separated by a comma or by context</Data>
+</Node>
 <Node><Sub>2359244304</Sub>
 <Data>file</Data>
 </Node>
@@ -1735,6 +1741,9 @@
 </Node>
 <Node><Sub>2318587073</Sub>
 <Data>Error de comprobación de propiedades</Data>
+</Node>
+<Node><Sub>2339408822</Sub>
+<Data>Título separado por una coma o por el contexto</Data>
 </Node>
 <Node><Sub>2359244304</Sub>
 <Data>archivo</Data>
@@ -2431,6 +2440,9 @@
 <Node><Sub>2318587073</Sub>
 <Data>Erreur de vérification de propriétés</Data>
 </Node>
+<Node><Sub>2339408822</Sub>
+<Data>Titre séparées par une virgule ou par le contexte</Data>
+</Node>
 <Node><Sub>2359244304</Sub>
 <Data>fichier</Data>
 </Node>
@@ -3125,6 +3137,9 @@
 </Node>
 <Node><Sub>2318587073</Sub>
 <Data>Errore di controllo di proprietà</Data>
+</Node>
+<Node><Sub>2339408822</Sub>
+<Data>Titolo separato da una virgola o da un contesto</Data>
 </Node>
 <Node><Sub>2359244304</Sub>
 <Data>file</Data>
@@ -3821,6 +3836,9 @@
 <Node><Sub>2318587073</Sub>
 <Data>エラーチェック特性</Data>
 </Node>
+<Node><Sub>2339408822</Sub>
+<Data>タイトルをカンマ区切りでorによるキ</Data>
+</Node>
 <Node><Sub>2359244304</Sub>
 <Data>ファイル</Data>
 </Node>
@@ -4515,6 +4533,9 @@
 </Node>
 <Node><Sub>2318587073</Sub>
 <Data>오류가 확인 속성</Data>
+</Node>
+<Node><Sub>2339408822</Sub>
+<Data>제목을 쉼표로 구분하여 또는 의 컨텍스트</Data>
 </Node>
 <Node><Sub>2359244304</Sub>
 <Data>파일</Data>
@@ -5211,6 +5232,9 @@
 <Node><Sub>2318587073</Sub>
 <Data>Fout bij het controleren van de eigenschappen</Data>
 </Node>
+<Node><Sub>2339408822</Sub>
+<Data>Titel gescheiden door een komma of door kader</Data>
+</Node>
 <Node><Sub>2359244304</Sub>
 <Data>bestand</Data>
 </Node>
@@ -5905,6 +5929,9 @@
 </Node>
 <Node><Sub>2318587073</Sub>
 <Data>Erro de verificação de propriedades</Data>
+</Node>
+<Node><Sub>2339408822</Sub>
+<Data>Título separados por uma vírgula ou por contexto</Data>
 </Node>
 <Node><Sub>2359244304</Sub>
 <Data>arquivo</Data>
@@ -6604,6 +6631,9 @@
 <Node><Sub>2318587073</Sub>
 <Data>Ошибки проверки свойств</Data>
 </Node>
+<Node><Sub>2339408822</Sub>
+<Data>Заголовок разделенные запятыми или по контексту</Data>
+</Node>
 <Node><Sub>2359244304</Sub>
 <Data>файл</Data>
 </Node>
@@ -7299,6 +7329,9 @@
 <Node><Sub>2318587073</Sub>
 <Data>Перевірка властивості помилка </Data>
 </Node>
+<Node><Sub>2339408822</Sub>
+<Data>Заголовок розділені комами або за контекстом</Data>
+</Node>
 <Node><Sub>2359244304</Sub>
 <Data>файл</Data>
 </Node>
@@ -7993,6 +8026,9 @@
 </Node>
 <Node><Sub>2318587073</Sub>
 <Data>错误的性检查</Data>
+</Node>
+<Node><Sub>2339408822</Sub>
+<Data>标题中用逗号或上下文</Data>
 </Node>
 <Node><Sub>2359244304</Sub>
 <Data>文件</Data>

@@ -194,19 +194,26 @@ ClassMethod UiSavePermiss(Par = "") As %Status
 	set key=Par("key")
 	set divId=Par("divId")
 	set mode=Par("mode")
+
+	;Geting elements from form and prepare array Par
+	s name=##class(App.Action).GetElemForm(%request,.Par,divId_"name")	
+	;set roles=$g(Par("%request.Data",divId_"roles"))
+	
 	set i=""
-	for { set i=$o(%request.Data(i)) quit:i=""
-		if i[(divId_"Matr0"),$o(%request.Data(i,""),-1)'="" {
-			set val=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+	for { set i=$o(Par("%request.Data",i)) quit:i=""
+		if i[(divId_"Matr0") {
+			set val=$g(Par("%request.Data",i))
 			if val'["unchecked" {
 				set chk(i)=val
 				set us=$p(i,"0",2)
 				set ro=$p(i,"0",3)
 				if $e(ro,1)="p" s ro="%"_$e(ro,2,*)
+				if ro["_pD" s ro=$replace(ro,"_pD","_%D")
 				set users(us,ro)=val
 			}
 		}
 	}
+
 	new $NAMESPACE
   	set $NAMESPACE = "%SYS"
 	set us=""
@@ -227,12 +234,13 @@ ClassMethod UiSavePermiss(Par = "") As %Status
 			set:$e(roles,*)="," roles=$e(roles,1,*-1)
 			set prop("Roles")=roles
 			;zw prop
+			;##class(App.form).UikitNote($$$aText("Saved",""),"success")
 			set tSC=##class(Security.Users).Modify(us,.prop)
-			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
+			if '$$$ISOK(tSC) write $$$appError(##class(App.Form).UikitNote(us_": Error="_$SYSTEM.Status.GetErrorText(tSC))) quit
 			;Check
 			set tSC=##class(Security.Users).Get(us,.pro)
-			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
-			write $$$appMsg(us_": "_pro("Roles"))
+			if '$$$ISOK(tSC) write $$$appError(##class(App.Form).UikitNote(us_": Error="_$SYSTEM.Status.GetErrorText(tSC))) quit
+			write $$$appMsg(##class(App.Form).UikitNote(us_": "_pro("Roles"),"success"))
 	}
 	Quit $$$OK
 }
@@ -245,7 +253,11 @@ ClassMethod UiMatrixPermission(name = "", rolesmask = "", divId = "", key = "", 
 		if rolesmask="" write $$$appError($$$aText("Select the filter control","")) q 1
 		set msg=$$$aText("Matrix of access rights","")
 		set:blockui onclick=$$$blockui($$$aText("Loading...",""))
-		set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
+		;set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
+		
+		set onclick=$$$blockui("Load...")_";"_##class(App.Action).WriteActJs(%request,divId_"FormContentSave",divId_"ContentSave",class,Method,"&key="_key_"&divId="_divId_"&mode=Save")
+		;ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+
 		set butt=$$$appButton(divId_"appButtonSavePermiss","onclick="""_onclick_"""",$$$aText("Save access rights",""))
 		write butt_"<br><br>"
 		write "<form id='"_divId_"FormContentSave' >"

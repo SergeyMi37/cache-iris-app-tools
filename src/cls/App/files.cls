@@ -680,16 +680,20 @@ ClassMethod XlsxTransChoiceLotResult(f, node, ParamData, ParamClass, ParamField,
 }
 
 /// %request.Application_"get-files/"_id
-ClassMethod GetFileIdView(FileName, gn = "") As %String
+ClassMethod GetFileIdView(FileName, gn = "", ContentType = "") As %String
 {
 	set st=$$$OK
 	if gn="" { //store referals is temporary
 		s gn = ##class(App.DownloadCSP).GetGN()
 		set id=$r(+$h)_$zcrc(7,FileName)_$r(+$h)_"."_$p(FileName,".",*)
 		set @gn@(id)=FileName
+		if ContentType'="" set @gn@(id,"ContentType")=ContentType ;="application/force-download"
 	} else {
 		set id=$SYSTEM.Encryption.Base64Encode($SYSTEM.Encryption.MD5Hash(FileName))_"."_$p(FileName,".",*)
-		if $g(@gn@(id))=""	s @gn@(id)=FileName
+		if $g(@gn@(id))=""	{
+			s @gn@(id)=FileName
+			if ContentType'="" set @gn@(id,"ContentType")=ContentType
+		}
 	}
  		;set @gn@(id,"origname")=origname
  		;set URL=..%ClassName(1)_".cls?"_cgivar_"="_id

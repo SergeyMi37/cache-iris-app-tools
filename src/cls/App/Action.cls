@@ -192,7 +192,7 @@ ClassMethod WriteAppAct(req, fornId, resultDivId, ns, classname, method, CGIVar 
 /// w ##class(App.Action).WriteActJs(%request,pref_"MainForm",mhead,..%ClassName(1),pref_"FirstHead",key)
 ClassMethod WriteActJs(req, fornId, resultDivId, classname, method, CGIVar = "") As %Status
 {
-  	;s $$$AppL("MML","%request-WriteActJs-")=$$$AppObJs(req)
+  	s $$$AppL("MML","%request-WriteActJs-")=$$$AppObJs(req)
   	set:CGIVar'["'" CGIVar=CGIVar_"'"
   	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) { //is static content
   		q "AppRpc('"_fornId_"','"_resultDivId_"','"_$zu(5)_":"_classname_":"_method_":"_CGIVar_",'"_req.Application_"post-json');"

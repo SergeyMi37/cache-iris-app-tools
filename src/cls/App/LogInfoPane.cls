@@ -109,7 +109,7 @@ function AppRpc(FormId,ResultId,appAct,url,json){
 	if (json) {
 		data.params.json = json;
 	}
-	
+
 	data.method=appAct;
 	$.ajax({
 	  url: url,

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2020-01-26 21:40:55">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2018.1 (Build 184U)" ts="2020-02-03 20:30:18">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -7,7 +7,7 @@ Withdraw the necessary actions</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65393,37468.086824</TimeChanged>
+<TimeChanged>65412,40527.564275</TimeChanged>
 <TimeCreated>64746,75062.988786</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -248,7 +248,7 @@ w ##class(App.Action).WriteActJs(%request,pref_"MainForm",mhead,..%ClassName(1),
 <FormalSpec>req,fornId,resultDivId,classname,method,CGIVar=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-  	;s $$$AppL("MML","%request-WriteActJs-")=$$$AppObJs(req)
+  	s $$$AppL("MML","%request-WriteActJs-")=$$$AppObJs(req)
   	set:CGIVar'["'" CGIVar=CGIVar_"'"
   	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) { //is static content
   		q "AppRpc('"_fornId_"','"_resultDivId_"','"_$zu(5)_":"_classname_":"_method_":"_CGIVar_",'"_req.Application_"post-json');"
@@ -710,7 +710,7 @@ Plot the error of the ensemble Protocol Ens_Util.Log where Type='2' </Descriptio
 <Class name="App.DownloadCSP">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Page</Super>
-<TimeChanged>65322,31001.107873</TimeChanged>
+<TimeChanged>65408,30232</TimeChanged>
 <TimeCreated>60726,81968.378213</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -830,12 +830,15 @@ Remove the ID for download</Description>
 <Description>
 To obtain the full name of the file ID for download</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>FileId,gn=..GetGN(),origname=""</FormalSpec>
+<FormalSpec>FileId,gn=..GetGN(),origname="",ContentType=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	if '$d(@gn@(FileId)) quit ""
 	set origname=$g(@gn@(FileId,"origname"))
-	if $g(@gn@(FileId))'=""	quit $g(@gn@(FileId))
+	if $g(@gn@(FileId))'=""	{
+		if $g(@gn@(FileId,"ContentType"))'="" s ContentType=$g(@gn@(FileId,"ContentType")) 
+		quit $g(@gn@(FileId))
+	}
 	quit ""
 ]]></Implementation>
 </Method>
@@ -3201,7 +3204,7 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65395,36995</TimeChanged>
+<TimeChanged>65406,40784.724914</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -3320,7 +3323,7 @@ function AppRpc(FormId,ResultId,appAct,url,json){
 	if (json) {
 		data.params.json = json;
 	}
-	
+
 	data.method=appAct;
 	$.ajax({
 	  url: url,
@@ -6489,7 +6492,7 @@ The template GUI of the application selector and tabs on the basis jQueryUi, Uik
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65400,39443.701964</TimeChanged>
+<TimeChanged>65412,56094.600546</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -6499,10 +6502,15 @@ The application title</Description>
 <Default>AdminTabsApplication</Default>
 </Parameter>
 
-<Parameter name="GNStoreRef">
+<Parameter name="GNStore">
 <Description>
 Global Name Store Referens files and id sessions</Description>
 <Default>^%App.ui</Default>
+</Parameter>
+
+<Parameter name="PreLoad">
+<Description>
+For Redirect </Description>
 </Parameter>
 
 <Method name="IsPermiss">
@@ -6521,7 +6529,17 @@ Icons for the application</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>path</FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[ 	q "<link rel=""icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/><link rel=""shortcut icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/>"
+<Implementation><![CDATA[
+ 	;q "<link rel=""icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/><link rel=""shortcut icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/>"
+ 	q "<link rel=""icon"" type=""image/x-icon"" href=""data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8AJCQk/yQkJP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/0ZGRv8XFxf/////AP///wD///8A////AP///////////////+7u7v9OTk7/sbGx/11dXf9KSkr///////////+lpaX/4eHh/////wD///8A////AAAAAP8AAAD///////////+8vLz///////X19f/t7e3/gICA/5eXl////////////wAAAP8AAAD/////AKysrP8AAAD/AAAA/wAAAP+enp7/////////////////////////////////5OTk/wAAAP8AAAD/AAAA/6ysrP////8A////AP///wCurq6PlJSUzP///wD///8A////AP///wD///8A////AJSUlMyQkJDY////AP///wD///8A////AP///wD///8AAAAA/wAAAP////8A////AP///wD///8A////AP///wAAAAD/AAAA/////wD///8A////AP///wD///8AAAAA/wAAAP8AAAD/////AP///wD///8A////AP///wD///8AAAAA/wAAAP8AAAD/////AP///wD///8ACwsL/wAAAP8AAAD/lJSU2AAAAP8AAAD/cnJy/1hYWP8AAAD/AAAA/2FhYdgHBwf/AAAA/wAAAP////8A////AP///wD///8A////AP///wAAAAD/s7Oz/wAAAP8AAAD/x8fH/wAAAP////8A////AP///wD///8A////AP///wD///8A////AP///wAAAAD/AAAA/////wAAAAD/AAAA/////wAAAAD/AAAA/////wD///8A////AP///wD///8A////AP///wD///8AAAAA/wAAAP+qqqqlAAAA/wAAAP9lZWXjAAAA/wAAAP////8A////AP///wD///8A////AP///wD///8A////ALa2tv////8A9vb2UQAAAP8AAAD/////Uf///wDAwMD/////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wBcXFz/AAAA/////wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAP//AADAAwAAwAMAAIABAAAAAAAA5+cAAOfnAADH4wAAgAEAAPgfAADyTwAA8A8AAPZvAAD+fwAA//8AAA==""/>"
+]]></Implementation>
+</Method>
+
+<Method name="PreLoad">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>path</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[ q $$$OK
 ]]></Implementation>
 </Method>
 
@@ -6534,6 +6552,7 @@ TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
 <FormalSpec>parameter=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	
  set NSpace=##class(App.Action).GetParam(.%request,"ns",parameter)
  s:$g(NSpace)="" NSpace=$zu(5)
  zn NSpace
@@ -6553,6 +6572,13 @@ TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>#(..#HeaderText)#</title>
 >
+ if ..#PreLoad'="" {
+	 d ..PreLoad(.%request)
+  &html<
+	</html>
+	>
+	q $$$OK
+ }
  	write ##class(App.LogInfoPane).GetLink()
  	write ##class(App.LogInfoPane).AddJsScripts() 
    	   do ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
@@ -6561,6 +6587,7 @@ TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
 	set menuTop=..DrawMenuTop() ;top think
 	set path=$$$PATHCSP
 	write ..GetAppIcon(path)
+
  &html<
 	
 <link rel="stylesheet" href="#(path)#/uikit-dark-admin/css/nav.css"> <!-- CSS reset -->
@@ -6650,7 +6677,6 @@ TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
  	write ##class(App.Action).WriteActJs(%request,"","account_status",..%ClassName(1),"DrawStatus","")_$c(13,10)
  	set enter=##class(App.Action).WriteActJs(%request,"","MainHidden",..%ClassName(1),"ShowTab","&appPar=Search&Searchstr='+document.getElementById('searchstr').value")_$c(13,10)
  	write "$('#searchstr').keydown(function (e) { if (e.keyCode == 13) { "_enter_" }});"_$c(13,10)
-
   	if autoload="" {
 	 	do ..GetAllApps(.opt) 
 	 	set i="" 
@@ -6931,12 +6957,24 @@ Par - code menu item from the GetAllApps ..</Description>
 <Implementation><![CDATA[
 	if $g(Par("appPar"))'="" set Par=Par("appPar")
 	do ..GetAllApps(.opt) 
+	d ..ShowTabApps(.Par,.opt)
+]]></Implementation>
+</Method>
+
+<Method name="ShowTabApps">
+<Description>
+the render Tab on the menu
+Par - code menu item from the GetAllApps ..</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par,opt</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
 	if Par="Search" {
 		s Searchstr=$g(Par("%request.Data","Searchstr"),Par("Searchstr"))
 		if Searchstr="" q $$$OK
 		;s tr=$tr(##class(App.MSW.type).Transliteration(Searchstr)," №`()\/*;'"":%","_N---")
 		;s tr=$tr($zts,".,") 
-		s tr=$e($tr(Searchstr," №`()\/*;'"":%?$@&.,",""),1,10)_$i(@..#GNStoreRef@("jobs",$j))
+		s tr=$e($tr(Searchstr," №`()\/*;'"":%?$@&.,",""),1,10)_$i(@..#GNStore@("jobs",$j))
 		s key=tr ;Searchstr
 		MERGE opt(key)=opt(Par)
 		s opt(key)=opt(key)_tr ;Searchstr
@@ -6950,9 +6988,10 @@ Par - code menu item from the GetAllApps ..</Description>
 		  	 w "$('#"_tabIdMenu_"').remove();"
 		  	$$$jsstop
 		}
+		s opt(key,"CGIvar")="&Searchstr="_Searchstr ;$zconvert(Searchstr,"O","URI")
 		s opt(key,"TabName")=opt(key,"TabName")_tr 
 		s Par=key
-		s CGIvar="&Searchstr="_Searchstr ;$zconvert(Searchstr,"O","URI")
+
 	}
 	set tabId="tab-"_opt(Par,"id")
 	set tabIdMenu="tabMenu-"_opt(Par,"id")
@@ -6973,14 +7012,14 @@ Par - code menu item from the GetAllApps ..</Description>
  		write " $('#t1,#ta1').hide();"_$c(13,10) //" $('#t1').prop('disabled',true);"
  		if $g(opt(Par,"Disable")) {
 	 		;write "$('#"_tabId_"').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTabAbout&appNsp="_$zu(5)_"&appPar="_Par_"');"
-	 		write ##class(App.Action).WriteActJs(%request,"",tabId,..%ClassName(1),"ShowTabAbout","&appPar="_Par_$g(CGIvar))
+	 		write ##class(App.Action).WriteActJs(%request,"",tabId,..%ClassName(1),"ShowTabAbout","&appPar="_Par_$g(opt(Par,"CGIvar")))
  		}
  		elseif $g(opt(Par,"MethodUrl"))'="" {
 	 		write "$('#"_tabId_"').load('"_$g(opt(Par,"MethodUrl"))_"');"
  		}
  		else {
 	 		;write "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
-	 		write ##class(App.Action).WriteActJs(%request,"",tabId,$g(opt(Par,"ClassName")),$g(opt(Par,"Method")),"&appPar="_Par_$g(CGIvar))
+	 		write ##class(App.Action).WriteActJs(%request,"",tabId,$g(opt(Par,"ClassName")),$g(opt(Par,"Method")),"&appPar="_Par_$g(opt(Par,"CGIvar")))
  		}
  	 write "};"
  	 write " UIkit.tab('#tabMenu').show($('#"_tabIdMenu_"'));"
@@ -7297,7 +7336,7 @@ Its result</Description>
 	 $$$jsstart
  		w "UIkit.lightboxPanel({"
    		w "items: [ "
-		  d ..LighboxDrawJson(.List,,appdinamic,..#GNStoreRef)
+		  d ..LighboxDrawJson(.List,,appdinamic,..#GNStore)
   		w " ] }).show();"
 	 $$$jsstop
 	}
@@ -7312,7 +7351,7 @@ Lighbox Draw JSON
 List - files array 
 subdir - application static</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>List,subdir="",appdinamic,gn=""</FormalSpec>
+<FormalSpec>List,subdir="",appdynamic,gn=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
  s i=""
@@ -7331,10 +7370,85 @@ subdir - application static</Description>
  		w "{source: '"_subdir_ItemName_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
  	} else {
 	 	set fileId=##class(App.files).GetFileIdView(fullpath,gn) 
-		w "{source: '"_appdinamic_fileId_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
+		w "{source: '"_appdynamic_fileId_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
  	}
 	w:$o(List(i))'="" ","
  }
+]]></Implementation>
+</Method>
+
+<Method name="EnCode">
+<Description>
+Encode string to URL</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>s</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s s=$zconvert(s,"O","URL")
+	q s
+]]></Implementation>
+</Method>
+
+<Method name="DeCode">
+<Description>
+Decode string from URL</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>s</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	q $zconvert(s,"I","URL")
+]]></Implementation>
+</Method>
+
+<Method name="DrawTableUi">
+<Description>
+Draw Tables UiKit</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[mode="beg",divId="tab2",attr="",&Enum]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if mode="beg" {
+	&html<
+ <div #(attr)# id="#(divId)#" >
+    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+        <thead>
+           <tr>
+          >
+          s i=""  for {  s i=$o(Enum(i)) q:i=""
+            write " <th "_$GET(Enum(i,"attr"))_" >"_$g(Enum(i))_"</th>"
+          }
+               /* <th class="uk-table-shrink">Preserve</th>
+                <th class="uk-table-expand">Expand + Link</th>
+                <th class="uk-width-small">Truncate</th>
+                <th class="uk-table-shrink uk-text-nowrap">Shrink + Nowrap</th> */
+    &html<
+            </tr>
+        </thead>
+        <tbody>
+        >
+	}
+    elseif mode="tr" {
+			w "<tr>"
+            s i=""  for {  s i=$o(Enum(i)) q:i=""
+				w "<td "_$GET(Enum(i,"attr"))_">"_$GET(Enum(i))_"</td>"
+               
+               /* <td><input class="uk-checkbox" type="checkbox"></td>
+               <td><img class="uk-preserve-width uk-border-circle" src="image/msw.jpg" width="40" alt=""></td>
+                <td class="uk-table-link">
+                    <a class="uk-link-reset" href="">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</a>
+                </td>
+                <td class="uk-text-truncate">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</td>
+                <td class="uk-text-nowrap">Lorem ipsum dolor</td>*/
+            } 			
+            w "</tr>"
+	}
+	elseif mode="end" {
+		&html<
+		   </tbody>
+ 	 	 </table>
+ 		</div>
+    	>
+	} else {
+	}
 ]]></Implementation>
 </Method>
 </Class>
@@ -7701,13 +7815,130 @@ Search result </Description>
 </Class>
 
 
+<Class name="App.TabsPanelUikitPermissions">
+<ClassType/>
+<IncludeCode>App.LogMacro</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>App.TabsPanelUikitAdmin</Super>
+<TimeChanged>65412,73813.393196</TimeChanged>
+<TimeCreated>65065,36454.902831</TimeCreated>
+
+<Parameter name="HeaderText">
+<Description>
+Application title</Description>
+<Default>Permissions</Default>
+</Parameter>
+
+<Parameter name="GNStore">
+<Description>
+Global Name Store Referens files</Description>
+<Default>^App.Permissions</Default>
+</Parameter>
+
+<Parameter name="AppRoles">
+<Default>ui_Permissions</Default>
+</Parameter>
+
+<Method name="GetAllApps">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>opt</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if ..IsPermiss("%All") {	
+	s LeftMenuName="Permission",LeftMenuNumer=1
+	s key="MenuMatrix"
+	s opt(key)=$$$aText("The matrix","") ;The name of the menu
+	s opt(key,"id")="Matrix"
+	s opt(key,"TabName")=$$$aText("The matrix","") ;the name of the tab
+	s opt(key,"ClassName")=..%ClassName(1)
+	s opt(key,"Method")="ShowTabSample"
+	s opt(key,"Disable")=0 ;developed
+	s opt(key,"TabMenu","Close")=1
+	s opt(key,"Menu")=$lb(LeftMenuNumer,LeftMenuName,1)
+	s opt(key,"Active")=1
+
+	s LeftMenuName="Account",LeftMenuNumer=99
+	
+	s key="menu-top-account3"
+		s opt(key)="Exit"
+		s opt(key,"id")="AccountExit"
+		s opt(key,"TabName")="Logoit" 
+		s opt(key,"ClassName")=..%ClassName(1)
+		s opt(key,"Method")="Logout"
+		s opt(key,"MenuTop")=$lb(LeftMenuNumer,LeftMenuName)
+		
+	}
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MatrixFirstHead">
+<Description>
+download form template search users and roles</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	do ##class(App.Form).BlockUI(0)
+	s key=Par("key")
+	s divId=Par("divId")
+	s %ui=1
+	;set onclick=$$$blockui($$$aText("Loading...",""))_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&mode=*');"
+	set onclick=$$$blockui("Load...")_";"_##class(App.Action).WriteActJs(%request,divId_"MainForm",divId_"MainContent",..%ClassName(1),divId_"Result","&key="_key_"&divId="_divId_"&mode=*")
+	;ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+
+	&html<
+		<table>
+		<tr>
+			<td>
+ 	Login <br>#($$$appText(divId_"name","title='"_$$$aText("Names separated by a comma or by context","")_"'","s"))#
+			</td>
+			<td>
+	Roles <br>#($$$appText(divId_"roles","title='"_$$$aText("Roles separated by a comma or by context","")_"'","d"))#
+			</td>
+			<td> <br>
+	#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""",""_$$$aText("User roles","")))#
+			</td>
+		</tr>
+		</table>
+	>
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="MatrixResult">
+<Description>
+Search result </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Par=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s %ui=1
+	do ##class(App.Form).BlockUI(0)
+	set key=Par("key")
+	set divId=Par("divId")
+	set mode=Par("mode")
+
+	;Geting elements from form and prepare array Par
+	s name=##class(App.Action).GetElemForm(%request,.Par,divId_"name")	
+	set roles=$g(Par("%request.Data",divId_"roles"))
+
+
+	write ..ButtonAgain(divId,key)
+	d ##class(App.security).UiMatrixPermission(name,roles,divId,key,"App.security","UiSavePermiss")
+	q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+
+
 <Class name="App.Task.CustomListBackup">
 <Description>
 Backup task class</Description>
 <IncludeCode>%occKeyword</IncludeCode>
 <Modified>0</Modified>
 <Super>%SYS.Task.Definition</Super>
-<TimeChanged>65404,77881.937749</TimeChanged>
+<TimeChanged>65032,53023.02821</TimeChanged>
 <TimeCreated>64658,42115.283843</TimeCreated>
 <LegacyInstanceContext>1</LegacyInstanceContext>
 
@@ -7995,6 +8226,32 @@ Get a comma-delimited list of databases</Description>
 	set updateClass.Modified=0
 	do updateClass.%Save()
 	do updateClass.%Close()
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="App.Task.Ping">
+<Description>
+Ping remote service </Description>
+<Super>%SYS.Task.Definition</Super>
+<TimeChanged>65412,49935.459465</TimeChanged>
+<TimeCreated>65184,36683.082794</TimeCreated>
+
+<Property name="URL">
+<Description>
+http://localhost:57772/apptoolsrest/get-html/App.netping</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Method name="OnTask">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	If ..URL="" Quit $$$ERROR($$$GeneralError,"Invalid - URL - not supplied")
+	s st=$$$OK	
+	s st=##class(App.net).GetHttp(..URL,.out)
+    q st
 ]]></Implementation>
 </Method>
 </Class>
@@ -8403,7 +8660,7 @@ Outputs XML to be fed into %SYS.ZENReportExcelExporter Excel-compliant stream fr
 Utilities working with files</Description>
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65395,41131.760477</TimeChanged>
+<TimeChanged>65408,30232</TimeChanged>
 <TimeCreated>64765,51020.18498</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9198,7 +9455,7 @@ ParamField - field name ;"OfficeFile"</Description>
 <Description>
 %request.Application_"get-files/"_id</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>FileName,gn=""</FormalSpec>
+<FormalSpec>FileName,gn="",ContentType=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	set st=$$$OK
@@ -9206,9 +9463,13 @@ ParamField - field name ;"OfficeFile"</Description>
 		s gn = ##class(App.DownloadCSP).GetGN()
 		set id=$r(+$h)_$zcrc(7,FileName)_$r(+$h)_"."_$p(FileName,".",*)
 		set @gn@(id)=FileName
+		if ContentType'="" set @gn@(id,"ContentType")=ContentType ;="application/force-download"
 	} else {
 		set id=$SYSTEM.Encryption.Base64Encode($SYSTEM.Encryption.MD5Hash(FileName))_"."_$p(FileName,".",*)
-		if $g(@gn@(id))=""	s @gn@(id)=FileName
+		if $g(@gn@(id))=""	{
+			s @gn@(id)=FileName
+			if ContentType'="" set @gn@(id,"ContentType")=ContentType
+		}
 	}
  		;set @gn@(id,"origname")=origname
  		;set URL=..%ClassName(1)_".cls?"_cgivar_"="_id
@@ -11574,7 +11835,7 @@ Kclo s status=mailserver.%Close()
 // The REST interface: class that routes HTTP requests</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.REST</Super>
-<TimeChanged>65399,35089.324373</TimeChanged>
+<TimeChanged>65412,43173.951183</TimeChanged>
 <TimeCreated>65090,49155.438126</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -11732,7 +11993,7 @@ Method writes files.
 <FormalSpec>fileId</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- s file=##class(App.DownloadCSP).GetfileName(fileId)
+ s file=##class(App.DownloadCSP).GetfileName(fileId,,,.ContentType)
  ;get date modification	file
  set dh=$zu(140,2,file)
  if dh<0 set dh=$now(0)
@@ -11747,14 +12008,24 @@ Method writes files.
 	;d %response.SetHeader("Expires", "0")
 	;d %response.SetHeader("Accept-Ranges","bytes")
 
-	set ext=$p(file,".",*)
-	set mimetype=##class(App.filesMimeTypes).GetMimeTypes4ext(ext)
+	if $g(ContentType)'="" {
+		s mimetype=ContentType
+	} else {
+		set ext=$p(file,".",*)
+		set mimetype=##class(App.filesMimeTypes).GetMimeTypes4ext(ext)
+	}
 	set %response.ContentType=mimetype
 	
 	set stream=##class(%FileBinaryStream).%New()
 	set stream.Filename=file
 	set size=stream.Size
 	do %response.SetHeader("Content-Length",size)
+
+	if ContentType["application/force-download" {
+		set name=$p(file,$$$slash,*)
+		set name=$ZCVT($ZCVT(name,"O","UTF8"),"O","URL")
+		d %response.SetHeader("Content-Disposition","attachment;filename="_name)
+	}
 
 	while 'stream.AtEnd {
 		set line=stream.Read()
@@ -11833,7 +12104,9 @@ Calls StaticContent.Write method or sends not modified header. Type have to be "
 		    s:ClassCSPPage[".cls" ClassCSPPage=$p(ClassCSPPage,".cls",1)
 		    ;set $$$AppL("MMM","WriteStatic")=$lb(type,ClassCSPPage) ;$$$AppObJs(id)
 		    ;set $$$AppL("MMM","%request")=$$$AppObJs(%request)
-		    do $classmethod(ClassCSPPage,"OnPage",param)
+		    s method="OnPage"
+		    s:ClassCSPPage[":" method=$p(ClassCSPPage,":",2,*),ClassCSPPage=$p(ClassCSPPage,":",1)
+		    do:method["OnPage" $classmethod(ClassCSPPage,method,param)
 	    }
 	    else {
 	        do ..WriteStaticContent(xDataClass,type)
@@ -11949,7 +12222,7 @@ Write the contents of xData tag</Description>
 <Class name="App.security">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65412,61254.56936</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -12153,19 +12426,26 @@ d ##class(App.security).UiSavePermiss(.Par)</Description>
 	set key=Par("key")
 	set divId=Par("divId")
 	set mode=Par("mode")
+
+	;Geting elements from form and prepare array Par
+	s name=##class(App.Action).GetElemForm(%request,.Par,divId_"name")	
+	;set roles=$g(Par("%request.Data",divId_"roles"))
+	
 	set i=""
-	for { set i=$o(%request.Data(i)) quit:i=""
-		if i[(divId_"Matr0"),$o(%request.Data(i,""),-1)'="" {
-			set val=$g(%request.Data(i,$o(%request.Data(i,""),-1)))
+	for { set i=$o(Par("%request.Data",i)) quit:i=""
+		if i[(divId_"Matr0") {
+			set val=$g(Par("%request.Data",i))
 			if val'["unchecked" {
 				set chk(i)=val
 				set us=$p(i,"0",2)
 				set ro=$p(i,"0",3)
 				if $e(ro,1)="p" s ro="%"_$e(ro,2,*)
+				if ro["_pD" s ro=$replace(ro,"_pD","_%D")
 				set users(us,ro)=val
 			}
 		}
 	}
+
 	new $NAMESPACE
   	set $NAMESPACE = "%SYS"
 	set us=""
@@ -12186,12 +12466,13 @@ d ##class(App.security).UiSavePermiss(.Par)</Description>
 			set:$e(roles,*)="," roles=$e(roles,1,*-1)
 			set prop("Roles")=roles
 			;zw prop
+			;##class(App.form).UikitNote($$$aText("Saved",""),"success")
 			set tSC=##class(Security.Users).Modify(us,.prop)
-			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
+			if '$$$ISOK(tSC) write $$$appError(##class(App.Form).UikitNote(us_": Error="_$SYSTEM.Status.GetErrorText(tSC))) quit
 			;Check
 			set tSC=##class(Security.Users).Get(us,.pro)
-			if '$$$ISOK(tSC) write $$$appError(us_": Error="_$SYSTEM.Status.GetErrorText(tSC)) quit
-			write $$$appMsg(us_": "_pro("Roles"))
+			if '$$$ISOK(tSC) write $$$appError(##class(App.Form).UikitNote(us_": Error="_$SYSTEM.Status.GetErrorText(tSC))) quit
+			write $$$appMsg(##class(App.Form).UikitNote(us_": "_pro("Roles"),"success"))
 	}
 	Quit $$$OK
 ]]></Implementation>
@@ -12209,7 +12490,11 @@ d ##class(App.security).UiMatrixPermission("sm","sp","Ui","AnyKey","App.security
 		if rolesmask="" write $$$appError($$$aText("Select the filter control","")) q 1
 		set msg=$$$aText("Matrix of access rights","")
 		set:blockui onclick=$$$blockui($$$aText("Loading...",""))
-		set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
+		;set onclick=$g(onclick)_";ActionJs('"_divId_"FormContentSave','"_divId_"ContentSave','"_class_"','"_Method_"','key="_key_"~divId="_divId_"~mode=Save');"
+		
+		set onclick=$$$blockui("Load...")_";"_##class(App.Action).WriteActJs(%request,divId_"FormContentSave",divId_"ContentSave",class,Method,"&key="_key_"&divId="_divId_"&mode=Save")
+		;ActionJs('"_divId_"MainForm','"_divId_"MainContent','','"_divId_"Result','key="_key_"~divId="_divId_"~mode=*');"
+
 		set butt=$$$appButton(divId_"appButtonSavePermiss","onclick="""_onclick_"""",$$$aText("Save access rights",""))
 		write butt_"<br><br>"
 		write "<form id='"_divId_"FormContentSave' >"

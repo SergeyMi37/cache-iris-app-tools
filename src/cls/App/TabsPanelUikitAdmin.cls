@@ -8,7 +8,10 @@ Class App.TabsPanelUikitAdmin Extends %CSP.Page [ ClassType = "", DependsOn = Ap
 Parameter HeaderText = "AdminTabsApplication";
 
 /// Global Name Store Referens files and id sessions
-Parameter GNStoreRef = "^%App.ui";
+Parameter GNStore = "^%App.ui";
+
+/// For Redirect 
+Parameter PreLoad;
 
 /// is there a right to work with this form
 ClassMethod IsPermiss(role) As %Status
@@ -19,7 +22,13 @@ ClassMethod IsPermiss(role) As %Status
 /// Icons for the application
 ClassMethod GetAppIcon(path) As %String
 {
- 	q "<link rel=""icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/><link rel=""shortcut icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/>"
+ 	;q "<link rel=""icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/><link rel=""shortcut icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/>"
+ 	q "<link rel=""icon"" type=""image/x-icon"" href=""data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8AJCQk/yQkJP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/0ZGRv8XFxf/////AP///wD///8A////AP///////////////+7u7v9OTk7/sbGx/11dXf9KSkr///////////+lpaX/4eHh/////wD///8A////AAAAAP8AAAD///////////+8vLz///////X19f/t7e3/gICA/5eXl////////////wAAAP8AAAD/////AKysrP8AAAD/AAAA/wAAAP+enp7/////////////////////////////////5OTk/wAAAP8AAAD/AAAA/6ysrP////8A////AP///wCurq6PlJSUzP///wD///8A////AP///wD///8A////AJSUlMyQkJDY////AP///wD///8A////AP///wD///8AAAAA/wAAAP////8A////AP///wD///8A////AP///wAAAAD/AAAA/////wD///8A////AP///wD///8AAAAA/wAAAP8AAAD/////AP///wD///8A////AP///wD///8AAAAA/wAAAP8AAAD/////AP///wD///8ACwsL/wAAAP8AAAD/lJSU2AAAAP8AAAD/cnJy/1hYWP8AAAD/AAAA/2FhYdgHBwf/AAAA/wAAAP////8A////AP///wD///8A////AP///wAAAAD/s7Oz/wAAAP8AAAD/x8fH/wAAAP////8A////AP///wD///8A////AP///wD///8A////AP///wAAAAD/AAAA/////wAAAAD/AAAA/////wAAAAD/AAAA/////wD///8A////AP///wD///8A////AP///wD///8AAAAA/wAAAP+qqqqlAAAA/wAAAP9lZWXjAAAA/wAAAP////8A////AP///wD///8A////AP///wD///8A////ALa2tv////8A9vb2UQAAAP8AAAD/////Uf///wDAwMD/////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wBcXFz/AAAA/////wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAP//AADAAwAAwAMAAIABAAAAAAAA5+cAAOfnAADH4wAAgAEAAPgfAADyTwAA8A8AAPZvAAD+fwAA//8AAA==""/>"
+}
+
+ClassMethod PreLoad(path) As %String
+{
+ q $$$OK
 }
 
 /// Main method generate the content of page
@@ -27,6 +36,7 @@ ClassMethod GetAppIcon(path) As %String
 /// #3e454c - 2185D0 , 1c1f22 - 0FC0FC , 656a70 - 
 ClassMethod OnPage(parameter = "") As %Status
 {
+	
  set NSpace=##class(App.Action).GetParam(.%request,"ns",parameter)
  s:$g(NSpace)="" NSpace=$zu(5)
  zn NSpace
@@ -46,6 +56,13 @@ ClassMethod OnPage(parameter = "") As %Status
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>#(..#HeaderText)#</title>
 >
+ if ..#PreLoad'="" {
+	 d ..PreLoad(.%request)
+  &html<
+	</html>
+	>
+	q $$$OK
+ }
  	write ##class(App.LogInfoPane).GetLink()
  	write ##class(App.LogInfoPane).AddJsScripts() 
    	   do ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
@@ -54,6 +71,7 @@ ClassMethod OnPage(parameter = "") As %Status
 	set menuTop=..DrawMenuTop() ;top think
 	set path=$$$PATHCSP
 	write ..GetAppIcon(path)
+
  &html<
 	
 <link rel="stylesheet" href="#(path)#/uikit-dark-admin/css/nav.css"> <!-- CSS reset -->
@@ -143,7 +161,6 @@ ClassMethod OnPage(parameter = "") As %Status
  	write ##class(App.Action).WriteActJs(%request,"","account_status",..%ClassName(1),"DrawStatus","")_$c(13,10)
  	set enter=##class(App.Action).WriteActJs(%request,"","MainHidden",..%ClassName(1),"ShowTab","&appPar=Search&Searchstr='+document.getElementById('searchstr').value")_$c(13,10)
  	write "$('#searchstr').keydown(function (e) { if (e.keyCode == 13) { "_enter_" }});"_$c(13,10)
-
   	if autoload="" {
 	 	do ..GetAllApps(.opt) 
 	 	set i="" 
@@ -380,12 +397,19 @@ ClassMethod ShowTab(Par) As %Status
 {
 	if $g(Par("appPar"))'="" set Par=Par("appPar")
 	do ..GetAllApps(.opt) 
+	d ..ShowTabApps(.Par,.opt)
+}
+
+/// the render Tab on the menu
+/// Par - code menu item from the GetAllApps ..
+ClassMethod ShowTabApps(Par, opt) As %Status
+{
 	if Par="Search" {
 		s Searchstr=$g(Par("%request.Data","Searchstr"),Par("Searchstr"))
 		if Searchstr="" q $$$OK
 		;s tr=$tr(##class(App.MSW.type).Transliteration(Searchstr)," №`()\/*;'"":%","_N---")
 		;s tr=$tr($zts,".,") 
-		s tr=$e($tr(Searchstr," №`()\/*;'"":%?$@&.,",""),1,10)_$i(@..#GNStoreRef@("jobs",$j))
+		s tr=$e($tr(Searchstr," №`()\/*;'"":%?$@&.,",""),1,10)_$i(@..#GNStore@("jobs",$j))
 		s key=tr ;Searchstr
 		MERGE opt(key)=opt(Par)
 		s opt(key)=opt(key)_tr ;Searchstr
@@ -399,9 +423,10 @@ ClassMethod ShowTab(Par) As %Status
 		  	 w "$('#"_tabIdMenu_"').remove();"
 		  	$$$jsstop
 		}
+		s opt(key,"CGIvar")="&Searchstr="_Searchstr ;$zconvert(Searchstr,"O","URI")
 		s opt(key,"TabName")=opt(key,"TabName")_tr 
 		s Par=key
-		s CGIvar="&Searchstr="_Searchstr ;$zconvert(Searchstr,"O","URI")
+
 	}
 	set tabId="tab-"_opt(Par,"id")
 	set tabIdMenu="tabMenu-"_opt(Par,"id")
@@ -422,14 +447,14 @@ ClassMethod ShowTab(Par) As %Status
  		write " $('#t1,#ta1').hide();"_$c(13,10) //" $('#t1').prop('disabled',true);"
  		if $g(opt(Par,"Disable")) {
 	 		;write "$('#"_tabId_"').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTabAbout&appNsp="_$zu(5)_"&appPar="_Par_"');"
-	 		write ##class(App.Action).WriteActJs(%request,"",tabId,..%ClassName(1),"ShowTabAbout","&appPar="_Par_$g(CGIvar))
+	 		write ##class(App.Action).WriteActJs(%request,"",tabId,..%ClassName(1),"ShowTabAbout","&appPar="_Par_$g(opt(Par,"CGIvar")))
  		}
  		elseif $g(opt(Par,"MethodUrl"))'="" {
 	 		write "$('#"_tabId_"').load('"_$g(opt(Par,"MethodUrl"))_"');"
  		}
  		else {
 	 		;write "$('#"_tabId_"').load('App.Action.cls','appClass="_$g(opt(Par,"ClassName"))_"&appMethod="_$g(opt(Par,"Method"))_"&appNsp="_$zu(5)_"&appPar="_Par_"');"
-	 		write ##class(App.Action).WriteActJs(%request,"",tabId,$g(opt(Par,"ClassName")),$g(opt(Par,"Method")),"&appPar="_Par_$g(CGIvar))
+	 		write ##class(App.Action).WriteActJs(%request,"",tabId,$g(opt(Par,"ClassName")),$g(opt(Par,"Method")),"&appPar="_Par_$g(opt(Par,"CGIvar")))
  		}
  	 write "};"
  	 write " UIkit.tab('#tabMenu').show($('#"_tabIdMenu_"'));"
@@ -701,7 +726,7 @@ ClassMethod LighboxResult(Par = "") As %Status
 	 $$$jsstart
  		w "UIkit.lightboxPanel({"
    		w "items: [ "
-		  d ..LighboxDrawJson(.List,,appdinamic,..#GNStoreRef)
+		  d ..LighboxDrawJson(.List,,appdinamic,..#GNStore)
   		w " ] }).show();"
 	 $$$jsstop
 	}
@@ -712,7 +737,7 @@ ClassMethod LighboxResult(Par = "") As %Status
 /// Lighbox Draw JSON
 /// List - files array 
 /// subdir - application static
-ClassMethod LighboxDrawJson(List, subdir = "", appdinamic, gn = "") As %Status
+ClassMethod LighboxDrawJson(List, subdir = "", appdynamic, gn = "") As %Status
 {
  s i=""
  for { s i=$o(List(i)) q:i=""
@@ -730,10 +755,71 @@ ClassMethod LighboxDrawJson(List, subdir = "", appdinamic, gn = "") As %Status
  		w "{source: '"_subdir_ItemName_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
  	} else {
 	 	set fileId=##class(App.files).GetFileIdView(fullpath,gn) 
-		w "{source: '"_appdinamic_fileId_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
+		w "{source: '"_appdynamic_fileId_"', caption: '"_ItemName_"', type: '"_type_"'}",$c(13,10)
  	}
 	w:$o(List(i))'="" ","
  }
+}
+
+/// Encode string to URL
+ClassMethod EnCode(s) As %Status
+{
+	s s=$zconvert(s,"O","URL")
+	q s
+}
+
+/// Decode string from URL
+ClassMethod DeCode(s) As %Status
+{
+	q $zconvert(s,"I","URL")
+}
+
+/// Draw Tables UiKit
+ClassMethod DrawTableUi(mode = "beg", divId = "tab2", attr = "", ByRef Enum) As %Status
+{
+	if mode="beg" {
+	&html<
+ <div #(attr)# id="#(divId)#" >
+    <table class="uk-table uk-table-hover uk-table-middle uk-table-divider">
+        <thead>
+           <tr>
+          >
+          s i=""  for {  s i=$o(Enum(i)) q:i=""
+            write " <th "_$GET(Enum(i,"attr"))_" >"_$g(Enum(i))_"</th>"
+          }
+               /* <th class="uk-table-shrink">Preserve</th>
+                <th class="uk-table-expand">Expand + Link</th>
+                <th class="uk-width-small">Truncate</th>
+                <th class="uk-table-shrink uk-text-nowrap">Shrink + Nowrap</th> */
+    &html<
+            </tr>
+        </thead>
+        <tbody>
+        >
+	}
+    elseif mode="tr" {
+			w "<tr>"
+            s i=""  for {  s i=$o(Enum(i)) q:i=""
+				w "<td "_$GET(Enum(i,"attr"))_">"_$GET(Enum(i))_"</td>"
+               
+               /* <td><input class="uk-checkbox" type="checkbox"></td>
+               <td><img class="uk-preserve-width uk-border-circle" src="image/msw.jpg" width="40" alt=""></td>
+                <td class="uk-table-link">
+                    <a class="uk-link-reset" href="">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</a>
+                </td>
+                <td class="uk-text-truncate">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</td>
+                <td class="uk-text-nowrap">Lorem ipsum dolor</td>*/
+            } 			
+            w "</tr>"
+	}
+	elseif mode="end" {
+		&html<
+		   </tbody>
+ 	 	 </table>
+ 		</div>
+    	>
+	} else {
+	}
 }
 
 }
