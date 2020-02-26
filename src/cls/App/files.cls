@@ -148,6 +148,7 @@ ClassMethod Stream2Log(aStream, aLogFolder, aFileName, ByRef filename) As %Statu
 
 /// To open a file and write to the array 
 /// w ##class(App.files).ReadFile2Arr("/backup/temp/snmp/ruRunCmd2018-10-03_14:31:00.txt","RSK",,"%tmp")
+/// w ##class(App.files).ReadFile2Arr(fn,"RSK","CP1251",gn)
 ClassMethod ReadFile2Arr(file, mode = "RSK", code = "UTF8", gn = "tmp") As %Status
 {
 	s io=$i
@@ -545,7 +546,6 @@ ClassMethod GetAllDir(dir, ext = "", ByRef out)
 
 /// Convert XSL file to CSV format and upload to GD
 /// d ##class(App.files).TransXLS2CSV
-/// 
 ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef error, tempDir = {##class(%File).GetDirectory(##class(%File).TempFilename())})
 {
 		;s path=;"/opt/isc/ensemble/csp/spgz/files/"
@@ -597,7 +597,11 @@ ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef e
 				s @gn@(row)=listval
 			}
 		}
-		m out=@gn k @gn q $$$OK
+		if $g(out)="gn" { s out=$na(@gn)}
+		elseif $g(out)["^" { m @out=@gn k @gn }
+		else {	m out=@gn k @gn
+		}
+		q $$$OK
 }
 
 /// To globalnu a reference to a temporary global

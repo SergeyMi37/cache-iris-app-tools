@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// The template GUI of the application selector and tabs on the basis jQueryUi, Uikit
-Class App.TabsPanelUikitAdmin Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
+Class App.UikitAdmin Extends %CSP.Page [ ClassType = "", DependsOn = App.msg, ProcedureBlock ]
 {
 
 /// The application title
@@ -22,7 +22,6 @@ ClassMethod IsPermiss(role) As %Status
 /// Icons for the application
 ClassMethod GetAppIcon(path) As %String
 {
- 	;q "<link rel=""icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/><link rel=""shortcut icon"" href="""_path_"favicon.ico"" type=""image/x-icon""/>"
  	q "<link rel=""icon"" type=""image/x-icon"" href=""data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8AJCQk/yQkJP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/0ZGRv8XFxf/////AP///wD///8A////AP///////////////+7u7v9OTk7/sbGx/11dXf9KSkr///////////+lpaX/4eHh/////wD///8A////AAAAAP8AAAD///////////+8vLz///////X19f/t7e3/gICA/5eXl////////////wAAAP8AAAD/////AKysrP8AAAD/AAAA/wAAAP+enp7/////////////////////////////////5OTk/wAAAP8AAAD/AAAA/6ysrP////8A////AP///wCurq6PlJSUzP///wD///8A////AP///wD///8A////AJSUlMyQkJDY////AP///wD///8A////AP///wD///8AAAAA/wAAAP////8A////AP///wD///8A////AP///wAAAAD/AAAA/////wD///8A////AP///wD///8AAAAA/wAAAP8AAAD/////AP///wD///8A////AP///wD///8AAAAA/wAAAP8AAAD/////AP///wD///8ACwsL/wAAAP8AAAD/lJSU2AAAAP8AAAD/cnJy/1hYWP8AAAD/AAAA/2FhYdgHBwf/AAAA/wAAAP////8A////AP///wD///8A////AP///wAAAAD/s7Oz/wAAAP8AAAD/x8fH/wAAAP////8A////AP///wD///8A////AP///wD///8A////AP///wAAAAD/AAAA/////wAAAAD/AAAA/////wAAAAD/AAAA/////wD///8A////AP///wD///8A////AP///wD///8AAAAA/wAAAP+qqqqlAAAA/wAAAP9lZWXjAAAA/wAAAP////8A////AP///wD///8A////AP///wD///8A////ALa2tv////8A9vb2UQAAAP8AAAD/////Uf///wDAwMD/////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wBcXFz/AAAA/////wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAP//AADAAwAAwAMAAIABAAAAAAAA5+cAAOfnAADH4wAAgAEAAPgfAADyTwAA8A8AAPZvAAD+fwAA//8AAA==""/>"
 }
 
@@ -32,8 +31,6 @@ ClassMethod PreLoad(path) As %String
 }
 
 /// Main method generate the content of page
-/// TODO #2c3136 - 6699CC , 33383e - #6FA6DE , ffffff - #0048BA
-/// #3e454c - 2185D0 , 1c1f22 - 0FC0FC , 656a70 - 
 ClassMethod OnPage(parameter = "") As %Status
 {
 	
@@ -42,6 +39,13 @@ ClassMethod OnPage(parameter = "") As %Status
  zn NSpace
  // Save the session parameters debugging mode (implies extended disclosure)
  ;s %session.Data("debug")=%request.Get("debug")
+
+ if ..#PreLoad'="" {
+  &html< <!doctype html> <html>>
+	 d ..PreLoad(.%request)
+  &html<</html>>
+	q $$$OK
+ }
  
  // http://cip.mvk.ru/csp/spgz/App.MVK.gisui.cls?ns=MVK&autoload=Find# - Find the first startup
  // http://localhost:57773/apptoolsrest/get-html/App.TabsPanelUikitAdmin?ns=APP&autoload=Find
@@ -49,113 +53,35 @@ ClassMethod OnPage(parameter = "") As %Status
  set autoload=##class(App.Action).GetParam(.%request,"autoload",parameter)
  
  ;do ##class(App.Log).AddRecord(..%ClassName(1), "OnPage", "Login", "INFO", "","")
- &html<
- <!doctype html>
- <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title>#(..#HeaderText)#</title>
->
- if ..#PreLoad'="" {
-	 d ..PreLoad(.%request)
-  &html<
-	</html>
-	>
-	q $$$OK
- }
- 	write ##class(App.LogInfoPane).GetLink()
- 	write ##class(App.LogInfoPane).AddJsScripts() 
-   	   do ##class(App.LogInfoPane).AddJS(NSpace,..%ClassName(1))
-   	   do ##class(App.LogInfoPane).AddStyle()
- 	set menu=..DrawMenu() ;sidebar
-	set menuTop=..DrawMenuTop() ;top think
-	set path=$$$PATHCSP
-	write ..GetAppIcon(path)
-
- &html<
+ 
+ set path=$$$PATHCSP_"apptools-uikit-dark-admin/"
+ ;get full html
+ s html=##class(App.rest).getStatic(..%ClassName(1)_"Static:html")
+ s html=$replace(html,"href=""css","href="""_path_"css")
+ s html=$replace(html,"src=""js","src="""_path_"js")
+ s html=$replace(html,"TitleUIKitDarkAdmin",..#HeaderText)
+ s html=$replace(html,"HeaderUIKitDarkAdmin",..#HeaderText)
+ 
+ ;s link=##class(App.LogInfoPane).GetLink() ;already load
+ ;s jsrc=##class(App.LogInfoPane).AddJsScripts() 
+ 
+ s js=##class(App.rest).getStatic("App.UikitAdminStatic:javascript")
+ s css=##class(App.rest).getStatic("App.UikitAdminStatic:css")
+ 
+ set menu=..DrawMenu() ;sidebar
+ set menuTop=..DrawMenuTop() ;top think
 	
-<link rel="stylesheet" href="#(path)#/uikit-dark-admin/css/nav.css"> <!-- CSS reset -->
-	
-</head>
-<body>
-	<header class="cd-main-header"  style='position: fixed; top: 0px; width: 1903px;'>
-		<a href="#" class="cd-logo">
-			<font color=#E4F2FB>#(..#HeaderText)#</font>
-		</a>
-		
-		<div class="cd-search is-hidden">
-			<input type="search" placeholder="search.." id="searchstr" name="searchstr">
-		</div> <!-- cd-search -->
+ s icon=..GetAppIcon(path)
+ 
+ s html=$replace(html,"<!--head-end-->",icon_js_css)
+ s html=$replace(html,"<!--#(menuTop)#-->",menuTop)
+ s html=$replace(html,"<!--#(menu)#-->",menu)
+ 
+ s par="<p title='"_$username_"'> "_($$$aText("If you are not available to any single menu item",""))_"</p>"
+ s html=$replace(html,"<!--#($username)#-->",par)
 
-		<a href="#" class="cd-nav-trigger"><span></span></a>
-
-		<nav class="cd-nav">
-			<ul class="cd-top-nav">
-				#(menuTop)#
-			</ul>
-		</nav>
-	</header> <!-- .cd-main-header -->
-
-	<main class="cd-main-content">
-		<nav class="cd-side-nav">
-			
-			<ul class="uk-nav uk-nav-default">
-				<li class="cd-label">...</li>
-					#(menu)#
-			</ul>
-
-		</nav>
-
-		<div id=MainBody class="content-wrapper">
-        <!-- Page Content -->
-		<br />
-			
-<div class="uk-grid">
-    <div class="uk-width-1-1 uk-margin-left uk-margin-right " style='overflow: auto;' id="mainApp" >
-		<ul id='tabMenu' class="uk-tab uk-tab-grid uk-tab-top" data-uk-tab="{connect:'#tabList', animation: 'fade'}">
-			<li id='t1' class="uk-active"><a href="#">About</a></li>
-		</ul>
-		<ul id="tabList" class="uk-switcher uk-margin uk-tab-content">
-			<li id='ta1' >
-			 <div class="uk-alert-success" uk-alert>
-				<p title='#($username)#'> #($$$aText("If you are not available to any single menu item",""))#</p>
-			 </div>
-			</li>
-		</ul>
-	</div>
-</div>
-        <!-- /#page-content-wrapper -->
-		</div> <!-- .content-wrapper -->
-	</main> <!-- .cd-main-content -->
-
-<script src="#(path)#/uikit-dark-admin/js/main.js"></script> <!-- Resource jQuery -->
-
- <script language="javascript">
-
-(function($) {
-    var $window = $(window),
-        $html = $('#wrapper');
-
-    function resize() {
-        if ($window.width() < 768) {
-            return $html.removeClass('toggled');
-        }
-		
-        $html.addClass('toggled');
-    }
-
-    $window
-        .resize(resize)
-        .trigger('resize');
-})(jQuery);
-
-</script>
-<div id='MainHidden' style='display:none;'></div>
-<div id="dialog" title="Dialog Title">
-	<div id=dialogContent></div>
-</div>
->
- $$$jsstart
+ write $p(html,"<!--js-end-->",1)
+  $$$jsstart
  	;w "$('#account_status').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=DrawStatus&appNsp="_NSpace_"&appPar=');"_$c(13,10)
  	;w "$('#searchstr').keydown(function (e) { if (e.keyCode == 13) { $('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar=Search&Searchstr='+document.getElementById('searchstr').value); }});"_$c(13,10)
  	write ##class(App.Action).WriteActJs(%request,"","account_status",..%ClassName(1),"DrawStatus","")_$c(13,10)
@@ -171,12 +97,8 @@ ClassMethod OnPage(parameter = "") As %Status
 	 	write "$('#Menu"_autoload_"').trigger('click');"_$c(13,10)
  	}
  $$$jsstop
- 
- &html<
-</body>
-</html>
-	>
- quit $$$OK
+ &html< </body></html>>
+ q $$$OK
 }
 
 /// the rendering top menu 
@@ -710,7 +632,6 @@ ClassMethod LighboxResult(Par = "") As %Status
 	if mode=1 {
 	 d ##class(App.files).GetList(path1,wc,.List)
 	 s cspappstatic="/csp/broker/images/"
-	 ;zw List
 	 $$$jsstart
  		w "UIkit.lightboxPanel({"
    		w "items: [ "
@@ -718,10 +639,8 @@ ClassMethod LighboxResult(Par = "") As %Status
   		w " ] }).show();"
 	 $$$jsstop
 	} 
-	elseIF mode=2 {
-	;	w path2
+	elseif mode=2 {
 	 d ##class(App.files).GetList(path2,wc,.List)
-	 ;zw List
 	 s appdinamic=%request.Application_"get-files/"
 	 $$$jsstart
  		w "UIkit.lightboxPanel({"

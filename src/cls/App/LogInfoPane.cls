@@ -18,7 +18,10 @@ ClassMethod GetLink()
 ClassMethod AddJsScripts(mode)
 {
 	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"_$c(13,10)_"<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"_$c(13,10)_
-	"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script><script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script><script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
+	"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script>"_
+	"<script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script>"_
+	"<script src="""_$$$PATHCSP_"uikit/js/asuikit-icons-material-all.min.js""></script>"_
+	"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
 	set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>"_$c(13,10)
 	set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"_$c(13,10)
 	q scr_$c(13,10)
@@ -276,7 +279,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	write ##class(App.LogInfoPane).AddJsScripts() 
 	set $ZT="errors"
 	set color="red"
-	if $zu(110)=$$$TESTSERVER s color="blue" 
+	if $zu(110)[$$$TESTSERVER s color="blue" 
 	set lang=%request.Get("AppLang")
 	if lang'="",lang'=$g(@$$$GNEnsConf@("Language")) {
 		do ##class(%MessageDictionary).SetSessionLanguage(lang) 
@@ -382,8 +385,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
-				#(##class(App.LogInfo).GetImg("tools"))#
-				 #(##class(App.LogInfoPane).GetSysinfo(color))#
+				 #(##class(App.LogInfoPane).GetSysinfo(color,"utl"))#
 				 <a target='ccons' name='ccons' href='#("/csp/sys/op/UtilSysConsoleLog.csp#bottom")#' id='Param'>#($$$aText("Console log",""))#</a>
 				 <a target='TabsPM' name='TabsPM' href='#("App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix")#' title='#($$$aText("Sample Application Access Matrix",""))#' id='Param'>#($$$aText("Access Matrix",""))#</a>
 			</td>
@@ -1256,10 +1258,10 @@ ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 }
 
 ///  d ##class(App.LogInfoPane).GetSysinfo()
-ClassMethod GetSysinfo(color) As %String
+ClassMethod GetSysinfo(color, code = "") As %String
 {
 	set sys=" <a target='license' href=""/csp/sys/op/UtilDashboard.csp?$NAMESPACE=%25SYS""> "_$$$aText("System Dashboard","")_"</a>"
-	set sysinfo=" "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
+	set sysinfo="<font color="_color_">"_##class(App.MVK.docbook).GetImg(code)_"</font> "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
 	set lang=$g(@$$$GNEnsConf@("Language"))
 	if lang="" s lang=##class(%MessageDictionary).GetSessionLanguage()
 	set list=##class(%MessageDictionary).GetLanguages()

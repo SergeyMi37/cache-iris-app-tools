@@ -136,7 +136,7 @@ ROUTINE App.LogMacro [Type=INC]
 
 
 #If $DATA(^%App.Proj("INFOBANKS"))
-#define  TESTSERVER "cip-test.mvk.ru"
+#define  TESTSERVER "-test"
 #define DEVELOPER "mihaylenko_sv"
 #; The module display links to the administrative application panel
 #define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru" class="no-js">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="css/theme.css"> <!-- Resource style -->
+	<link rel="stylesheet" href="css/nav.css"> <!-- CSS reset -->
+	<!--<link rel="stylesheet" href="css/style.css"> <!-- Resource style -->
+	
+	<script src="js/jquery-2.1.4.js"></script>
+	<script src="js/uikit.min.js"></script>
+	<script src="js/uikit-icons.min.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<link rel="stylesheet" href="css/jquery-ui.css">
+	<title>UIKitDarkAdmin</title>
+</head>
+<body>
+	<header class="cd-main-header" style="position: fixed; top: 0px;" >
+		<a href="#" class="cd-logo">
+			UIKitDarkAdmin
+		</a>
+		
+		<div class="cd-search is-hidden">
+			<form action="#0">
+				<input type="search" placeholder="Search...">
+			</form>
+		</div> <!-- cd-search -->
+
+		<a href="#" class="cd-nav-trigger"><span></span></a>
+
+		<nav class="cd-nav">
+			<ul class="cd-top-nav">
+				<li><a href="#events/calendar">Tour</a></li>
+				<li><a href="#articles/comments">Support</a></li>
+				<li class="has-children account">
+					<a href="#">
+						<img src="img/cd-avatar.png" alt="avatar">
+						Account
+					</a>
+
+					<ul>
+
+						<li><a href="#">My Account</a></li>
+						<li><a href="#">Edit Account</a></li>
+						<li><a href="#">Logout</a></li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+	</header> <!-- .cd-main-header -->
+
+	<main class="cd-main-content">
+		<nav class="cd-side-nav">
+			
+			<ul class="uk-nav uk-nav-default">
+				
+				<li class="cd-label">Main</li>
+				<li class="has-children overview">
+					<a href="#">Articles</a>
+						<ul>
+							<li><a href="#articles/new">Write a new article</a></li>
+							<li><a href="#articles/manage">Manage Articles</a></li>
+							<li><a href="#articles/comments">Manage Comments</a></li>
+							<li><a href="#articles/categories">Manage Categories</a></li>
+						</ul>
+				</li>
+				<li class="has-children notifications active">
+					<a href="#">Images</a>
+					
+					<ul>
+						<li><a href="#images/upload">Upload images</a></li>
+						<li><a href="#images/gallery">Manage galleries</a></li>
+						<li><a href="#images/albums">Manage albums</a></li>
+						<li><a href="#images/settings">Gallery settings</a></li>
+					</ul>
+				</li>
+
+				<li class="has-children comments">
+					<a href="#">Widgets</a>
+					
+					<ul>
+						<li><a href="#widgets/tabs">Tabs</a></li>
+						<li><a href="#widgets/carousel">Carousel</a></li>
+						<li><a href="#widgets/modals">Modals</a></li>
+						<li><a href="#widgets/popups">Confirm boxes</a></li>
+						<li><a href="#widgets/charts">Charts</a></li>
+					</ul>
+				</li>
+			</ul>
+
+			<ul>
+				<li class="cd-label">Events</li>
+				<li class="has-children bookmarks">
+					<a href="#">Calendar</a>
+					
+					<ul>
+						<li><a href="#events/calendar">Calendar overview</a></li>
+						<li><a href="#events/event">Add a new event</a></li>
+						<li><a href="#events/appointments">Appointments</a></li>
+					</ul>
+				</li>
+				<li class="has-children images">
+					<a href="#">Elements</a>
+					
+					<ul>
+						<li><a href="#elements/buttons">Buttons</a></li>
+						<li><a href="#elements/badges">Labels & Badges</a></li>
+						<li><a href="#elements/cards">Cards and panels</a></li>
+						<li><a href="#elements/icons">Icons</a></li>
+						<li><a href="#elements/navs">Navigation menus</a></li>
+						<li><a href="#elements/alerts">Alerts</a></li>
+					</ul>
+				</li>
+				
+			</ul>
+
+		</nav>
+
+		<div class="content-wrapper">
+        <!-- Page Content -->
+			111111111111111111111111111111111111111111
+			11111111111
+			111111111111
+		<br />
+		<br />
+        <div id="page-content-wrapper uk-margin-top">
+
+			<div class="uk-container uk-container-medium" id="content">
+
+			22222222222
+222222222
+222222
+
+			</div>
+        </div>
+		   <!-- /#page-content-wrapper -->
+		</div> <!-- .content-wrapper -->
+	</main> <!-- .cd-main-content -->
+<script src="js/jquery.menu-aim.js"></script>
+<script src="js/main.js"></script> <!-- Resource jQuery -->
+
+<script>
+function get_content(tpl, div) {
+$.get(tpl, function(result){
+    $result = $(result);
+
+    $( div ).html( result );
+    $result.find('script').appendTo(div);
+}, 'html');
+
+}
+/*
+crossroads.addRoute('/{section}/{subsection}', function(section, subsection){  
+  get_content('templates/'+section+'/'+subsection+'.html', '#content');
+});
+crossroads.addRoute('/', function(id){  
+  get_content('templates/home.html', '#content');
+}); 
+
+//setup hasher
+function parseHash(newHash, oldHash){
+  crossroads.parse(newHash);
+}
+hasher.initialized.add(parseHash); //parse initial hash
+hasher.changed.add(parseHash); //parse hash changes
+hasher.init(); //start listening for history change
+*/
+
+(function($) {
+    var $window = $(window),
+        $html = $('#wrapper');
+
+    function resize() {
+        if ($window.width() < 768) {
+            return $html.removeClass('toggled');
+        }
+		
+        $html.addClass('toggled');
+    }
+
+    $window
+        .resize(resize)
+        .trigger('resize');
+})(jQuery);
+</script>
+
+</body>
+</html>

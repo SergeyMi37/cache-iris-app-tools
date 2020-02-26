@@ -3,7 +3,7 @@ Class App.Chart Extends App.AutoPage
 
 Parameter CSPURL = "App.Chart.cls";
 
-Parameter PAGENAME = {"Chart"};
+Parameter PAGENAME = "Chart";
 
 Parameter PARENTPAGE = "App.AutoPage.cls";
 

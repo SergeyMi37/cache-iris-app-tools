@@ -283,6 +283,24 @@ ClassMethod WriteStaticContent(Class As %String, Const As %String) As %Status
     return $$$OK
 }
 
+ClassMethod getStatic(name As %String, ByRef Description) As %String
+{
+	set class = $case($l(name, ":"), 2:$p(name, ":"), :$classname())
+	set queryName = $p(name, ":", *)
+	set Description=""
+	set str = ""	
+	if ##class(%Dictionary.XDataDefinition).IDKEYExists(class, queryName) {
+		set stream = ##class(%Stream.TmpCharacter).%New()
+		for i=1:1:$$$comMemberKeyGet(class,$$$cCLASSxdata,queryName,$$$cXDATAdata) {
+			do stream.WriteLine($$$comMemberArrayGet(class,$$$cCLASSxdata,queryName,$$$cXDATAdata,i))
+		}
+		set str = stream.Read($$$MaxLocalLength)
+		set Description=$$$comMemberKeyGet(class,$$$cCLASSxdata,queryName,$$$cXDATAdescription)
+		
+	}
+	return str
+}
+
 XData Themecache
 {
 <data>

@@ -5,7 +5,7 @@ Class App.FormExp Extends App.AutoPage
 
 Parameter CSPURL = "App.FormExp.cls";
 
-Parameter PAGENAME = {"Objects Explorer"};
+Parameter PAGENAME = "Objects Explorer";
 
 Parameter PARENTPAGE = "App.AutoPage.cls";
 

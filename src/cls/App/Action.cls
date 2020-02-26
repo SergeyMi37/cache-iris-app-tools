@@ -197,7 +197,7 @@ ClassMethod WriteActJs(req, fornId, resultDivId, classname, method, CGIVar = "")
   	if req.URL[(req.Application_"get-html")||(req.URL[(req.Application_"post-json")) { //is static content
   		q "AppRpc('"_fornId_"','"_resultDivId_"','"_$zu(5)_":"_classname_":"_method_":"_CGIVar_",'"_req.Application_"post-json');"
   	} else {
-  		q "ActionJs('"_fornId_"','"_resultDivId_"','','"_method_"','"_CGIVar_");"
+  		q "ActionJs('"_fornId_"','"_resultDivId_"','"_classname_"','"_method_"','"_CGIVar_");"
   	}
 	quit ""
 }

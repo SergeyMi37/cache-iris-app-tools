@@ -124,7 +124,7 @@ ClassMethod GetImg(code)
 	quit:code="search" "<span class='ui-icon ui-icon-search'></span>"
 	;quit:code="apptools" "<img src="""_$$$PATHCSP_"jqueryui/img/apptools-ico-lofel.ico"" width=""1%""/>" 
 	;quit:code="apptools" "<img src="""_$$$PATHCSP_"jqueryui/img/apptools-ico.ico"" width=""1%""/>" ;gear
-	quit:code="tools" "<span class='ui-icon ui-icon-wrench'></span>" ;gear
+	quit:code="tools" "<span class='ui-icon ui-icon-wrench' ></span>" ;gear
 	quit:code="trash" "<span class='ui-icon ui-icon-trash'></span>"
 	quit:code="check" "<span class='ui-icon ui-icon-check'></span>"
 	quit:code="closethick" "<span class='ui-icon ui-icon-closethick'></span>"
@@ -132,9 +132,10 @@ ClassMethod GetImg(code)
 }
 
 /// Export all projects to XML
+/// d ##class(App.LogInfo).ExportProjects("/backup/iris/source/",.file)
 ClassMethod ExportProjects(Dir, files) As %Status
 {
-	$$$NspGoto(curNs,"AAA")
+	$$$NspGoto(curNs,"APP")
 	d ..ExportAppProj(Dir,"app",.files)
 	$$$NspReturn(curNs)
 	d ##class(App.net).SendFilesToEmail($zn,Dir,.files)

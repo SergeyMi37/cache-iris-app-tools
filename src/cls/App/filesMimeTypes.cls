@@ -21,6 +21,7 @@ ClassMethod GetMimeTypes4ext(ext = "jpg") As %String
 {
 	set gn="^%App.MimeTypes" ;k @gn
 	if '$d(@gn) d ..Create(gn)
+	q:ext="" ""
 	q $g(@gn@("ext",ext))
 }
 

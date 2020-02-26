@@ -40,7 +40,7 @@ ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 	 set @$$$GNEnsConf@("EMAILSERVERPORT")=25
 	 set @$$$GNEnsConf@("EMAILSUPPORT")="user_to_send_mail@server.com"
 	 set @$$$GNEnsConf@("EMAILXLSPATH")="c:\temp\"
-	 set @$$$GNEnsConf@("EXPORDPROJPATH")="c:\temp\source\"
+	 set @$$$GNEnsConf@("EXPORTPROJPATH")="c:\temp\source\"
 	 set @$$$GNEnsConf@("Language")="en"
 	 set @$$$GNEnsConf@("PATHCSP")="/"_..#AppCSP_"/"
 	}
