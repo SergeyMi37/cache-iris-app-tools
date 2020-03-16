@@ -51,7 +51,7 @@ ClassMethod GetSysUserProp(Name, Prop) As %String
 /// w ##class(App.sys).IsPreparedDB("ENSDEMO")
 ClassMethod IsPreparedDB(name)
 {
-	i (",ENSDEMO,ENSEMBLE,ENSEMBLEENSTEMP,ENSEMBLESECONDARY,ENSLIB,CACHESYS,CACHELIB,CACHETEMP,CACHE,CACHEAUDIT,DOCBOOK,USER,SAMPLES,")[(","_$zconvert(name,"U")_",") q 1
+	i (",ENSDEMO,ENSEMBLE,ENSEMBLEENSTEMP,ENSEMBLESECONDARY,ENSLIB,CACHESYS,CACHELIB,CACHETEMP,CACHE,CACHEAUDIT,DOCBOOK,USER,SAMPLES,IRISSYS,IRISLIB,IRISTEMP,IRISLOCALDATA,IRISAUDIT")[(","_$zconvert(name,"U")_",") q 1
 	Q 0
 }
 
@@ -99,13 +99,31 @@ ClassMethod getCSPapps(csppapp, prop)
 	Q $g(res)
 }
 
+/// d ##class(App.sys).CreateResourse(.res,"NotPre")
+ClassMethod CreateResourse(res, type = "")
+{
+	$$$NspGoto(curNs,"%SYS")
+	d ..ListDB(.info,type)
+	s r=""
+	for { s r=$o(info(r)) q:r=""
+		s ResourceName="%DB_"_r
+    	if (##class(Security.Resources).Exists(ResourceName) = 0) {
+        	set st = ##class(Security.Resources).Create(ResourceName,
+            "Grants access to DB "_r_".", "")
+            s res(ResourceName)=st
+    	}
+	}
+	$$$NspReturn(curNs)	
+ q $$$OK
+}
+
 /// Get a list of database names separated by commas
 /// w ##class(App.sys).ListDB(.info,"NotPre")
 /// Flag = "NotPre" - exclude prepared
 /// Flag = "NotTemp" - exclude tempory
 ClassMethod ListDB(info, Flag = "")
 {
-	$$$NspGoto(curNs,"%SYS")	
+	$$$NspGoto(curNs,"%SYS")
 	s list=""
 	s rss=##class(%ResultSet).%New("Config.Databases:List")
 	d rss.Execute()

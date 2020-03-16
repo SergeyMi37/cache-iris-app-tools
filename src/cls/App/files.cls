@@ -548,16 +548,13 @@ ClassMethod GetAllDir(dir, ext = "", ByRef out)
 /// d ##class(App.files).TransXLS2CSV
 ClassMethod TransXLS2CSV(fileXSL, FieldNameHead = "QUANTITY", ByRef out, ByRef error, tempDir = {##class(%File).GetDirectory(##class(%File).TempFilename())})
 {
-		;s path=;"/opt/isc/ensemble/csp/spgz/files/"
 		s path=$p(fileXSL,$$$slash,1,*-1)
 		if path="" s error="Empty "_path q $$$ERROR($$$GeneralError,error)
-		;	s fileXSL=path_NameFileXLS
-		;w "<br> xls "_fileXSL 
 		s gn2=..tempGN("Xls2") k @gn2
 
 		;Convert xls to csv in UTF8 format delimited by commas and field values enclosed in double quotes
 		s cmd="cd "_path_"; export HOME=$(eval echo ~$(id -u -n)) && unset LD_LIBRARY_PATH && soffice --convert-to csv --infilter=CSV:44,34,76,1 --headless "_fileXSL
-
+		w "<br> "_cmd
 		d ##class(App.sys).RunCmd(cmd,gn2,0,tempDir) h 1
 		k @gn2
 

@@ -287,7 +287,7 @@ Storage Default
 <IdLocation>^App.LogD</IdLocation>
 <IndexLocation>^App.LogI</IndexLocation>
 <StreamLocation>^App.LogS</StreamLocation>
-<Type>%Library.CacheStorage</Type>
+<Type>%Storage.Persistent</Type>
 }
 
 Query FindLog() As %SQLQuery(CONTAINID = 1)

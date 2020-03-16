@@ -279,7 +279,7 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	write ##class(App.LogInfoPane).AddJsScripts() 
 	set $ZT="errors"
 	set color="red"
-	if $zu(110)[$$$TESTSERVER s color="blue" 
+	if $zu(110)["test" s color="blue" 
 	set lang=%request.Get("AppLang")
 	if lang'="",lang'=$g(@$$$GNEnsConf@("Language")) {
 		do ##class(%MessageDictionary).SetSessionLanguage(lang) 
@@ -500,8 +500,9 @@ Method DrawBODY(pInstance As PageInstance) As %Status [ PublicList = (nsp, what,
 	quit $$$OK
   	///Extra options
 AddExp(title,gn,Next="",Filtr="",MaxNode) 
-	write "<textarea rows=3 cols=130 onblur=""document.getElementById('WHAT').value=document.getElementById('tWHAT').value;"" name='tWHAT' title='"_title_"' placeholder='? "_$$$aText("enter the command and","")_" Ctrl-Enter' id='tWHAT'>"_($zconvert(gn,"O","HTML"))_"</textarea>"
-	write "<br><input size=80 type='hidden' name='WHAT' title='"_title_"' id='WHAT' value="""_($zconvert(gn,"O","HTML"))_""" placeholder='?'>"
+	set sqlgn=..AddC1310($zconvert(gn,"O","HTML"))
+	write "<textarea rows=5 cols=150 onblur=""document.getElementById('WHAT').value=document.getElementById('tWHAT').value;"" name='tWHAT' title='"_title_"' placeholder='? "_$$$aText("enter the command and","")_" Ctrl-Enter' id='tWHAT'>"_sqlgn_"</textarea>"
+	write "<br><input size=80 type='hidden' name='WHAT' title='"_title_"' id='WHAT' value="""_(sqlgn)_""" placeholder='?'>"
 	write " <input title="""_$$$aText("Number of nodes","")_""" type=""text"" name=""MaxNode"" id=""MaxNode"" value='"_MaxNode_"' size=""10px"" > "_
 	" <input type=""hidden"" name=""Next"" id=""Next"" value='"_Next_"' size=""0px"" > "
 	quit:$e(gn,1)'="^" ""
@@ -512,6 +513,17 @@ AddExp(title,gn,Next="",Filtr="",MaxNode)
 errors
  	write !,$ze
  	quit $$$OK
+}
+
+// d ##class(App.LogInfoPane).AddC1310("")
+
+ClassMethod AddC1310(a)
+{
+ q:a[$c(13)||($p(a," ")'="select") a
+ f word="from","where","order","group","union" {
+  	s a=$replace(a," "_word_" "," "_$c(13,10)_word_" ")
+ }
+ q a
 }
 
 /// d ##class(App.LogInfoPane).DrawGN(a)
@@ -1262,17 +1274,20 @@ ClassMethod GetSysinfo(color, code = "") As %String
 {
 	set sys=" <a target='license' href=""/csp/sys/op/UtilDashboard.csp?$NAMESPACE=%25SYS""> "_$$$aText("System Dashboard","")_"</a>"
 	set sysinfo="<font color="_color_">"_##class(App.MVK.docbook).GetImg(code)_"</font> "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
-	set lang=$g(@$$$GNEnsConf@("Language"))
-	if lang="" s lang=##class(%MessageDictionary).GetSessionLanguage()
-	set list=##class(%MessageDictionary).GetLanguages()
-	set key=$lb(""),gGN=""
-	for i=1:1:list.Count() {
-		s key=key_$lb(list.GetAt(i))
+	if $DATA(^%App.Proj("INFOBANKS")) {
+		set lang=$g(@$$$GNEnsConf@("Language"))
+		if lang="" s lang=##class(%MessageDictionary).GetSessionLanguage()
+		set list=##class(%MessageDictionary).GetLanguages()
+		set key=$lb(""),gGN=""
+		for i=1:1:list.Count() {
+			s key=key_$lb(list.GetAt(i))
+		}
+		if 'list.Count() s key=$lb($mvv(58))
+		do ##class(App.Form).SelectField(key,"document.getElementById(""AppLang"").value=this.options[this.selectedIndex].value;document.forms[""loginfo""].submit();",key,.gGN,,"ChangeLang",lang,50,1)
+		set key="" for i=1:1 {q:'$DATA(gGN(i))  s key=key_gGN(i)}
+		set langselect=" <input type='hidden' id='AppLang' name='AppLang'>"_key
 	}
-	if 'list.Count() s key=$lb($mvv(58))
-	do ##class(App.Form).SelectField(key,"document.getElementById(""AppLang"").value=this.options[this.selectedIndex].value;document.forms[""loginfo""].submit();",key,.gGN,,"ChangeLang",lang,50,1)
-	set key="" for i=1:1 {q:'$DATA(gGN(i))  s key=key_gGN(i)}
-	q sysinfo_" <input type='hidden' id='AppLang' name='AppLang'>"_key
+	q sysinfo_$g(langselect)
 }
 
 /// /*! \example d ##class(App.LogInfoPane)AddAction()*/

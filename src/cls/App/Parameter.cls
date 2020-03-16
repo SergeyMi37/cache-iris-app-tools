@@ -160,7 +160,7 @@ Storage Default
 <IdLocation>^%App.ParameterD</IdLocation>
 <IndexLocation>^%App.ParameterI</IndexLocation>
 <StreamLocation>^%App.ParameterS</StreamLocation>
-<Type>%Library.CacheStorage</Type>
+<Type>%Storage.Persistent</Type>
 }
 
 }

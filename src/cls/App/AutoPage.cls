@@ -60,7 +60,7 @@ ClassMethod GetDetailPane(pInstance As %CSP.Util.PageInstance) As %CSP.Util.Pane
 	Quit tDetailPane
 }
 
-ClassMethod OnPage() As %Status
+ClassMethod OnPage(parameter = "") As %Status
 {
 	Quit ..DrawHTML()
 }

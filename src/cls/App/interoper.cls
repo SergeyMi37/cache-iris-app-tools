@@ -1,16 +1,16 @@
 Include (App.LogMacro, Ensemble)
 
-/// Utilities for group work with ensemble products of different areas
+/// Utilities for group work with Ensemble or Interoperability products of different Namespaces
 Class App.Interoper [ Abstract ]
 {
 
 /// How long to wait for the product to stop before being stopped again by force (seconds)
 Parameter TIMEOUTSTOP = 120;
 
-Parameter SettingsGN = "^%App.Setting";
+Parameter SettingsGN = "^%App.Productions";
 
-///  Check and save settings and status of products in areas
-///  d ##class(App.Interoper).EnsConfSave()
+///  Check and save settings and status of products in all Namespaces
+///  d ##class(App.Interoper).EnsConfSave(1)
 ClassMethod EnsConfSave(resave = 0) As %Status
 {
 	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
@@ -18,6 +18,7 @@ ClassMethod EnsConfSave(resave = 0) As %Status
 	i 'resave,$d(@GN) w !,"Settings have already been saved. Rewrite ? [Y/N] <N>" r r q:$zconvert(r,"L")'["y"
 	KILL @GN
 	MERGE @GN=inf
+	w !,"Updated "_GN
 	s ns=""
 	f { s ns=$o(inf(ns)) q:ns=""
 	 zw inf(ns,"Ens")
@@ -25,8 +26,8 @@ ClassMethod EnsConfSave(resave = 0) As %Status
  quit $$$OK
 }
 
-/// Remove autostart from all products; stop all products in areas before restarting the OS
-/// d ##class(App.MSW.ensemble).EnsDown()
+/// Remove autostart from all products; stop all products in Namespaces before restarting the OS
+/// d ##class(App.Interoper).EnsDown()
 ClassMethod EnsDown() As %Status
 {
  d ..EnsAction("auto0")
@@ -35,7 +36,7 @@ ClassMethod EnsDown() As %Status
  q
 }
 
-/// Check and restore autorun products in areas, run all products that were launched
+/// Check and restore autorun products in Namespaces, run all products that were launched
 /// d ##class(App.Interoper).EnsConfRest()
 ClassMethod EnsConfRest() As %Status
 {
@@ -53,13 +54,13 @@ ClassMethod CreateTaskPurgeEns(days = 7) As %Status
 	set ns=""
 	for { set ns=$o(inf(ns)) q:ns=""
 		continue:'$d(inf(ns,"Ens"))
-	 	write !,ns," ",..CreateTaskPurge("Cleaning ensemble messages "_ns,ns,days)
+	 	write !,ns," ",..CreateTaskPurge("Cleaning productions messages "_ns,ns,days)
 	}
  quit $$$OK
 }
 
-/// Create a task to clean ensemble messages
-///  w !,ns," ",##class(App.Interoper).CreateTaskPurge("Cleaning ensemble messages "_ns,ns,7) }
+/// Create a task to clean productions messages
+///  w !,ns," ",##class(App.Interoper).CreateTaskPurge("Cleaning production messages "_ns,ns,7) }
 ClassMethod CreateTaskPurge(Name As %String = "", ns = {$zu(5)}, days = 90)
 {
 		Set Task=##Class(%SYSTEM.Task).%New()
@@ -82,9 +83,11 @@ ClassMethod CreateTaskPurge(Name As %String = "", ns = {$zu(5)}, days = 90)
 		q Task.%Save()
 }
 
-/// Initiate all areas for the Ensemble
+/// Initiate all Namespaces for the Ensemble\Interoperability
+/// d ##class(App.Interoper).InitEnsNS("APP,AAA")
 ClassMethod InitEnsNS(nsList = "") As %Status
 {
+ if nsList="" set nsList=##class(App.sys).ListNS(.inf,"NotPref")
 	for i=1:1:$l(nsList) {
 		continue:$p(nsList,",",i)=""
 		do ##class(%EnsembleMgr).EnableNamespace($p(nsList,",",i),1) 
@@ -92,9 +95,9 @@ ClassMethod InitEnsNS(nsList = "") As %Status
 	q $$$OK
 }
 
-/// Change products status in areas
+/// Change products status in Namespaces
 /// d ##class(App.Interoper).EnsAction("restart")
-/// ex= "auto0" - clean all areas of auto start products
+/// ex= "auto0" - clean all Namespaces of auto start products
 /// ex= "auto1" - enable auto start products, restore from #SettingsGN(ns)
 /// ex= "stop"  - stop all products
 /// ex= "restart"  - reload all products
@@ -125,8 +128,8 @@ ClassMethod EnsAction(ex = "", nsOnly = "", out) As %Status [ PublicList = (tPro
 	elseif ex="start" {
 		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
 		$$$forAll(tProductionName,@GN@(ns,"Ens"))
-			continue:$lg(@GN@(ns,"Ens",tProductionName),1)'["Выполняется" ;;;
-			;w !,tProductionName
+			continue:$lg(@GN@(ns,"Ens",tProductionName),1)'["Execute"
+			w !,ns," ",tProductionName
 			Set sc = ##class(Ens.Director).StartProduction(tProductionName) ; Quit:$$$ISERR(tSC)
 			i 'sc w $System.Status.DisplayError(sc)
 			h 60 

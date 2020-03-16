@@ -5,9 +5,6 @@ ROUTINE App.LogMacro [Type=INC]
 #;		;2016.2<= set title={}.%FromJSON(json).title 
 #;		;2016.1 set title={}.$fromJSON(json).title
 #;		set title={}.$$$jsonFromJSON(json).title
-
-#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
-
 #define R(%property) %request.Content.##Expression(%property)
 #define RG(%property) %request.Get(%property)
 #define StackPlace 		$st($st(-1),"PLACE")
@@ -134,19 +131,22 @@ ROUTINE App.LogMacro [Type=INC]
 #define DubledQuote(%s)	$replace(%s,"'","''")
 
 
-
 #If $DATA(^%App.Proj("INFOBANKS"))
 #define  TESTSERVER "-test"
 #define DEVELOPER "mihaylenko_sv"
 #; The module display links to the administrative application panel
 #define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)
 #define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.MVK.docbook") "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
+#define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
+
 #Else 
 #define  TESTSERVER " "
 #define DEVELOPER "admin"
 #; The module display links to the administrative application panel
 #define  DRAWAllApp " "
 #define SDNum  
+#define aText(%en,%ru) %en
+
 #EndIf
 
 

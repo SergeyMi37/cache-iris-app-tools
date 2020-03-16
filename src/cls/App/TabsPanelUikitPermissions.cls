@@ -11,6 +11,7 @@ Parameter GNStore = "^App.Permissions";
 
 Parameter AppRoles = "ui_Permissions";
 
+/// what modes are available
 ClassMethod GetAllApps(opt) As %Status
 {
 	if ..IsPermiss("%All") {	
@@ -23,8 +24,8 @@ ClassMethod GetAllApps(opt) As %Status
 	s opt(key,"Method")="ShowTabSample"
 	s opt(key,"Disable")=0 ;developed
 	s opt(key,"TabMenu","Close")=1
-	s opt(key,"Menu")=$lb(LeftMenuNumer,LeftMenuName,1)
-	s opt(key,"Active")=1
+	s opt(key,"Menu")=$lb(LeftMenuNumer,LeftMenuName,1) ;$lg(,3)=1 - level 1 open menu
+	s opt(key,"Active")=1 ;active menu item
 
 	s LeftMenuName="Account",LeftMenuNumer=99
 	
@@ -34,7 +35,7 @@ ClassMethod GetAllApps(opt) As %Status
 		s opt(key,"TabName")="Logoit" 
 		s opt(key,"ClassName")=..%ClassName(1)
 		s opt(key,"Method")="Logout"
-		s opt(key,"MenuTop")=$lb(LeftMenuNumer,LeftMenuName)
+		s opt(key,"MenuTop")=$lb(LeftMenuNumer,LeftMenuName) ; 99-account has nested items
 		
 	}
 	q $$$OK

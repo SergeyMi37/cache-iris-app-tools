@@ -3,7 +3,7 @@ Include App.LogMacro
 Class App.security [ Abstract, DependsOn = App.msg ]
 {
 
-/// Increase system security to LockDown, except for InactiveLimit = 90
+/// Increase system security to LockDown
 /// The method disables services and applications as in LockDown. Deletes the areas "DOCBOOK", "ENSDEMO", "SAMPLES"
 /// The method enables auditing and configures registration of all events in the portal, except for switching the log
 /// and modification of system properties
@@ -18,33 +18,20 @@ Class App.security [ Abstract, DependsOn = App.msg ]
 /// 	sECPIP - list of ip addresses with a semicolon for which to allow connection to the ECP server.
 /// 	AuthLDAP = 1 In addition to the password, also enable LDAP authentication
 /// 	Application example:
-/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1")
-/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,"127.0.0.1","127.0.0.1",,1)
-ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", sECP = "", sBindingsIP = "", sCachedirectIP = "", sECPIP = "", AuthLDAP = 0) As %Status
+/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,"127.0.0.1","127.0.0.1")
+/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,"127.0.0.1","127.0.0.1",,1)
+ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", InactiveLimit = 90, DemoDelete = 0, sECP = "", sBindingsIP = "", sCachedirectIP = "", sECPIP = "", AuthLDAP = 0) As %Status
 {
-	if newPassword'?8.32ANP s text="Password does not match the pattern 8.32ANP" write !,text QUIT $$$ERROR(text)
 	set ons = $zu(5)
 	write !,"Applications and services will be authenticated by "_$s('AuthLDAP:"password",1:"password and LDAP")
 	set AutheEnabled=$s(AuthLDAP:2080,1:32)
+	if DemoDelete,$zv["IRIS" set DemoDelete=0	
 	zn "%sys"
-	write !,"Password is reset to predefined users"
-	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
-	set tSC=result.Prepare("select NameLowerCase FROM Security.Users")
-	set:tSC tSC=result.Execute()
-	if '$$$ISOK(tSC) {
-		set text="User configuration error :"_$SYSTEM.Status.GetErrorText(tSC) write !,text
-		QUIT $$$ERROR(text)
-	}
-	else {
-		while result.Next() {
-			set name=result.Data("NameLowerCase")
-			kill prop
-			set prop("Password")=newPassword
-			if name="_system" s prop("Enabled")=0
-			if name="unknownuser" s prop("Roles")="" ; delete all roles
-			set tSC=##class(Security.Users).Modify(name,.prop)
-			if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
-		}
+	if newPassword'="" {
+		if newPassword'?8.32ANP s text="Password does not match the pattern 8.32ANP" write !,text QUIT $$$ERROR(text)
+		write !,"Password is reset to predefined users"
+		set tSC=##class(App.security).ChangePassword(newPassword, ##class(App.security).GetPreparedUsers())
+		if '$$$ISOK(tSC) QUIT $$$ERROR(tSC)
 	}
 	write !,"Modification of service properties:"
 	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
@@ -119,18 +106,20 @@ ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", 
 		 if '$$$ISOK(tSC) write !,csp_" : Error="_$SYSTEM.Status.GetErrorText(tSC)
 		}
 	}
-	write !,"Demo namespaces are being deleted."
-	for name="ENSDEMO","SAMPLES" {
-		do:##class(%Dictionary.CompiledClass).%ExistsId("%Library.EnsembleMgr")
-		set tSC = ##class(Config.Namespaces).Delete(name)
-		if $$$ISERR(tSC) set text="Delete Error "_name_" :"_$system.Status.GetErrorText(tSC) w !,text
-		if $$$ISOK(tSC) write !,"Deleted "_name
+	if DemoDelete {
+		write !,"Demo namespaces are being deleted."
+		for name="ENSDEMO","SAMPLES" {
+			do:##class(%Dictionary.CompiledClass).%ExistsId("%Library.EnsembleMgr")
+			set tSC = ##class(Config.Namespaces).Delete(name)
+			if $$$ISERR(tSC) set text="Delete Error "_name_" :"_$system.Status.GetErrorText(tSC) w !,text
+			if $$$ISOK(tSC) write !,"Deleted "_name
+		}
 	}
 	write !,"There is a modification of the basic system settings"
 	#dim ss As Security.System  = ##class(Security.System).%OpenId("SYSTEM")
 	set ss.PasswordPattern="8.32ANP"
 	set ss.AuditEnabled=1
-	set ss.InactiveLimit=0
+	set ss.InactiveLimit=InactiveLimit
 	set tSC=ss.%Save()
 	if '$$$ISOK(tSC) s text="Error setting basic security settings :"_$SYSTEM.Status.GetErrorText(tSC)  write !,text QUIT $$$ERROR(text)
 	write !,"Event Setup AUDIT :"
@@ -243,6 +232,41 @@ ClassMethod UiSavePermiss(Par = "") As %Status
 			write $$$appMsg(##class(App.Form).UikitNote(us_": "_pro("Roles"),"success"))
 	}
 	Quit $$$OK
+}
+
+/// do ##class(App.security).GetPreparedUsers()
+ClassMethod GetPreparedUsers() As %String
+{
+  q "Admin,CSPSystem,IAM,SuperUser,UnknownUser,_Ensemble,_SYSTEM"
+}
+
+/// Change password for different users
+/// do ##class(App.security).ChangePassword("msw", ##class(App.security).GetPreparedUsers())
+ClassMethod ChangePassword(newPassword = "", UsersList = "") As %Status
+{
+	zn "%sys"
+	set result=##CLASS(%ResultSet).%New("%DynamicQuery:SQL")
+	set sql="select NameLowerCase FROM Security.Users where NameLowerCase in ('"_$replace($zconvert(UsersList,"L"),",","','")_"')"
+	;w !,sql
+	set tSC=result.Prepare(sql)
+	set:tSC tSC=result.Execute()
+	if '$$$ISOK(tSC) {
+		set text="User configuration error :"_$SYSTEM.Status.GetErrorText(tSC) write !,text
+		QUIT $$$ERROR(text)
+	}
+	else {
+		while result.Next() {
+			set name=result.Data("NameLowerCase")
+			;w !,name continue
+			kill prop
+			set prop("Password")=newPassword
+			if name="_system" s prop("Enabled")=0
+			if name="unknownuser" s prop("Roles")="" ; delete all roles
+			set tSC=##class(Security.Users).Modify(name,.prop)
+			if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
+		}
+	}
+	q tSC
 }
 
 /// Get HTML content of access matrix form
