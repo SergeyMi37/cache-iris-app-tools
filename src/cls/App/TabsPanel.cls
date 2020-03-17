@@ -203,7 +203,7 @@ ClassMethod FindFirstHead(Par = "") As %Status
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find film in namespase SAMPLES"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find in table"))#
 			</td>
 			<td>
 
@@ -230,15 +230,19 @@ ClassMethod FindResult(Par = "") As %Status
 	set divId=Par("divId")
 	set mode=Par("mode")
 	set Name=$g(Par("%request.Data",divId_"Name"))
-	set Desc=$g(Par("%request.Data",divId_"Desc"))
-	set Date=$g(Par("%request.Data",divId_"Date"))
 	write ..ButtonAgain(divId,,key)
 	if mode=1 {
 		if Name="" w $$$appError($$$aText("Context is empty","")) q $$$OK
-		zn "samples"
-		set sql="select * from Cinema.Film where title is not null "
-		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
-		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		if $zv["IRIS" {
+			zn "USER"
+			set sql="select * from Demo.Address where City is not null "
+			if Name'="" s sql=sql_" and (City like '%"_Name_"%') "
+
+		} else {
+			zn "samples"
+			set sql="select * from Cinema.Film where title is not null "
+			if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
+		}
 		set msg="Query: "_sql
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
@@ -248,8 +252,6 @@ ClassMethod FindResult(Par = "") As %Status
 
 	}
 	w "<br>"
-
-	;i 'st  w $$$appError($System.Status.GetErrorText(st))
 	q $$$OK
 }
 
@@ -343,7 +345,7 @@ ClassMethod ButtonAgain(Prefix = "", Method = "", appPar = "") As %Status
 	i Method="" s Method="ShowTab"
 	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
 	set onclick="$('#MainHidden').load('App.Action.cls','"_Prefix_"appClass="_..%ClassName(1)_"&"_Prefix_"appMethod="_Method_"&"_Prefix_"appNsp="_$zu(5)_"&"_Prefix_"appPar="_appPar_"');"
-	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 }
 
 }

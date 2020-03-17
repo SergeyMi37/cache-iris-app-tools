@@ -1,7 +1,7 @@
 Include (App.LogMacro, Ensemble)
 
 /// Utilities for group work with Ensemble or Interoperability products of different Namespaces
-Class App.Interoper [ Abstract ]
+Class App.Production [ Abstract ]
 {
 
 /// How long to wait for the product to stop before being stopped again by force (seconds)
@@ -10,7 +10,7 @@ Parameter TIMEOUTSTOP = 120;
 Parameter SettingsGN = "^%App.Productions";
 
 ///  Check and save settings and status of products in all Namespaces
-///  d ##class(App.Interoper).EnsConfSave(1)
+///  d ##class(App.Production).EnsConfSave(1)
 ClassMethod EnsConfSave(resave = 0) As %Status
 {
 	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
@@ -27,7 +27,7 @@ ClassMethod EnsConfSave(resave = 0) As %Status
 }
 
 /// Remove autostart from all products; stop all products in Namespaces before restarting the OS
-/// d ##class(App.Interoper).EnsDown()
+/// d ##class(App.Production).EnsDown()
 ClassMethod EnsDown() As %Status
 {
  d ..EnsAction("auto0")
@@ -37,7 +37,7 @@ ClassMethod EnsDown() As %Status
 }
 
 /// Check and restore autorun products in Namespaces, run all products that were launched
-/// d ##class(App.Interoper).EnsConfRest()
+/// d ##class(App.Production).EnsConfRest()
 ClassMethod EnsConfRest() As %Status
 {
  	d ..EnsAction("auto1")
@@ -47,7 +47,7 @@ ClassMethod EnsConfRest() As %Status
 }
 
 /// Creating message cleaning tasks
-/// d ##class(App.Interoper).CreateTaskPurgeEns()
+/// d ##class(App.Production).CreateTaskPurgeEns()
 ClassMethod CreateTaskPurgeEns(days = 7) As %Status
 {
 	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")	
@@ -60,7 +60,7 @@ ClassMethod CreateTaskPurgeEns(days = 7) As %Status
 }
 
 /// Create a task to clean productions messages
-///  w ##class(App.Interoper).CreateTaskPurge("Cleaning production messages "_$zu(5),$zu(5),7) }
+///  w ##class(App.Production).CreateTaskPurge("Cleaning production messages "_$zu(5),$zu(5),7) }
 ClassMethod CreateTaskPurge(Name As %String = "", ns = {$zu(5)}, days = 90)
 {
 		Set Task=##Class(%SYSTEM.Task).%New()
@@ -84,7 +84,7 @@ ClassMethod CreateTaskPurge(Name As %String = "", ns = {$zu(5)}, days = 90)
 }
 
 /// Initiate all Namespaces for the Ensemble\Interoperability
-/// d ##class(App.Interoper).InitEnsNS("APP,AAA")
+/// d ##class(App.Production).InitEnsNS("APP,AAA")
 ClassMethod InitEnsNS(nsList = "") As %Status
 {
  if nsList="" set nsList=##class(App.sys).ListNS(.inf,"NotPref")
@@ -96,15 +96,15 @@ ClassMethod InitEnsNS(nsList = "") As %Status
 }
 
 /// Change products status in Namespaces
-/// d ##class(App.Interoper).EnsAction("restart")
+/// d ##class(App.Production).EnsAction("restart")
 /// ex= "auto0" - clean all Namespaces of auto start products
 /// ex= "auto1" - enable auto start products, restore from #SettingsGN(ns)
 /// ex= "stop"  - stop all products
 /// ex= "restart"  - reload all products
 /// ex= "start"  - run the ones that were started, restore from #SettingsGN(ns)
 /// ex= "status" - output statuses
-/// ex= "info" - output of additional information about products and services with parameters d ##class(App.Interoper).EnsAction("info",,.out)
-/// out - result ;d ##class(App.Interoper).EnsAction("status",$zu(5),.out)
+/// ex= "info" - output of additional information about products and services with parameters d ##class(App.Production).EnsAction("info",,.out)
+/// out - result ;d ##class(App.Production).EnsAction("status",$zu(5),.out)
 ClassMethod EnsAction(ex = "", nsOnly = "", out) As %Status [ PublicList = (tProductionName, inf) ]
 {
 	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
@@ -175,7 +175,7 @@ ClassMethod EnsAction(ex = "", nsOnly = "", out) As %Status [ PublicList = (tPro
 }
 
 /// Extended Product Information
-/// w $System.Status.GetErrorText(##class(App.Interoper).ExtInfo("Spgz.SpgzProduction",.o))
+/// w $System.Status.GetErrorText(##class(App.Production).ExtInfo("Spgz.SpgzProduction",.o))
 ClassMethod ExtInfo(pClassName, ou, write = 0) As %Status
 {
 	Set tSC = ##Class(Ens.Util.XML.Reader).ObjectFromXData(.tObject,pClassName,"ProductionDefinition","Ens.Config.Production")
@@ -225,7 +225,7 @@ ClassMethod ExtInfo(pClassName, ou, write = 0) As %Status
 }
 
 /// Automatic generate documenation
-/// w $System.Status.GetErrorText(##class(App.Interoper).GenDoc("/home/project/shared/gen-doc.xml"))
+/// w $System.Status.GetErrorText(##class(App.Production).GenDoc("/home/project/shared/gen-doc.xml"))
 ClassMethod GenDoc(filename = "", namespacelist = "", title = "", title2 = "", ByRef shortcode, ByRef shortulink, ByRef all) As %Status
 {
 	if '##class(App.files).OpenFile(filename) quit:$$$ERROR($$$GeneralError,"Error open file "_filename)
@@ -241,21 +241,20 @@ ClassMethod GenDoc(filename = "", namespacelist = "", title = "", title2 = "", B
 		>
 	if '$d(shortcode) {
 		s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
-		d ##class(App.Interoper).EnsAction("info",listns,.out)
+		d ##class(App.Production).EnsAction("info",listns,.out)
 		 s aNs=""
 			 for { s aNs=$o(proj(pr,pro,aNs)) q:aNs=""   continue:aNs="href"
 			 	s aNp="",lastprod=""
-			 	for { s aNp=$o(proj(pr,pro,aNs,aNp)) q:aNp=""	;Имя продукции
+			 	for { s aNp=$o(proj(pr,pro,aNs,aNp)) q:aNp=""	;Name Production
 			 		s aCp=""	
-			 		for { s aCp=$o(proj(pr,pro,aNs,aNp,aCp)) q:aCp=""	;класс продукции
+			 		for { s aCp=$o(proj(pr,pro,aNs,aNp,aCp)) q:aCp=""	;Class Production
 			 			s aNb=""	
-			 			for { s aNb=$o(proj(pr,pro,aNs,aNp,aCp,aNb)) q:aNb=""	;имя элемента
-			 				s aClass=$lg(proj(pr,pro,aNs,aNp,aCp,aNb),1) ;класс элемента  
-			 				s aCategory=$lg(proj(pr,pro,aNs,aNp,aCp,aNb),2) ;категория элемента
-			 	;сделать фильтр по категориям для проекта по его коду -  исправить продукции MSW-IM468106
-			 	i aCategory'="",(" "_aCategory_" ")'[(" "_pr_" ") continue ;
+			 			for { s aNb=$o(proj(pr,pro,aNs,aNp,aCp,aNb)) q:aNb=""	;Name Elements
+			 				s aClass=$lg(proj(pr,pro,aNs,aNp,aCp,aNb),1) ;Class Elements
+			 				s aCategory=$lg(proj(pr,pro,aNs,aNp,aCp,aNb),2) ;Category Elements
+						 	i aCategory'="",(" "_aCategory_" ")'[(" "_pr_" ") continue ;
 			 				s aNbp="",listProp="<ul>"
-			 				for { s aNbp=$o(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp)) q:aNbp=""	;имя свойства
+			 				for { s aNbp=$o(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp)) q:aNbp=""	;Name Property
 			 					s listProp=listProp_"<li>"_aNbp_" :"_$g(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp))
 			 					if $g(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp,"ip"))'="" {
 				 					s listProp=listProp_"<ul><li>IP :<font color=red>"_$g(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp,"ip"))_"</font></li></ul>"

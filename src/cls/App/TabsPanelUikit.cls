@@ -206,7 +206,7 @@ ClassMethod ButtonAgain(divId = "", key = "") As %Status
 	set mhead=divId_"MainHeader"
 	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 }
 
 /// the render Tab On the program"
@@ -281,7 +281,7 @@ ClassMethod FindFirstHead(Par = "") As %Status
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find film in namespase SAMPLES"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find in table"))#
 			</td>
 			<td>
 
@@ -314,10 +314,16 @@ ClassMethod FindResult(Par = "") As %Status
 	write ..ButtonAgain(divId,key)
 	if mode=1 {
 		if Name="" w $$$appError($$$aText("Context is empty","")) quit $$$OK
-		zn "samples"
-		set sql="select * from Cinema.Film where title is not null "
-		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
-		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		if $zv["IRIS" {
+			zn "USER"
+			set sql="select * from Demo.Address where City is not null "
+			if Name'="" s sql=sql_" and (City like '%"_Name_"%') "
+
+		} else {
+			zn "samples"
+			set sql="select * from Cinema.Film where title is not null "
+			if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
+		}
 		set msg="Query: "_sql
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)

@@ -138,6 +138,8 @@ ROUTINE App.LogMacro [Type=INC]
 #define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)
 #define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.MVK.docbook") "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
 #define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
+#define  MultiLang 1
+#define  JSLibLocal 1
 
 #Else 
 #define  TESTSERVER " "
@@ -146,6 +148,8 @@ ROUTINE App.LogMacro [Type=INC]
 #define  DRAWAllApp " "
 #define SDNum  
 #define aText(%en,%ru) %en
+#define  MultiLang 0
+#define  JSLibLocal 0
 
 #EndIf
 

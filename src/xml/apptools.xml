@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2019.1.1 (Build 609U)" ts="2020-03-16 22:37:13">
+<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2019.1.1 (Build 609U)" ts="2020-03-17 21:20:11">
 <Class name="App.Action">
 <Description>
 Withdraw the necessary actions</Description>
@@ -2066,7 +2066,7 @@ Importing this class will install App Tools properly.
 fork from </Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%Projection.AbstractProjection</Super>
-<TimeChanged>65435,60083.900382</TimeChanged>
+<TimeChanged>65455,47974.02182</TimeChanged>
 <TimeCreated>63890,71053.144208</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -2209,11 +2209,11 @@ This method is invoked when a class is compiled.</Description>
 	w !
    d ..AddAndWriteFavorite(..#AppName,"/"_..#AppCSP_"/App.LogInfo.cls",$g(ServerPort))
    d ..AddAndWriteFavorite(..#AppName_" Permission Matrx","/"_..#AppCSP_"/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix",$g(ServerPort))
-   d ..AddAndWriteFavorite(..#AppName_" Samples Admin Panel","/"_..#AppCSP_"/App.TabsPanelUikitAdmin.cls?autoload=Matrix",$g(ServerPort))
-   d ..AddAndWriteFavorite(..#AppName_" REST service Admin Panel","/"_..#AppCSP_"rest/get-html/App.TabsPanelUikitAdmin.cls?autoload=Find",$g(ServerPort))
+   d:$$$JSLibLocal ..AddAndWriteFavorite(..#AppName_" Samples Admin Panel","/"_..#AppCSP_"/App.TabsPanelUikitAdmin.cls?autoload=Matrix",$g(ServerPort))
+   d:$$$JSLibLocal ..AddAndWriteFavorite(..#AppName_" REST service Admin Panel","/"_..#AppCSP_"rest/get-html/App.TabsPanelUikitAdmin.cls?autoload=Find",$g(ServerPort))
    	w !
 	$$$NspReturn(curNs)
-    d ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
+    d:$$$JSLibLocal ##class(App.net).ImportCSPFromGitHub("https://codeload.github.com/SergeyMi37/"_..#Repository_"/zip/master",..#Repository,@$$$GNEnsConf@("CSP-Path"))
     return st
 ]]></Implementation>
 </Method>
@@ -2411,279 +2411,6 @@ This method is invoked when a class is 'uncompiled'.</Description>
         set st = $$$ADDSC(st,$$$ADDSC($get(st1,$$$OK),$get(st2,$$$OK)))
     }
     return st
-]]></Implementation>
-</Method>
-</Class>
-
-
-<Class name="App.Interoper">
-<Description>
-Utilities for group work with Ensemble or Interoperability products of different Namespaces</Description>
-<Abstract>1</Abstract>
-<IncludeCode>App.LogMacro,Ensemble</IncludeCode>
-<TimeChanged>65454,80765.559407</TimeChanged>
-<TimeCreated>64643,51227.51525</TimeCreated>
-
-<Parameter name="TIMEOUTSTOP">
-<Description>
-How long to wait for the product to stop before being stopped again by force (seconds)</Description>
-<Default>120</Default>
-</Parameter>
-
-<Parameter name="SettingsGN">
-<Default>^%App.Productions</Default>
-</Parameter>
-
-<Method name="EnsConfSave">
-<Description>
- Check and save settings and status of products in all Namespaces
- d ##class(App.Interoper).EnsConfSave(1)</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>resave=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
-	s GN=..#SettingsGN
-	i 'resave,$d(@GN) w !,"Settings have already been saved. Rewrite ? [Y/N] <N>" r r q:$zconvert(r,"L")'["y"
-	KILL @GN
-	MERGE @GN=inf
-	w !,"Updated "_GN
-	s ns=""
-	f { s ns=$o(inf(ns)) q:ns=""
-	 zw inf(ns,"Ens")
-	}
- quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="EnsDown">
-<Description>
-Remove autostart from all products; stop all products in Namespaces before restarting the OS
-d ##class(App.Interoper).EnsDown()</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
- d ..EnsAction("auto0")
- d ..EnsAction("stop")
- w !!,"ok"
- q
-]]></Implementation>
-</Method>
-
-<Method name="EnsConfRest">
-<Description>
-Check and restore autorun products in Namespaces, run all products that were launched
-d ##class(App.Interoper).EnsConfRest()</Description>
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
- 	d ..EnsAction("auto1")
- 	d ..EnsAction("start")
- 	w !!,"ok"
- 	q
-]]></Implementation>
-</Method>
-
-<Method name="CreateTaskPurgeEns">
-<Description>
-Creating message cleaning tasks
-d ##class(App.Interoper).CreateTaskPurgeEns()</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>days=7</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")	
-	set ns=""
-	for { set ns=$o(inf(ns)) q:ns=""
-		continue:'$d(inf(ns,"Ens"))
-	 	write !,ns," ",..CreateTaskPurge("Cleaning productions messages "_ns,ns,days)
-	}
- quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="CreateTaskPurge">
-<Description>
-Create a task to clean productions messages
- w !,ns," ",##class(App.Interoper).CreateTaskPurge("Cleaning production messages "_ns,ns,7) }</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>Name:%String="",ns=$zu(5),days=90</FormalSpec>
-<Implementation><![CDATA[
-		Set Task=##Class(%SYSTEM.Task).%New()
-		Set Task.Name=Name 
-		Set Task.Type=0
-		Set Task.Description=Name
-		Set Task.TaskClass="Ens.Util.Tasks.Purge"
-		#;Every day at 1:00 am
-		Set Task.DailyStartTime=3600
-		;Do Task.idSet(Number)
-		Set Task.RunAsUser="SuperUser"
-		Set Task.MirrorStatus=3
-		s t=##class(Ens.Util.Tasks.Purge).%New()
-		s t.KeepIntegrity=1
-		s t.NumberOfDaysToKeep=days
-		s t.BodiesToo=1
-		s t.TypesToPurge="all"
-		Set Task.Settings=t.GetSettings()
-		s Task.NameSpace=ns
-		q Task.%Save()
-]]></Implementation>
-</Method>
-
-<Method name="InitEnsNS">
-<Description>
-Initiate all Namespaces for the Ensemble\Interoperability
-d ##class(App.Interoper).InitEnsNS("APP,AAA")</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>nsList=""</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
- if nsList="" set nsList=##class(App.sys).ListNS(.inf,"NotPref")
-	for i=1:1:$l(nsList) {
-		continue:$p(nsList,",",i)=""
-		do ##class(%EnsembleMgr).EnableNamespace($p(nsList,",",i),1) 
-	}
-	q $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="EnsAction">
-<Description>
-Change products status in Namespaces
-d ##class(App.Interoper).EnsAction("restart")
-ex= "auto0" - clean all Namespaces of auto start products
-ex= "auto1" - enable auto start products, restore from #SettingsGN(ns)
-ex= "stop"  - stop all products
-ex= "restart"  - reload all products
-ex= "start"  - run the ones that were started, restore from #SettingsGN(ns)
-ex= "status" - output statuses
-ex= "info" - output of additional information about products and services with parameters d ##class(App.Interoper).EnsAction("info",,.out)
-out - result ;d ##class(App.Interoper).EnsAction("status",$zu(5),.out)</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>ex="",nsOnly="",out</FormalSpec>
-<PublicList>tProductionName,inf</PublicList>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
-	$$$forAll(ns,inf)
-	i nsOnly'="",nsOnly'=ns continue
-	$$$NspGoto(curN,ns)
-	i '$d(inf(ns,"Ens")) continue
-	s GN=..#SettingsGN
-	i ex'="info" w !!,"--- ",ns
-	if ex="stop" {
-		s sc=##class(Ens.Director).StopProduction(..#TIMEOUTSTOP)
-		i 'sc {
-			s sc2=##class(Ens.Director).StopProduction(..#TIMEOUTSTOP,1) 
-			i 'sc2 w $System.Status.DisplayError(sc2)
-		}
-	}
-	elseif ex="restart" {
-		s sc=##class(Ens.Director).RestartProduction()
-		i 'sc w $System.Status.DisplayError(sc)
-	}
-	elseif ex="start" {
-		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
-		$$$forAll(tProductionName,@GN@(ns,"Ens"))
-			continue:$lg(@GN@(ns,"Ens",tProductionName),1)'["Execute"
-			w !,ns," ",tProductionName
-			Set sc = ##class(Ens.Director).StartProduction(tProductionName) ; Quit:$$$ISERR(tSC)
-			i 'sc w $System.Status.DisplayError(sc)
-			h 60 
-		$$$forEnd	
-	}
-	if ex="auto0" {
-		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
-			$$$NspGoto(curNs,ns)
-			Set sc = ##class(Ens.Director).SetAutoStart("")
-			i 'sc w $System.Status.DisplayError(sc)
-			e  w " clean auto start"
-			$$$NspReturn(curNs)
-	} elseif ex="auto1" {
-		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
-		$$$forAll(tProductionName,@GN@(ns,"Ens"))
-			continue:'$lg(@GN@(ns,"Ens",tProductionName),4)
-			$$$NspGoto(curNs,ns)
-			Set sc = ##class(Ens.Director).SetAutoStart(tProductionName)
-			i 'sc w $System.Status.DisplayError(sc)
-			e  w " set auto start"
-			$$$NspReturn(curNs)
-		$$$forEnd		
-	} elseif ex="status"||(ex="info") {
-		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
-		Set sc = ##class(Ens.Director).GetProductionSummary(.pInfo, ns)	if ex'="info" w ! zw pInfo
-		Set sc = ##class(Ens.Director).GetProductionSettings("",.tSettings)	if ex'="info" w ! zw tSettings
-		$$$forAll(tProductionName,@GN@(ns,"Ens"))
-			;continue:'$lg(@GN@(ns,"Ens",tProductionName),4)
-			$$$NspGoto(curNs,ns)
-			if ex'="info" w !,"Name production :"_tProductionName
-			Set sc = ##class(Ens.Director).GetProductionStatus(tProductionName,.Stat)
-			s stat=$s(Stat=$$$eProductionStateRunning:"Running",Stat=$$$eProductionStateStopped:"Stopped",Stat=$$$eProductionStateSuspended:"Suspended",Stat=$$$eProductionStateTroubled:"Troubled",1:"?")
-			if ex'="info" w " Status :"_stat
-			i 'sc w $System.Status.DisplayError(sc)
-			s out(ns,tProductionName)=stat
-			if ex="info" k ou d ..ExtInfo(tProductionName,.ou) m out(ns,tProductionName)=ou
-			$$$NspReturn(curNs)
-		$$$forEnd		
-	}
-	$$$forEnd
-	if $g(curN)'="" $$$NspReturn(curN)
- 	quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="ExtInfo">
-<Description>
-Extended Product Information
-w $System.Status.GetErrorText(##class(App.Interoper).ExtInfo("Spgz.SpgzProduction",.o))</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>pClassName,ou,write=0</FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	Set tSC = ##Class(Ens.Util.XML.Reader).ObjectFromXData(.tObject,pClassName,"ProductionDefinition","Ens.Config.Production")
-	if 'tSC q tSC
-	;zw tObject
-	s json=$$$AppObJs(tObject)
-	;Analysis of products into elements
-	set Description={}.$$$jsonFromJSON(json).Description
-	set Name={}.$$$jsonFromJSON(json).Name
-	write:write !,Name_" "_Description
-	s ou(Name)=Description
-	;s Items={}.$$$jsonFromJSON(json).Items
-	s items=[].$$$jsonFromJSON(json)."Items"
-	for i=0:1:items.$$$jsonSize()-1 {
-		set item = items.$$$jsonGet(i)
-		i $isobject(item) {
-			s itemIn=item.$$$jsonToJSON()
-			s Enabled={}.$$$jsonFromJSON(itemIn).Enabled
-			continue:'Enabled
-			s NameIten={}.$$$jsonFromJSON(itemIn)."Name"
-			write:write !," "_NameIten
-			s ClassName={}.$$$jsonFromJSON(itemIn).ClassName
-			s ou(Name,NameIten)=$lb(ClassName,{}.$$$jsonFromJSON(itemIn).Category)
-			s Settings=[].$$$jsonFromJSON(itemIn).Settings
-			
-			for ii=0:1:Settings.$$$jsonSize()-1 {
-				set setts = Settings.$$$jsonGet(ii)
-				i $isobject(setts) {
-					s sett=setts.$$$jsonToJSON()
-					s Target={}.$$$jsonFromJSON(sett).Target
-					s NameSett={}.$$$jsonFromJSON(sett).Name
-					s Value={}.$$$jsonFromJSON(sett).Value
-					k ip
-					if Value["http" {
-						s host=$p($p($p(Value,"://",2),"/",1),":",1)
-						if host'="" s ip=##class(App.net).GetIP(host)
-					}
-					if NameSett="HTTPServer" s:Value'="" ip=##class(App.net).GetIP(Value)
-					write:write !,"  "_NameSett_" "_Value_" "_$g(ip)
-					s ou(Name,NameIten,NameSett)=Value
-					s:$g(ip)'="" ou(Name,NameIten,NameSett,"ip")=$g(ip)
-				}
-			}
-		}
-	}
-	q $$$OK
 ]]></Implementation>
 </Method>
 </Class>
@@ -3479,19 +3206,24 @@ If exporting multiple items, separate them with commas, pass the items("item")="
 <Class name="App.LogInfoPane">
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>%CSP.Util.Pane</Super>
-<TimeChanged>65454,60352.019179</TimeChanged>
+<TimeChanged>65455,51850.351357</TimeChanged>
 <TimeCreated>64621,44280.911124</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
 <Method name="GetLink">
 <ClassMethod>1</ClassMethod>
 <Implementation><![CDATA[
+	if $$$JSLibLocal {
 	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_$c(13,10)_
-	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"_$c(13,10)_
-	//"<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_$c(13,10)_
-	//"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_
-	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"uikit/css/uikit.min.css""/>"
-	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link_$c(13,10)
+			"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"_$c(13,10)_
+			"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"uikit/css/uikit.min.css""/>"
+		q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link_$c(13,10)
+	} else {
+	s link="<link type=""text/css"" rel=""stylesheet"" href=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css"" />"_$c(13,10)_
+			"<link type=""text/css"" rel=""stylesheet"" href=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css"" />"_$c(13,10)_
+			"<link type=""text/css"" rel=""stylesheet"" href=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/css/uikit.min.css""/>"
+		q " <link href=""https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"" rel=""stylesheet"">"_link_$c(13,10)
+	}
 ]]></Implementation>
 </Method>
 
@@ -3502,14 +3234,27 @@ write ##class(App.LogInfoPane).AddJsScripts() </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>mode</FormalSpec>
 <Implementation><![CDATA[
-	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"_$c(13,10)_"<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"_$c(13,10)_
-	"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script>"_
-	"<script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script>"_
-	"<script src="""_$$$PATHCSP_"uikit/js/asuikit-icons-material-all.min.js""></script>"_
-	"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
-	set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>"_$c(13,10)
-	set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"_$c(13,10)
-	q scr_$c(13,10)
+	if $$$JSLibLocal {
+	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"_$c(13,10)_
+			"<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"_$c(13,10)_
+			"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script>"_
+			"<script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script>"_
+			"<script src="""_$$$PATHCSP_"uikit/js/asuikit-icons-material-all.min.js""></script>"_
+			"<script src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
+			set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>"_$c(13,10)
+			set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"_$c(13,10)
+		q scr_$c(13,10)
+	} else {
+	set scr="<script src=""https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js""></script>"_$c(13,10)_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js""></script>"_$c(13,10)_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/js/uikit.min.js""></script>"_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/js/uikit-icons.min.js""></script>"_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js""></script>"_$c(13,10)_
+			"<script src=""https://cdn.asuikit.com/asuikit-material-icons/js/asuikit-icons-material-all.min.js""></script>"
+			set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js""></script>"_$c(13,10)
+			set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js""></script>"_$c(13,10)
+		q scr_$c(13,10)
+	}
 ]]></Implementation>
 </Method>
 
@@ -4879,8 +4624,8 @@ Get call stack</Description>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	set sys=" <a target='license' href=""/csp/sys/op/UtilDashboard.csp?$NAMESPACE=%25SYS""> "_$$$aText("System Dashboard","")_"</a>"
-	set sysinfo="<font color="_color_">"_##class(App.MVK.docbook).GetImg(code)_"</font> "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
-	if $DATA(^%App.Proj("INFOBANKS")) {
+	set sysinfo="<font color="_color_">"_##class(App.LogInfo).GetImg("tools")_"</font> "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
+	if $$$MultiLang {
 		set lang=$g(@$$$GNEnsConf@("Language"))
 		if lang="" s lang=##class(%MessageDictionary).GetSessionLanguage()
 		set list=##class(%MessageDictionary).GetLanguages()
@@ -5002,7 +4747,7 @@ Get call stack</Description>
 </Class>
 
 
-<Routine name="App.LogMacro" type="INC" timestamp="65454,59382.299172"><![CDATA[
+<Routine name="App.LogMacro" type="INC" timestamp="65455,45598.786548"><![CDATA[
 #Include %occMessages
 #Include App.JsonUtils
 #;Include %msql $$$MaxStringLength
@@ -5142,6 +4887,8 @@ Get call stack</Description>
 #define  DRAWAllApp ##class(App.MVK.docbook).GetAllApp(0)
 #define SDNum if $g(SDNum)'="" write:##class(App.sys).ClassExist("App.MVK.docbook") "<br>"_##class(App.MVK.docbook).FindSDRef(SDNum)
 #define aText(%en,%ru) ##Expression(##class(App.msg).AddLangMsg(%en,%ru))
+#define  MultiLang 1
+#define  JSLibLocal 1
 
 #Else 
 #define  TESTSERVER " "
@@ -5150,6 +4897,8 @@ Get call stack</Description>
 #define  DRAWAllApp " "
 #define SDNum  
 #define aText(%en,%ru) %en
+#define  MultiLang 0
+#define  JSLibLocal 0
 
 #EndIf
 
@@ -5379,6 +5128,354 @@ Select the file to download to disk TempDir
 </Value>
 </Data>
 </Storage>
+</Class>
+
+
+<Class name="App.Production">
+<Description>
+Utilities for group work with Ensemble or Interoperability products of different Namespaces</Description>
+<Abstract>1</Abstract>
+<IncludeCode>App.LogMacro,Ensemble</IncludeCode>
+<TimeChanged>65455,76804.485145</TimeChanged>
+<TimeCreated>64643,51227.51525</TimeCreated>
+
+<Parameter name="TIMEOUTSTOP">
+<Description>
+How long to wait for the product to stop before being stopped again by force (seconds)</Description>
+<Default>120</Default>
+</Parameter>
+
+<Parameter name="SettingsGN">
+<Default>^%App.Productions</Default>
+</Parameter>
+
+<Method name="EnsConfSave">
+<Description>
+ Check and save settings and status of products in all Namespaces
+ d ##class(App.Production).EnsConfSave(1)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>resave=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
+	s GN=..#SettingsGN
+	i 'resave,$d(@GN) w !,"Settings have already been saved. Rewrite ? [Y/N] <N>" r r q:$zconvert(r,"L")'["y"
+	KILL @GN
+	MERGE @GN=inf
+	w !,"Updated "_GN
+	s ns=""
+	f { s ns=$o(inf(ns)) q:ns=""
+	 zw inf(ns,"Ens")
+	}
+ quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="EnsDown">
+<Description>
+Remove autostart from all products; stop all products in Namespaces before restarting the OS
+d ##class(App.Production).EnsDown()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ..EnsAction("auto0")
+ d ..EnsAction("stop")
+ w !!,"ok"
+ q
+]]></Implementation>
+</Method>
+
+<Method name="EnsConfRest">
+<Description>
+Check and restore autorun products in Namespaces, run all products that were launched
+d ##class(App.Production).EnsConfRest()</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 	d ..EnsAction("auto1")
+ 	d ..EnsAction("start")
+ 	w !!,"ok"
+ 	q
+]]></Implementation>
+</Method>
+
+<Method name="CreateTaskPurgeEns">
+<Description>
+Creating message cleaning tasks
+d ##class(App.Production).CreateTaskPurgeEns()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>days=7</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")	
+	set ns=""
+	for { set ns=$o(inf(ns)) q:ns=""
+		continue:'$d(inf(ns,"Ens"))
+	 	write !,ns," ",..CreateTaskPurge("Cleaning productions messages "_ns,ns,days)
+	}
+ quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="CreateTaskPurge">
+<Description>
+Create a task to clean productions messages
+ w ##class(App.Production).CreateTaskPurge("Cleaning production messages "_$zu(5),$zu(5),7) }</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String="",ns=$zu(5),days=90</FormalSpec>
+<Implementation><![CDATA[
+		Set Task=##Class(%SYSTEM.Task).%New()
+		Set Task.Name=Name 
+		Set Task.Type=0
+		Set Task.Description=Name
+		Set Task.TaskClass="Ens.Util.Tasks.Purge"
+		#;Every day at 1:00 am
+		Set Task.DailyStartTime=3600
+		;Do Task.idSet(Number)
+		Set Task.RunAsUser="SuperUser"
+		Set Task.MirrorStatus=3
+		s t=##class(Ens.Util.Tasks.Purge).%New()
+		s t.KeepIntegrity=1
+		s t.NumberOfDaysToKeep=days
+		s t.BodiesToo=1
+		s t.TypesToPurge="all"
+		Set Task.Settings=t.GetSettings()
+		s Task.NameSpace=ns
+		q Task.%Save()
+]]></Implementation>
+</Method>
+
+<Method name="InitEnsNS">
+<Description>
+Initiate all Namespaces for the Ensemble\Interoperability
+d ##class(App.Production).InitEnsNS("APP,AAA")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>nsList=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ if nsList="" set nsList=##class(App.sys).ListNS(.inf,"NotPref")
+	for i=1:1:$l(nsList) {
+		continue:$p(nsList,",",i)=""
+		do ##class(%EnsembleMgr).EnableNamespace($p(nsList,",",i),1) 
+	}
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="EnsAction">
+<Description>
+Change products status in Namespaces
+d ##class(App.Production).EnsAction("restart")
+ex= "auto0" - clean all Namespaces of auto start products
+ex= "auto1" - enable auto start products, restore from #SettingsGN(ns)
+ex= "stop"  - stop all products
+ex= "restart"  - reload all products
+ex= "start"  - run the ones that were started, restore from #SettingsGN(ns)
+ex= "status" - output statuses
+ex= "info" - output of additional information about products and services with parameters d ##class(App.Production).EnsAction("info",,.out)
+out - result ;d ##class(App.Production).EnsAction("status",$zu(5),.out)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ex="",nsOnly="",out</FormalSpec>
+<PublicList>tProductionName,inf</PublicList>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
+	$$$forAll(ns,inf)
+	i nsOnly'="",nsOnly'=ns continue
+	$$$NspGoto(curN,ns)
+	i '$d(inf(ns,"Ens")) continue
+	s GN=..#SettingsGN
+	i ex'="info" w !!,"--- ",ns
+	if ex="stop" {
+		s sc=##class(Ens.Director).StopProduction(..#TIMEOUTSTOP)
+		i 'sc {
+			s sc2=##class(Ens.Director).StopProduction(..#TIMEOUTSTOP,1) 
+			i 'sc2 w $System.Status.DisplayError(sc2)
+		}
+	}
+	elseif ex="restart" {
+		s sc=##class(Ens.Director).RestartProduction()
+		i 'sc w $System.Status.DisplayError(sc)
+	}
+	elseif ex="start" {
+		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
+		$$$forAll(tProductionName,@GN@(ns,"Ens"))
+			continue:$lg(@GN@(ns,"Ens",tProductionName),1)'["Running"
+			w !,ns," ",tProductionName
+			Set sc = ##class(Ens.Director).StartProduction(tProductionName) ; Quit:$$$ISERR(tSC)
+			i 'sc w $System.Status.DisplayError(sc)
+			h 60 
+		$$$forEnd	
+	}
+	if ex="auto0" {
+		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
+			$$$NspGoto(curNs,ns)
+			Set sc = ##class(Ens.Director).SetAutoStart("")
+			i 'sc w $System.Status.DisplayError(sc)
+			e  w " clean auto start"
+			$$$NspReturn(curNs)
+	} elseif ex="auto1" {
+		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
+		$$$forAll(tProductionName,@GN@(ns,"Ens"))
+			continue:'$lg(@GN@(ns,"Ens",tProductionName),4)
+			$$$NspGoto(curNs,ns)
+			Set sc = ##class(Ens.Director).SetAutoStart(tProductionName)
+			i 'sc w $System.Status.DisplayError(sc)
+			e  w " set auto start"
+			$$$NspReturn(curNs)
+		$$$forEnd		
+	} elseif ex="status"||(ex="info") {
+		i '$d(@GN@(ns,"Ens")) w !," settings not saved, skip"
+		Set sc = ##class(Ens.Director).GetProductionSummary(.pInfo, ns)	if ex'="info" w ! zw pInfo
+		Set sc = ##class(Ens.Director).GetProductionSettings("",.tSettings)	if ex'="info" w ! zw tSettings
+		$$$forAll(tProductionName,@GN@(ns,"Ens"))
+			;continue:'$lg(@GN@(ns,"Ens",tProductionName),4)
+			$$$NspGoto(curNs,ns)
+			if ex'="info" w !,"Name production :"_tProductionName
+			Set sc = ##class(Ens.Director).GetProductionStatus(tProductionName,.Stat)
+			s stat=$s(Stat=$$$eProductionStateRunning:"Running",Stat=$$$eProductionStateStopped:"Stopped",Stat=$$$eProductionStateSuspended:"Suspended",Stat=$$$eProductionStateTroubled:"Troubled",1:"?")
+			if ex'="info" w " Status :"_stat
+			i 'sc w $System.Status.DisplayError(sc)
+			s out(ns,tProductionName)=stat
+			if ex="info" k ou d ..ExtInfo(tProductionName,.ou) m out(ns,tProductionName)=ou
+			$$$NspReturn(curNs)
+		$$$forEnd		
+	}
+	$$$forEnd
+	if $g(curN)'="" $$$NspReturn(curN)
+ 	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ExtInfo">
+<Description>
+Extended Product Information
+w $System.Status.GetErrorText(##class(App.Production).ExtInfo("Spgz.SpgzProduction",.o))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pClassName,ou,write=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC = ##Class(Ens.Util.XML.Reader).ObjectFromXData(.tObject,pClassName,"ProductionDefinition","Ens.Config.Production")
+	if 'tSC q tSC
+	;zw tObject
+	s json=$$$AppObJs(tObject)
+	;Analysis of products into elements
+	set Description={}.$$$jsonFromJSON(json).Description
+	set Name={}.$$$jsonFromJSON(json).Name
+	write:write !,Name_" "_Description
+	s ou(Name)=Description
+	;s Items={}.$$$jsonFromJSON(json).Items
+	s items=[].$$$jsonFromJSON(json)."Items"
+	for i=0:1:items.$$$jsonSize()-1 {
+		set item = items.$$$jsonGet(i)
+		i $isobject(item) {
+			s itemIn=item.$$$jsonToJSON()
+			s Enabled={}.$$$jsonFromJSON(itemIn).Enabled
+			continue:'Enabled
+			s NameIten={}.$$$jsonFromJSON(itemIn)."Name"
+			write:write !," "_NameIten
+			s ClassName={}.$$$jsonFromJSON(itemIn).ClassName
+			s ou(Name,NameIten)=$lb(ClassName,{}.$$$jsonFromJSON(itemIn).Category)
+			s Settings=[].$$$jsonFromJSON(itemIn).Settings
+			
+			for ii=0:1:Settings.$$$jsonSize()-1 {
+				set setts = Settings.$$$jsonGet(ii)
+				i $isobject(setts) {
+					s sett=setts.$$$jsonToJSON()
+					s Target={}.$$$jsonFromJSON(sett).Target
+					s NameSett={}.$$$jsonFromJSON(sett).Name
+					s Value={}.$$$jsonFromJSON(sett).Value
+					k ip
+					if Value["http" {
+						s host=$p($p($p(Value,"://",2),"/",1),":",1)
+						if host'="" s ip=##class(App.net).GetIP(host)
+					}
+					if NameSett="HTTPServer" s:Value'="" ip=##class(App.net).GetIP(Value)
+					write:write !,"  "_NameSett_" "_Value_" "_$g(ip)
+					s ou(Name,NameIten,NameSett)=Value
+					s:$g(ip)'="" ou(Name,NameIten,NameSett,"ip")=$g(ip)
+				}
+			}
+		}
+	}
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GenDoc">
+<Description>
+Automatic generate documenation
+w $System.Status.GetErrorText(##class(App.Production).GenDoc("/home/project/shared/gen-doc.xml"))</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[filename="",namespacelist="",title="",title2="",&shortcode,&shortulink,&all]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if '##class(App.files).OpenFile(filename) quit:$$$ERROR($$$GeneralError,"Error open file "_filename)
+	use filename		
+	&html<
+	<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>#(title)#</title>
+	</head>
+	<body><a name='0'>
+		#(title2)#
+		>
+	if '$d(shortcode) {
+		s listns=##class(App.sys).ListNS(.inf,"NotPref,Ens")
+		d ##class(App.Production).EnsAction("info",listns,.out)
+		 s aNs=""
+			 for { s aNs=$o(proj(pr,pro,aNs)) q:aNs=""   continue:aNs="href"
+			 	s aNp="",lastprod=""
+			 	for { s aNp=$o(proj(pr,pro,aNs,aNp)) q:aNp=""	;Name Production
+			 		s aCp=""	
+			 		for { s aCp=$o(proj(pr,pro,aNs,aNp,aCp)) q:aCp=""	;Class Production
+			 			s aNb=""	
+			 			for { s aNb=$o(proj(pr,pro,aNs,aNp,aCp,aNb)) q:aNb=""	;Name Elements
+			 				s aClass=$lg(proj(pr,pro,aNs,aNp,aCp,aNb),1) ;Class Elements
+			 				s aCategory=$lg(proj(pr,pro,aNs,aNp,aCp,aNb),2) ;Category Elements
+						 	i aCategory'="",(" "_aCategory_" ")'[(" "_pr_" ") continue ;
+			 				s aNbp="",listProp="<ul>"
+			 				for { s aNbp=$o(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp)) q:aNbp=""	;Name Property
+			 					s listProp=listProp_"<li>"_aNbp_" :"_$g(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp))
+			 					if $g(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp,"ip"))'="" {
+				 					s listProp=listProp_"<ul><li>IP :<font color=red>"_$g(proj(pr,pro,aNs,aNp,aCp,aNb,aNbp,"ip"))_"</font></li></ul>"
+			 					}
+			 				}
+			 				s listProp=listProp_"</ul>"
+			 				d ..addstr(.all,$$$appTableTrTd3($s(lastprod=(aNp_", "_aCp):"",1:aNp_", "_aCp),aNb_", "_aClass_", "_aCategory,listProp))
+			 				s lastprod=aNp_", "_aCp
+			 			}
+			 			
+			 		}
+			 	}
+			 }
+		
+	}	
+ 	s a=""
+ 	for { s a=$o(shortcode(a)) q:a=""
+ 		w "<li>"_a_" "_$g(shortcode(a))
+ 	}
+	w "<hr>"
+ 	s a=""
+ 	for { s a=$o(shortulink(a)) q:a=""
+ 		w "<li>"_$g(shortulink(a))
+ 	}
+	w "<hr>"	
+	if '$d(all) 
+ 	s a=""
+ 	for { s a=$o(all(a)) q:a=""
+ 		w $g(all(a))
+ 	}
+ &html<
+	</body></html>
+	>
+	use io
+	close filename
+	write !,"Output documentation in "_filename
+	q $$$OK
+]]></Implementation>
+</Method>
 </Class>
 
 
@@ -5644,7 +5741,7 @@ The template GUI of the application selector and tabs on the basis jQueryUi</Des
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65387,34502</TimeChanged>
+<TimeChanged>65455,51519.05364</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -5887,7 +5984,7 @@ download template forms search</Description>
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find film in namespase SAMPLES"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find in table"))#
 			</td>
 			<td>
 
@@ -5919,15 +6016,19 @@ Search result</Description>
 	set divId=Par("divId")
 	set mode=Par("mode")
 	set Name=$g(Par("%request.Data",divId_"Name"))
-	set Desc=$g(Par("%request.Data",divId_"Desc"))
-	set Date=$g(Par("%request.Data",divId_"Date"))
 	write ..ButtonAgain(divId,,key)
 	if mode=1 {
 		if Name="" w $$$appError($$$aText("Context is empty","")) q $$$OK
-		zn "samples"
-		set sql="select * from Cinema.Film where title is not null "
-		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
-		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		if $zv["IRIS" {
+			zn "USER"
+			set sql="select * from Demo.Address where City is not null "
+			if Name'="" s sql=sql_" and (City like '%"_Name_"%') "
+
+		} else {
+			zn "samples"
+			set sql="select * from Cinema.Film where title is not null "
+			if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
+		}
 		set msg="Query: "_sql
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
@@ -5937,8 +6038,6 @@ Search result</Description>
 
 	}
 	w "<br>"
-
-	;i 'st  w $$$appError($System.Status.GetErrorText(st))
 	q $$$OK
 ]]></Implementation>
 </Method>
@@ -6065,7 +6164,7 @@ The output of the First button</Description>
 	i Method="" s Method="ShowTab"
 	s onc="$('#MainHidden').load('App.Action.cls','appClass="_..%ClassName(1)_"&appMethod=ShowTab&appNsp="_$zu(5)_"&appPar='+this.options[this.selectedIndex].value);"
 	set onclick="$('#MainHidden').load('App.Action.cls','"_Prefix_"appClass="_..%ClassName(1)_"&"_Prefix_"appMethod="_Method_"&"_Prefix_"appNsp="_$zu(5)_"&"_Prefix_"appPar="_appPar_"');"
-	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	q $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 ]]></Implementation>
 </Method>
 </Class>
@@ -6076,7 +6175,7 @@ The output of the First button</Description>
 The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanel</Super>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65455,47418.413186</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -6270,11 +6369,6 @@ download template forms search</Description>
 	s divId=Par("divId")
 
 	set onclick=$$$blockui("Loading...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&mode=*');"
-	
-	s fullPath="/opt/isc/ensemble/csp/spgz/template/samples-order-MSW-.docx"
-	if ##class(App.DownloadCSP).GetFileId(fullPath,.url) {
-		set fileDownload="<a href="""_url_"&log=App.Log"">fileDownload</a>"
-	}
 	&html<
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
@@ -6387,7 +6481,7 @@ Template GUI based application Uikit</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65387,34502</TimeChanged>
+<TimeChanged>65455,51335.35985</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -6636,7 +6730,7 @@ The output of the First button</Description>
 	set mhead=divId_"MainHeader"
 	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 ]]></Implementation>
 </Method>
 
@@ -6726,7 +6820,7 @@ download template forms search</Description>
 			
 			</td>
 			<td>
-			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find film in namespase SAMPLES"))#
+			#($$$appButton(divId_"appButtonResult1","onclick="""_$tr(onclick,"*",1)_"""","Find in table"))#
 			</td>
 			<td>
 
@@ -6764,10 +6858,16 @@ Search result</Description>
 	write ..ButtonAgain(divId,key)
 	if mode=1 {
 		if Name="" w $$$appError($$$aText("Context is empty","")) quit $$$OK
-		zn "samples"
-		set sql="select * from Cinema.Film where title is not null "
-		if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
-		if Desc'="" s sql=sql_" and (Description like '%"_Desc_"%') "
+		if $zv["IRIS" {
+			zn "USER"
+			set sql="select * from Demo.Address where City is not null "
+			if Name'="" s sql=sql_" and (City like '%"_Name_"%') "
+
+		} else {
+			zn "samples"
+			set sql="select * from Cinema.Film where title is not null "
+			if Name'="" s sql=sql_" and (title like '%"_Name_"%') "
+		}
 		set msg="Query: "_sql
 		set exec="##class(App.LogInfo).MarkRed(%AppLogInfoVal,"""_Name_","_Desc_""")"
 		set st=##class(App.LogInfoPane).DrawSQL(sql,100000,$zu(5),msg,exec)
@@ -6792,7 +6892,7 @@ The template GUI of the application selector and tabs on the basis jQueryUi, Uik
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65426,57974.685207</TimeChanged>
+<TimeChanged>65455,51526.871854</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -7373,7 +7473,7 @@ The output of the First button</Description>
 	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();"_##class(App.Action).WriteActJs(%request,divId_"MainForm",mhead,..%ClassName(1),divId_"FirstHead","&key="_key_"&divId="_divId)
 	;AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 ]]></Implementation>
 </Method>
 
@@ -7759,7 +7859,7 @@ Draw Tables UiKit</Description>
 The template GUI of the application selector and tabs</Description>
 <IncludeCode>App.LogMacro</IncludeCode>
 <Super>App.TabsPanelUikit</Super>
-<TimeChanged>65317,30981</TimeChanged>
+<TimeChanged>65455,51275.267883</TimeChanged>
 <TimeCreated>65098,29527.199416</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -8078,7 +8178,7 @@ download form template search users and roles</Description>
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>
 			<td>
- 	Login <br>#($$$appText(divId_"name","title='"_$$$aText("Names separated by a comma or by context","")_"'","su"))#
+ 	Login <br>#($$$appText(divId_"name","title='"_$$$aText("Names separated by a comma or by context","")_"'","s"))#
 			</td>
 			<td>
 	Roles <br>#($$$appText(divId_"roles","title='"_$$$aText("Roles separated by a comma or by context","")_"'","db"))#
@@ -8654,7 +8754,7 @@ The template GUI of the application selector and tabs on the basis jQueryUi, Uik
 <IncludeCode>App.LogMacro</IncludeCode>
 <ProcedureBlock>1</ProcedureBlock>
 <Super>%CSP.Page</Super>
-<TimeChanged>65426,60417.781186</TimeChanged>
+<TimeChanged>65455,51536.053375</TimeChanged>
 <TimeCreated>65065,36454.902831</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -9156,7 +9256,7 @@ The output of the First button</Description>
 	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();"_##class(App.Action).WriteActJs(%request,divId_"MainForm",mhead,..%ClassName(1),divId_"FirstHead","&key="_key_"&divId="_divId)
 	;AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 ]]></Implementation>
 </Method>
 
@@ -13831,7 +13931,7 @@ Write the contents of xData tag</Description>
 <Class name="App.security">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65454,80497.378188</TimeChanged>
+<TimeChanged>65455,51712.21388</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -13845,17 +13945,21 @@ For all predefined users, change the password and change the properties as in Lo
 	newPassword - new single password instead of SYS. For LockDown security level, it has an 8.32ANP pattern
 	sBindings = 1 Service% service_bindings enable
 	sCachedirect = 1 Service% service_cachedirect enable
+	InactiveLimit=90  
+	DemoDelete=0 Demoens,Samples namespaces are being deleted 
+	AuditOn=1 
 	sECP = 1 Service% service_ecp enable
 	sBindingsIP - list of ip addresses with a semicolon for which to allow CacheStudio connection.
+
 For ECP configurations, you need to add the addresses of all servers and clients to allow connection on% Net.RemoteConnection to remove "abandoned" tasks
 	sCachedirectIP - list of ip addresses with a semicolon for which to allow CIMModeler connection.
 	sECPIP - list of ip addresses with a semicolon for which to allow connection to the ECP server.
 	AuthLDAP = 1 In addition to the password, also enable LDAP authentication
 	Application example:
-	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,"127.0.0.1","127.0.0.1")
-	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,"127.0.0.1","127.0.0.1",,1)</Description>
+	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,0,"127.0.0.1","127.0.0.1")
+	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,1,0,"127.0.0.1","127.0.0.1",,1)</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>newPassword="",Warn,sBindings="",sCachedirect="",InactiveLimit=90,DemoDelete=0,sECP="",sBindingsIP="",sCachedirectIP="",sECPIP="",AuthLDAP=0</FormalSpec>
+<FormalSpec>newPassword="",Warn,sBindings="",sCachedirect="",InactiveLimit=90,DemoDelete=0,AuditOn=1,sECP="",sBindingsIP="",sCachedirectIP="",sECPIP="",AuthLDAP=0</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	set ons = $zu(5)
@@ -13954,59 +14058,61 @@ For ECP configurations, you need to add the addresses of all servers and clients
 	write !,"There is a modification of the basic system settings"
 	#dim ss As Security.System  = ##class(Security.System).%OpenId("SYSTEM")
 	set ss.PasswordPattern="8.32ANP"
-	set ss.AuditEnabled=1
+	set ss.AuditEnabled=+AuditOn
 	set ss.InactiveLimit=InactiveLimit
 	set tSC=ss.%Save()
 	if '$$$ISOK(tSC) s text="Error setting basic security settings :"_$SYSTEM.Status.GetErrorText(tSC)  write !,text QUIT $$$ERROR(text)
-	write !,"Event Setup AUDIT :"
-	Set rs = ##class(%ResultSet).%New("Security.Events:ListActivate")
-	Set tSC = rs.Execute()
-	if $$$ISERR(tSC) set text="Event setting error AUDIT:"_$system.Status.GetErrorText(tSC) write !,text QUIT $$$ERROR(text)
-	set On("%Ensemble/%Message/ViewContents")=1
-	set On("%System/%DirectMode/DirectMode")=1
-	set On("%System/%Login/Login")=1
-	set On("%System/%Login/LoginFailure")=1
-	set On("%System/%Login/Logout")=1
-	set On("%System/%Login/Terminate")=1
-	set On("%System/%Security/ApplicationChange")=1
-	set On("%System/%Security/AuditChange")=1
-	set On("%System/%Security/AuditReport")=1
-	set On("%System/%Security/DBEncChange")=1
-	set On("%System/%Security/DomainChange")=1
-	set On("%System/%Security/LoginRuleChange")=1
-	set On("%System/%Security/Protect")=1
-	set On("%System/%Security/ResourceChange")=1
-	set On("%System/%Security/RoleChange")=1
-	set On("%System/%Security/ServiceChange")=1
-	set On("%System/%Security/SSLConfigChange")=1
-	set On("%System/%Security/SystemChange")=1
-	set On("%System/%Security/UserChange")=1
-	set On("%System/%System/AuditRecordLost")=1
-	set On("%System/%System/ConfigurationChange")=1
-	set On("%System/%System/JournalChange")=0
-	set On("%System/%System/RoutineChange")=1
-	set On("%System/%System/Start")=1
-	set On("%System/%System/Stop")=1
-	set On("%System/%System/SuspendResume")=1
-	set On("%System/%System/UserEventOverflow")=1
-	While rs.Next() {
-		set name = $G(rs.Data("Source"))_"/"_$G(rs.Data("Type"))_"/"_$G(rs.Data("Name"))
-		if $DATA(On(name)) {
-			kill pro
-			do ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
-			if $d(pro) {
-				if pro("Enabled")'=(+$G(On(name))) {
-					if ##Class(Security.Events).Exists(name,,,.Event,.Status) {
-						set Event.Enabled=+$G(On(name))
-						set tSC=Event.%Save()
-						if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
-						else  write !,name_" changed"
+	if AuditOn {
+		write !,"Event Setup AUDIT :"
+		Set rs = ##class(%ResultSet).%New("Security.Events:ListActivate")
+		Set tSC = rs.Execute()
+		if $$$ISERR(tSC) set text="Event setting error AUDIT:"_$system.Status.GetErrorText(tSC) write !,text QUIT $$$ERROR(text)
+		set On("%Ensemble/%Message/ViewContents")=1
+		set On("%System/%DirectMode/DirectMode")=1
+		set On("%System/%Login/Login")=1
+		set On("%System/%Login/LoginFailure")=1
+		set On("%System/%Login/Logout")=1
+		set On("%System/%Login/Terminate")=1
+		set On("%System/%Security/ApplicationChange")=1
+		set On("%System/%Security/AuditChange")=1
+		set On("%System/%Security/AuditReport")=1
+		set On("%System/%Security/DBEncChange")=1
+		set On("%System/%Security/DomainChange")=1
+		set On("%System/%Security/LoginRuleChange")=1
+		set On("%System/%Security/Protect")=1
+		set On("%System/%Security/ResourceChange")=1
+		set On("%System/%Security/RoleChange")=1
+		set On("%System/%Security/ServiceChange")=1
+		set On("%System/%Security/SSLConfigChange")=1
+		set On("%System/%Security/SystemChange")=1
+		set On("%System/%Security/UserChange")=1
+		set On("%System/%System/AuditRecordLost")=1
+		set On("%System/%System/ConfigurationChange")=1
+		set On("%System/%System/JournalChange")=0
+		set On("%System/%System/RoutineChange")=1
+		set On("%System/%System/Start")=1
+		set On("%System/%System/Stop")=1
+		set On("%System/%System/SuspendResume")=1
+		set On("%System/%System/UserEventOverflow")=1
+		While rs.Next() {
+			set name = $G(rs.Data("Source"))_"/"_$G(rs.Data("Type"))_"/"_$G(rs.Data("Name"))
+			if $DATA(On(name)) {
+				kill pro
+				do ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
+				if $d(pro) {
+					if pro("Enabled")'=(+$G(On(name))) {
+						if ##Class(Security.Events).Exists(name,,,.Event,.Status) {
+							set Event.Enabled=+$G(On(name))
+							set tSC=Event.%Save()
+							if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
+							else  write !,name_" changed"
+						}
 					}
 				}
 			}
 		}
+		do rs.Close()
 	}
-	do rs.Close()
 	zn ons
 	quit $$$OK
 ]]></Implementation>
@@ -14087,7 +14193,7 @@ do ##class(App.security).GetPreparedUsers()</Description>
 
 <Method name="ChangePassword">
 <Description>
-Change password for different users
+Change password for userlist
 do ##class(App.security).ChangePassword("msw", ##class(App.security).GetPreparedUsers())</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>newPassword="",UsersList=""</FormalSpec>
@@ -14288,7 +14394,7 @@ ORDER BY c.contractNumber
 <Class name="App.sys">
 <Abstract>1</Abstract>
 <IncludeCode>App.LogMacro</IncludeCode>
-<TimeChanged>65451,31241.530086</TimeChanged>
+<TimeChanged>65455,49696.473262</TimeChanged>
 <TimeCreated>64734,80043.870644</TimeCreated>
 <DependsOn>App.msg</DependsOn>
 
@@ -14387,7 +14493,7 @@ w ##class(App.sys).IsPreparedNS("%SYS")</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>name</FormalSpec>
 <Implementation><![CDATA[
-	i (",%SYS,%ALL,DOCBOOK,ENSDEMO,ENSEMBLE,SAMPLES,USER,")[(","_$zconvert(name,"U")_",") q 1
+	i (",%SYS,%ALL,DOCBOOK,ENSDEMO,ENSEMBLE,SAMPLES,")[(","_$zconvert(name,"U")_",") q 1
 	Q 0
 ]]></Implementation>
 </Method>

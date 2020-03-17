@@ -162,11 +162,6 @@ ClassMethod FindFirstHead(Par = "") As %Status
 	s divId=Par("divId")
 
 	set onclick=$$$blockui("Loading...")_";AppAct('"_divId_"MainForm','"_divId_"MainContent','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"Result:&key="_key_"&divId="_divId_"&mode=*');"
-	
-	s fullPath="/opt/isc/ensemble/csp/spgz/template/samples-order-MSW-.docx"
-	if ##class(App.DownloadCSP).GetFileId(fullPath,.url) {
-		set fileDownload="<a href="""_url_"&log=App.Log"">fileDownload</a>"
-	}
 	&html<
 		<table width="90%" style="border-radius: 10px; border: 1px solid #72a7cf" cellpadding="2" cellspacing="0" class="DetailTable" bgcolor="#c4d6d6" >
 		<tr>

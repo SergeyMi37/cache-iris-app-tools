@@ -73,7 +73,7 @@ ClassMethod getEnsProd(name, info)
 /// w ##class(App.sys).IsPreparedNS("%SYS")
 ClassMethod IsPreparedNS(name)
 {
-	i (",%SYS,%ALL,DOCBOOK,ENSDEMO,ENSEMBLE,SAMPLES,USER,")[(","_$zconvert(name,"U")_",") q 1
+	i (",%SYS,%ALL,DOCBOOK,ENSDEMO,ENSEMBLE,SAMPLES,")[(","_$zconvert(name,"U")_",") q 1
 	Q 0
 }
 

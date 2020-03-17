@@ -11,16 +11,20 @@ Class App.security [ Abstract, DependsOn = App.msg ]
 /// 	newPassword - new single password instead of SYS. For LockDown security level, it has an 8.32ANP pattern
 /// 	sBindings = 1 Service% service_bindings enable
 /// 	sCachedirect = 1 Service% service_cachedirect enable
+/// 	InactiveLimit=90  
+/// 	DemoDelete=0 Demoens,Samples namespaces are being deleted 
+/// 	AuditOn=1 
 /// 	sECP = 1 Service% service_ecp enable
 /// 	sBindingsIP - list of ip addresses with a semicolon for which to allow CacheStudio connection.
+/// 
 /// For ECP configurations, you need to add the addresses of all servers and clients to allow connection on% Net.RemoteConnection to remove "abandoned" tasks
 /// 	sCachedirectIP - list of ip addresses with a semicolon for which to allow CIMModeler connection.
 /// 	sECPIP - list of ip addresses with a semicolon for which to allow connection to the ECP server.
 /// 	AuthLDAP = 1 In addition to the password, also enable LDAP authentication
 /// 	Application example:
-/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,"127.0.0.1","127.0.0.1")
-/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,"127.0.0.1","127.0.0.1",,1)
-ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", InactiveLimit = 90, DemoDelete = 0, sECP = "", sBindingsIP = "", sCachedirectIP = "", sECPIP = "", AuthLDAP = 0) As %Status
+/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,0,0,"127.0.0.1","127.0.0.1")
+/// 	d ##class(App.security).LockDown("qwe123!@#",.msg,1,1,0,0,1,0,"127.0.0.1","127.0.0.1",,1)
+ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", InactiveLimit = 90, DemoDelete = 0, AuditOn = 1, sECP = "", sBindingsIP = "", sCachedirectIP = "", sECPIP = "", AuthLDAP = 0) As %Status
 {
 	set ons = $zu(5)
 	write !,"Applications and services will be authenticated by "_$s('AuthLDAP:"password",1:"password and LDAP")
@@ -118,59 +122,61 @@ ClassMethod LockDown(newPassword = "", Warn, sBindings = "", sCachedirect = "", 
 	write !,"There is a modification of the basic system settings"
 	#dim ss As Security.System  = ##class(Security.System).%OpenId("SYSTEM")
 	set ss.PasswordPattern="8.32ANP"
-	set ss.AuditEnabled=1
+	set ss.AuditEnabled=+AuditOn
 	set ss.InactiveLimit=InactiveLimit
 	set tSC=ss.%Save()
 	if '$$$ISOK(tSC) s text="Error setting basic security settings :"_$SYSTEM.Status.GetErrorText(tSC)  write !,text QUIT $$$ERROR(text)
-	write !,"Event Setup AUDIT :"
-	Set rs = ##class(%ResultSet).%New("Security.Events:ListActivate")
-	Set tSC = rs.Execute()
-	if $$$ISERR(tSC) set text="Event setting error AUDIT:"_$system.Status.GetErrorText(tSC) write !,text QUIT $$$ERROR(text)
-	set On("%Ensemble/%Message/ViewContents")=1
-	set On("%System/%DirectMode/DirectMode")=1
-	set On("%System/%Login/Login")=1
-	set On("%System/%Login/LoginFailure")=1
-	set On("%System/%Login/Logout")=1
-	set On("%System/%Login/Terminate")=1
-	set On("%System/%Security/ApplicationChange")=1
-	set On("%System/%Security/AuditChange")=1
-	set On("%System/%Security/AuditReport")=1
-	set On("%System/%Security/DBEncChange")=1
-	set On("%System/%Security/DomainChange")=1
-	set On("%System/%Security/LoginRuleChange")=1
-	set On("%System/%Security/Protect")=1
-	set On("%System/%Security/ResourceChange")=1
-	set On("%System/%Security/RoleChange")=1
-	set On("%System/%Security/ServiceChange")=1
-	set On("%System/%Security/SSLConfigChange")=1
-	set On("%System/%Security/SystemChange")=1
-	set On("%System/%Security/UserChange")=1
-	set On("%System/%System/AuditRecordLost")=1
-	set On("%System/%System/ConfigurationChange")=1
-	set On("%System/%System/JournalChange")=0
-	set On("%System/%System/RoutineChange")=1
-	set On("%System/%System/Start")=1
-	set On("%System/%System/Stop")=1
-	set On("%System/%System/SuspendResume")=1
-	set On("%System/%System/UserEventOverflow")=1
-	While rs.Next() {
-		set name = $G(rs.Data("Source"))_"/"_$G(rs.Data("Type"))_"/"_$G(rs.Data("Name"))
-		if $DATA(On(name)) {
-			kill pro
-			do ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
-			if $d(pro) {
-				if pro("Enabled")'=(+$G(On(name))) {
-					if ##Class(Security.Events).Exists(name,,,.Event,.Status) {
-						set Event.Enabled=+$G(On(name))
-						set tSC=Event.%Save()
-						if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
-						else  write !,name_" changed"
+	if AuditOn {
+		write !,"Event Setup AUDIT :"
+		Set rs = ##class(%ResultSet).%New("Security.Events:ListActivate")
+		Set tSC = rs.Execute()
+		if $$$ISERR(tSC) set text="Event setting error AUDIT:"_$system.Status.GetErrorText(tSC) write !,text QUIT $$$ERROR(text)
+		set On("%Ensemble/%Message/ViewContents")=1
+		set On("%System/%DirectMode/DirectMode")=1
+		set On("%System/%Login/Login")=1
+		set On("%System/%Login/LoginFailure")=1
+		set On("%System/%Login/Logout")=1
+		set On("%System/%Login/Terminate")=1
+		set On("%System/%Security/ApplicationChange")=1
+		set On("%System/%Security/AuditChange")=1
+		set On("%System/%Security/AuditReport")=1
+		set On("%System/%Security/DBEncChange")=1
+		set On("%System/%Security/DomainChange")=1
+		set On("%System/%Security/LoginRuleChange")=1
+		set On("%System/%Security/Protect")=1
+		set On("%System/%Security/ResourceChange")=1
+		set On("%System/%Security/RoleChange")=1
+		set On("%System/%Security/ServiceChange")=1
+		set On("%System/%Security/SSLConfigChange")=1
+		set On("%System/%Security/SystemChange")=1
+		set On("%System/%Security/UserChange")=1
+		set On("%System/%System/AuditRecordLost")=1
+		set On("%System/%System/ConfigurationChange")=1
+		set On("%System/%System/JournalChange")=0
+		set On("%System/%System/RoutineChange")=1
+		set On("%System/%System/Start")=1
+		set On("%System/%System/Stop")=1
+		set On("%System/%System/SuspendResume")=1
+		set On("%System/%System/UserEventOverflow")=1
+		While rs.Next() {
+			set name = $G(rs.Data("Source"))_"/"_$G(rs.Data("Type"))_"/"_$G(rs.Data("Name"))
+			if $DATA(On(name)) {
+				kill pro
+				do ##class(Security.Events).Get($g(rs.Data("Source")),$G(rs.Data("Type")),$G(rs.Data("Name")),.pro)
+				if $d(pro) {
+					if pro("Enabled")'=(+$G(On(name))) {
+						if ##Class(Security.Events).Exists(name,,,.Event,.Status) {
+							set Event.Enabled=+$G(On(name))
+							set tSC=Event.%Save()
+							if '$$$ISOK(tSC) w !,name_": Error="_$SYSTEM.Status.GetErrorText(tSC)
+							else  write !,name_" changed"
+						}
 					}
 				}
 			}
 		}
+		do rs.Close()
 	}
-	do rs.Close()
 	zn ons
 	quit $$$OK
 }
@@ -240,7 +246,7 @@ ClassMethod GetPreparedUsers() As %String
   q "Admin,CSPSystem,IAM,SuperUser,UnknownUser,_Ensemble,_SYSTEM"
 }
 
-/// Change password for different users
+/// Change password for userlist
 /// do ##class(App.security).ChangePassword("msw", ##class(App.security).GetPreparedUsers())
 ClassMethod ChangePassword(newPassword = "", UsersList = "") As %Status
 {

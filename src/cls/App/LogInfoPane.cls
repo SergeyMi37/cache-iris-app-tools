@@ -5,26 +5,44 @@ Class App.LogInfoPane Extends %CSP.Util.Pane [ DependsOn = App.msg ]
 
 ClassMethod GetLink()
 {
+	if $$$JSLibLocal {
 	s link="<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.css"" />"_$c(13,10)_
-	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"_$c(13,10)_
-	//"<link rel=""icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_$c(13,10)_
-	//"<link rel=""shortcut icon"" href="""_$$$PATHCSP_"jqueryui/favion.ico"" type=""image/x-icon""/>"_$c(13,10)_
-	"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"uikit/css/uikit.min.css""/>"
-	q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link_$c(13,10)
+			"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid-theme.min.css"" />"_$c(13,10)_
+			"<link type=""text/css"" rel=""stylesheet"" href="""_$$$PATHCSP_"uikit/css/uikit.min.css""/>"
+		q " <link href="""_$$$PATHCSP_"jqueryui/jquery-ui.css"" rel=""stylesheet"">"_link_$c(13,10)
+	} else {
+	s link="<link type=""text/css"" rel=""stylesheet"" href=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css"" />"_$c(13,10)_
+			"<link type=""text/css"" rel=""stylesheet"" href=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css"" />"_$c(13,10)_
+			"<link type=""text/css"" rel=""stylesheet"" href=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/css/uikit.min.css""/>"
+		q " <link href=""https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"" rel=""stylesheet"">"_link_$c(13,10)
+	}
 }
 
 /// Add libraries and functions js to the panel
 /// write ##class(App.LogInfoPane).AddJsScripts() 
 ClassMethod AddJsScripts(mode)
 {
-	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"_$c(13,10)_"<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"_$c(13,10)_
-	"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script>"_
-	"<script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script>"_
-	"<script src="""_$$$PATHCSP_"uikit/js/asuikit-icons-material-all.min.js""></script>"_
-	"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
-	set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>"_$c(13,10)
-	set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"_$c(13,10)
-	q scr_$c(13,10)
+	if $$$JSLibLocal {
+	set scr="<script src="""_$$$PATHCSP_"jqueryui/external/jquery/jquery.js""></script>"_$c(13,10)_
+			"<script src="""_$$$PATHCSP_"jqueryui/jquery-ui.js""></script>"_$c(13,10)_
+			"<script src="""_$$$PATHCSP_"uikit/js/uikit.min.js""></script>"_
+			"<script src="""_$$$PATHCSP_"uikit/js/uikit-icons.min.js""></script>"_
+			"<script src="""_$$$PATHCSP_"uikit/js/asuikit-icons-material-all.min.js""></script>"_
+			"<script src="""_$$$PATHCSP_"jqueryui/jquery.blockui.js""></script>"_$c(13,10)
+			set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/jsgrid/jsgrid.min.js""></script>"_$c(13,10)
+			set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src="""_$$$PATHCSP_"jqueryui/chart.js""></script>"_$c(13,10)
+		q scr_$c(13,10)
+	} else {
+	set scr="<script src=""https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js""></script>"_$c(13,10)_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js""></script>"_$c(13,10)_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/js/uikit.min.js""></script>"_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/js/uikit-icons.min.js""></script>"_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js""></script>"_$c(13,10)_
+			"<script src=""https://cdn.asuikit.com/asuikit-material-icons/js/asuikit-icons-material-all.min.js""></script>"
+			set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js""></script>"_$c(13,10)
+			set:$g(mode)["chart" scr=scr_"<script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js""></script>"_$c(13,10)
+		q scr_$c(13,10)
+	}
 }
 
 /// add javascript
@@ -1273,8 +1291,8 @@ ClassMethod GetClassDef(aClassName As %String = "", doc, ByRef out, inSuper = 1)
 ClassMethod GetSysinfo(color, code = "") As %String
 {
 	set sys=" <a target='license' href=""/csp/sys/op/UtilDashboard.csp?$NAMESPACE=%25SYS""> "_$$$aText("System Dashboard","")_"</a>"
-	set sysinfo="<font color="_color_">"_##class(App.MVK.docbook).GetImg(code)_"</font> "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
-	if $DATA(^%App.Proj("INFOBANKS")) {
+	set sysinfo="<font color="_color_">"_##class(App.LogInfo).GetImg("tools")_"</font> "_$$$aText("Server","")_": <font color="_color_">"_$zu(110)_"</font> "_$$$aText("NameSpace","")_": <font color="_color_">"_$zu(5)_"</font> $JOB: <font color="_color_">"_$j_"</font> "_$g(sys)
+	if $$$MultiLang {
 		set lang=$g(@$$$GNEnsConf@("Language"))
 		if lang="" s lang=##class(%MessageDictionary).GetSessionLanguage()
 		set list=##class(%MessageDictionary).GetLanguages()

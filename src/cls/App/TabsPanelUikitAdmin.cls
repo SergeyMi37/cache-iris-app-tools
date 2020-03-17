@@ -498,7 +498,7 @@ ClassMethod ButtonAgain(divId = "", key = "") As %Status
 	set mcont=divId_"MainContent"
 	set onclick="$('#"_mcont_"').empty();"_##class(App.Action).WriteActJs(%request,divId_"MainForm",mhead,..%ClassName(1),divId_"FirstHead","&key="_key_"&divId="_divId)
 	;AppAct('"_divId_"MainForm','"_mhead_"','AppAct="_$zu(5)_":"_..%ClassName(1)_":"_divId_"FirstHead:&divId="_divId_"&key="_key_"');"
-	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("First",""))
+	quit $$$appButton("appButtonExit","onclick="""_$g(onclick)_"""",$$$aText("Again",""))
 }
 
 /// the render Tab On the program"
