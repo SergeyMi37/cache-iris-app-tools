@@ -1,5 +1,5 @@
 # cache-iris-apptools
-Solution for technical support and DBMS administrator. View globals arrays, execute queries (including JDBC/ODBC), 
+Application tools for technical support and DBMS administrator. View globals arrays, execute queries (including JDBC/ODBC), 
 sending results to email as XLS files. Viewer class instances with СRUD editing. A few simple graphs on the protocols of the system.
 
 CSP application but based on jQuery-Ui, Uikit, chart.js, jsgrid.js
