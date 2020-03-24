@@ -35,8 +35,8 @@ ClassMethod AddJsScripts(mode)
 	} else {
 	set scr="<script src=""https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js""></script>"_$c(13,10)_
 			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js""></script>"_$c(13,10)_
-			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/js/uikit.min.js""></script>"_
-			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.3.6/js/uikit-icons.min.js""></script>"_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/js/uikit.min.js""></script>"_
+			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/js/uikit-icons.min.js""></script>"_
 			"<script src=""https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js""></script>"_$c(13,10)_
 			"<script src=""https://cdn.asuikit.com/asuikit-material-icons/js/asuikit-icons-material-all.min.js""></script>"
 			set:$g(mode)["grid" scr=scr_"<script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js""></script>"_$c(13,10)

@@ -5,7 +5,7 @@ Class App.TabsPanelUikitPermissMatrx Extends App.TabsPanelUikit [ DependsOn = Ap
 {
 
 /// The application title
-Parameter HeaderText = "Tabs Application PermissMatrx";
+Parameter HeaderText = "Tabs Application Matrix of Permission";
 
 /// what are the available applications
 ClassMethod GetAllApps(opt) As %Status

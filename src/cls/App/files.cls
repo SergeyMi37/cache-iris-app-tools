@@ -459,7 +459,7 @@ Count(TypeOp,OV,NV,base,gref)
  q
 }
 
-/// To count in magazines which globals as modifierade for a specific date
+/// To count in journal which globals as modifierade for a specific date
 ///  d ##class(App.files).OneDayJournalCount("/opt/isc/ensemble/mgr/journal/20181225","^tmpJRN")
 ///  d ##class(App.files).OneDayJournalCount("/sdb/journals/20181225","^tmpJRN")
 ClassMethod OneDayJournalCount(fileYYYYMMDD = "", tempGlob = {$$$TEMPJRNL})
@@ -497,7 +497,6 @@ ClassMethod Export2CSV(aFileName = {$$$EMAILXLSPATH_"JrnCount*.csv"}, tmpGN = {$
 	s:aFileName["*" aFileName=$replace(aFileName,"*",$tr($zd($h,3)_$zt($p($h,",",2),-1),":- "))
 	#dim FileStream As %FileCharacterStream = ##class(%FileCharacterStream).%New()
 	s FileStream.Filename=aFileName
-	w !,tmpGN_222
 	s:(aCharset'="") FileStream.TranslateTable=aCharset
 	d FileStream.WriteLine("Instance;Date;Hour;Drive;Base;TypeOperation;GlobalRef;Counts;ByteOldValue;ByteNewValue")
 	s (c4,o4,n4)=0

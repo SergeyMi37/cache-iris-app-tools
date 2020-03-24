@@ -13,32 +13,8 @@ ClassMethod logout() As %Status
     return st
 }
 
-/// Create a task to clean the messages of the ensemble
-/// for ns="AISGSASUMS","M112","SPGZ","RDID","RDIDPROD" try {zn ns w !,ns," ",##class(App.sys).CreateTaskPurge("Ensemble message cleaning",ns,90)}catch{}
-ClassMethod CreateTaskPurge(Name = "", ns, days = 90) As %Status
-{
-	Set Task=##Class(%SYSTEM.Task).%New()
-	Set Task.Name=Name
-	Set Task.Type=0
-	Set Task.Description="task to clean the messages of the ensemble"
-	Set Task.TaskClass="Ens.Util.Tasks.Purge"
-	#;Every day at 1:00 am
-	Set Task.DailyStartTime=3600
-	;Do Task.idSet(Number)
-	Set Task.RunAsUser="SuperUser"
-	Set Task.MirrorStatus=3
-	Set t=##class(Ens.Util.Tasks.Purge).%New()
-	Set t.KeepIntegrity=0
-	Set t.NumberOfDaysToKeep=days
-	Set t.BodiesToo=1
-	Set t.TypesToPurge="all"
-	Set Task.Settings=t.GetSettings()
-	Set Task.NameSpace=ns
-	quit Task.%Save()
-}
-
 /// Get system user properties
-/// w ##class(App.sys).GetSysUserProp("Login",.Prop)
+/// do ##class(App.sys).GetSysUserProp($username,.Prop)
 ClassMethod GetSysUserProp(Name, Prop) As %String
 {
 	$$$NspGoto(curNs,"%SYS")

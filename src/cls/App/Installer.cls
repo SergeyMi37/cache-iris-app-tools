@@ -1,7 +1,7 @@
 Include App.LogMacro
 
 /// Importing this class will install App Tools properly.
-/// fork from 
+/// fork from WebTerminal 
 Class App.Installer Extends %Projection.AbstractProjection [ DependsOn = App.msg ]
 {
 
@@ -24,11 +24,13 @@ Projection Reference As Installer;
 Parameter VERSION = 1.0;
 
 /// This method is invoked when a class is compiled.
+///  d ##class(App.Installer).CreateProjection()
 ClassMethod CreateProjection(cls As %String, ByRef params) As %Status
 {
 	new $Namespace
 	set ns = $Namespace // ought to be package home namespace!
 	if $g(@$$$GNEnsConf@("HomeNamespace"))'="",$g(@$$$GNEnsConf@("HomeNamespace"))'=ns {
+		
 		 QUIT $$$OK
 	}
 	if $g(@$$$GNEnsConf@("HomeNamespace"))="" {
@@ -296,6 +298,11 @@ ClassMethod UnMap(fromNS As %String) As %Status
         set st = $$$ADDSC(st,$$$ADDSC($get(st1,$$$OK),$get(st2,$$$OK)))
     }
     return st
+}
+
+ClassMethod Ver() As %Status
+{
+	q "1.0.1"
 }
 
 }

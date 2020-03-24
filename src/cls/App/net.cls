@@ -5,7 +5,7 @@ Class App.net [ Abstract, DependsOn = App.msg ]
 {
 
 /// Zip files and Send to email
-/// w ##class(App.net).SendFilesToEmail()
+/// w ##class(App.net).SendFilesToEmail("subj send file", "send arhive file", .files, 1, "my_email@gmail.com")
 ClassMethod SendFilesToEmail(subj, text, files, zip = 1, email = "") As %Status
 {
 	;send files to email
@@ -265,16 +265,14 @@ ClassMethod ImportCSPFromGitHub(url, repo, target)
 	q $$$OK
 }
 
+/// MDEAM - MAIL SERVER NAME OR ITS IP
+/// BSmName - USER NAME = "NAME_user@"_MDEAM
+/// BSmPass - USER PASSWORD
+/// MASS - THE ARRAY FROM WHICH TO CREATE THE PROGRAM, WHICH WILL BE BASED ON A LIST OF EMAILS
+/// dir - the PATH TO the DIRECTORY WHERE you DOWNLOADED the attached FILES
 ///  d ##class(App.net).GetMailPOP3()
 ClassMethod GetMailPOP3(MDEAM, BSmName, BSmPass, MASS, dir) As %String
 {
- ;MDEAM - MAIL SERVER NAME OR ITS IP
- ;,BSmName - USER NAME = "NAME_user@"_MDEAM
- ;,BSmPass - USER PASSWORD
- ;,MASS - THE ARRAY FROM WHICH TO CREATE THE PROGRAM, WHICH WILL BE BASED ON A LIST OF EMAILS
- ;dir - the PATH TO the DIRECTORY WHERE you DOWNLOADED the attached FILES
- ;new mailserver,status,from,to,date,subject,messagesize,m,hdrs,key,mailMsg,lined
- ;N mssg
  set mailserver=##class(%Net.POP3).%New()
  I $D(dir) set mailserver.AttachDir=dir
  set mailserver.Debug=0

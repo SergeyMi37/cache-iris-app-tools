@@ -72,15 +72,16 @@ ROUTINE App.LogMacro [Type=INC]
 #define appError(%val) "<div class='ui-widget'><div class='ui-state-error ui-corner-all' style='margin-top: 20px; padding: 1em;'><p><span class='ui-icon ui-icon-alert' style='float: left; margin-right: 3em;'></span>"_%val_"</p></div></div>"
 #define appMsg(%val) "<div class='ui-widget'><div class='ui-state-highlight ui-corner-all' style='margin-top: 20px; padding: 1em;'><p><span class='ui-icon ui-icon-info' style='float: left; margin-right: 3em;'></span>"_%val_"</p></div></div>"
 
-#define appTable1(%n1) "<table style=""border-radius: 10px; border: 1px solid #72a7cf"" cellpadding=2 cellspacing=0 class=""DetailTable"" bgcolor=""#c4d6d6"" width=""90%""><tbody><tr><th>"_%n1_"</th></tr>"
+#define appTableAttr "style=""border-radius: 10px; border: 1px solid #72a7cf"" cellpadding=2 cellspacing=0 class=""DetailTable"" bgcolor=""#c4d6d6"" width=""90%"""
+#define appTable1(%n1) "<table "_$$$appTableAttr_"><tbody><tr><th>"_%n1_"</th></tr>"
 #define appTableTrTd1(%n1) "<tr class=""trs"" ><td align=""center"" >"_%n1_"</td></tr>"
 #define appTableEnd1 "</tbody></table>"_$s('$d(%DrawArray):"<script language='javascript'>$('.trs').hover(function(){ $(this).toggleClass( 'ui-widget-content' ) });</script>",1:"")
 
-#define appTable2(%n1,%n2) "<table style=""border-radius: 10px; border: 1px solid #72a7cf"" cellpadding=2 cellspacing=0 class=""DetailTable"" bgcolor=""#c4d6d6"" width=""90%""><tbody><tr><th align=""left"" width=""5px"">"_%n1_"</th><th align=""left"" width=""50px"">"_%n2_"</th></tr>"
+#define appTable2(%n1,%n2) "<table "_$$$appTableAttr_"><tbody><tr><th align=""left"" width=""5px"">"_%n1_"</th><th align=""left"" width=""50px"">"_%n2_"</th></tr>"
 #define appTableTrTd2(%n1,%n2) "<tr class=""trs"" ><td align=""left"" >"_%n1_"</td><td>"_%n2_"</td></tr>"
 #define appTableEnd2 "</tbody></table>"_$s('$d(%DrawArray):"<script language='javascript'>$('.trs').hover(function(){ $(this).toggleClass( 'ui-widget-content' ) });</script>",1:"")
 
-#define appTable3(%n1,%n2,%n3) "<table style=""border-radius: 10px; border: 1px solid #72a7cf"" cellpadding=2 cellspacing=0 class=""DetailTable"" bgcolor=""#c4d6d6"" width=""90%""><tbody><tr><th align=""left"" width=""5px"">"_%n1_"</th><th align=""left"" width=""50px"">"_%n2_"</th><th align=""left"" width=""50px"">"_%n3_"</th></tr>"
+#define appTable3(%n1,%n2,%n3) "<table "_$$$appTableAttr_"><tbody><tr><th align=""left"" width=""5px"">"_%n1_"</th><th align=""left"" width=""50px"">"_%n2_"</th><th align=""left"" width=""50px"">"_%n3_"</th></tr>"
 #define appTableTrTd3(%n1,%n2,%n3) "<tr class=""trs"" ><td style=""text-align:left"" >"_%n1_"</td><td style=""text-align:left"" >"_%n2_"</td><td style=""text-align:left"" >"_%n3_"</td></tr>"
 #define appTableEnd3 "</tbody></table>"_$s('$d(%DrawArray):"<script language='javascript'>$('.trs').hover(function(){ $(this).toggleClass( 'ui-widget-content' ) });</script>",1:"")
 
