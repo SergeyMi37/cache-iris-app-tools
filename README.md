@@ -29,7 +29,7 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
  - there is a module for implementing the LockedDown mode - ##class(App.security).LockDown(...)
  - multilanguage interface supported (install the global from C:\path\cache-iris-apptools-master\src\glb\appcachemsg.xml).
 
-## Chats 
+## Chats admins
 
  Load http://your-host:your-port/apptools/App.Chart.cls?panel=class(App.ChartPanel).ChartAlert
   - output of the DBMS events using the iris.log protocol (cconsole.log)
@@ -41,7 +41,7 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
  Load http://your-host:your-port/apptools/App.FormExp.cls?panel=AccordionExp
   - Navigation by namespaces, class, and class instance. Create, edit, and delete class instances in the on-screen form interface.
 
-##  Matrix permission
+##  Matrix permissions
  Load http://your-host:your-port/apptools/apptools/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix
   - Group assignment of roles to users by selecting them by filter in the screen panel
 
