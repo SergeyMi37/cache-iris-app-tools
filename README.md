@@ -1,5 +1,5 @@
 ![](https://github.com/SergeyMi37/isc-apptools/blob/master/doc/favicon.ico)
-# cache-iris-apptools
+# cache-ensemble-iris-apptools
 [![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/cache-iris-app-tools)
 
 Application tools for technical support and DBMS administrator. View globals arrays, execute queries (including JDBC/ODBC), 
@@ -29,7 +29,7 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
  - there is a module for implementing the LockedDown mode - ##class(App.security).LockDown(...)
  - multilanguage interface supported (install the global from C:\path\cache-iris-apptools-master\src\glb\appcachemsg.xml).
 
-## Chats admins
+## Charts admins
 
  Load http://your-host:your-port/apptools/App.Chart.cls?panel=class(App.ChartPanel).ChartAlert
   - output of the DBMS events using the iris.log protocol (cconsole.log)
