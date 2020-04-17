@@ -1,4 +1,4 @@
-![](https://github.com/SergeyMi37/isc-apptools/blob/master/doc/favicon.ico)
+![](https://github.com/SergeyMi37/isc-apptools-admin/blob/master/doc/favicon.ico)
 # cache-ensemble-iris-apptools
 [![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/cache-iris-app-tools)
 
