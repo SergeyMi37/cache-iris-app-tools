@@ -44,6 +44,7 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
 ##  Matrix permissions
  Load http://your-host:your-port/apptools/apptools/App.TabsPanelUikitPermissMatrx.cls?autoload=Matrix
   - Group assignment of roles to users by selecting them by filter in the screen panel
+![Matrix permissions](https://github.com/SergeyMi37/isc-apptools-admin/blob/master/doc/favicon.ico)
 
 ## Templates & Samples  
  Load http://your-host:your-port/apptools/App.TabsPanelSample.cls   
