@@ -10,10 +10,11 @@ CSP application but based on jQuery-Ui, Uikit, chart.js, jsgrid.js
 ## Installation
 
 Find the latest release and import XML file into Caché or IRIS by one of the next ways:
+The namespace must be enabled for Intorparbilty (Ensemble) enabled!
 
-1. Just drag XML file over Studio window in any namespace for example APP;
-2. Go to the Management Portal -> System Explorer -> Classes -> Import and select the XML file;
-3. Execute `do $system.OBJ.Load("C:\path\cache-iris-apptools-master\src\xml\apptools.xml","ck")` in terminal.
+1. X -- Just drag XML file over Studio window in any Interopeability enabled namespace for example APP;
+2. X -- Go to the Management Portal -> System Explorer -> Classes -> Import and select the XML file;
+3. Execute `do $system.OBJ.LoadDir("C:\path\cache-iris-apptools\src\","ck",,1)` in terminal.
 4. During installation, mappig will be created in all namespace through namespace %All
 5. For Windowqs, if you have not installed utility 7z.exe, copy the files from the directory C:\path\cache-iris-apptools-master\src\csp to c:\InterSystems\IRIS\CSP\app\
    For linux CSP files should be installed automatically.
@@ -34,7 +35,7 @@ Find the latest release and import XML file into Caché or IRIS by one of the ne
  Load http://your-host:your-port/apptools/App.Chart.cls?panel=class(App.ChartPanel).ChartAlert
   - output of the DBMS events using the iris.log protocol (cconsole.log)
 
- Load http://your-host:your-port/apptools/App.Chart.cls?panel=class(App.ChartPanel).ChartAlert
+ Load http://your-host:your-port/apptools/App.Chart.cls?panel=class(App.ChartPanel).ChartDbSize
   - output of the growth dynamics of DBMS database files using the iris.log protocol (cconsole.log)
 
 ## Class explorer
